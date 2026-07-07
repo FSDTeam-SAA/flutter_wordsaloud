@@ -15,7 +15,7 @@ class CustomButton extends StatelessWidget {
     required this.text,
     this.onPressed,
     this.icon,
-    this.backgroundColor = const Color(0xFFA83F2D),
+    this.backgroundColor = const Color(0xFFAE3F30),
     this.foregroundColor = Colors.white,
     this.width = double.infinity,
     this.height = 64,
@@ -29,7 +29,7 @@ class CustomButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
-        disabledBackgroundColor: backgroundColor?.withOpacity(0.5),
+        disabledBackgroundColor: backgroundColor,
         minimumSize: Size(width ?? double.infinity, height ?? 64),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius),
@@ -44,11 +44,12 @@ class CustomButton extends StatelessWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: Colors.white
             ),
           ),
           if (icon != null) ...[
             const SizedBox(width: 8),
-            Icon(icon, size: 20),
+            Icon(icon, size: 20, color: Colors.white),
           ],
         ],
       ),

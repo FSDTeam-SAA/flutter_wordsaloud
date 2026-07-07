@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:flutter_wordsaloud/features/auth/screens/sign_up_screen.dart';
 
 class RoleSelectionController extends GetxController {
   // 0 for User, 1 for Tradesman, null for none
@@ -10,8 +11,7 @@ class RoleSelectionController extends GetxController {
 
   void onContinue() {
     if (selectedRole.value != null) {
-      // Navigate to Signup or Login based on logic
-      print("Role selected: ${selectedRole.value}");
+      Get.to(() => const SignUpScreen());
     }
   }
 }

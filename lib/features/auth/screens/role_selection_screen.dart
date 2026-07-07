@@ -12,7 +12,7 @@ class RoleSelectionScreen extends StatelessWidget {
     final controller = Get.put(RoleSelectionController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5EEE2), // Creamy background
+      backgroundColor: const Color(0xFFF5EFE6), // Creamy background
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
@@ -74,7 +74,7 @@ class RoleSelectionScreen extends StatelessWidget {
                           subtitle: 'Find skilled workers in T n T',
                           description:
                               'Browse, message, hire. Real reviews from real Trinis.',
-                          iconPath: Icons.person,
+                          image: 'assets/images/material-symbols_person (1).png',
                           contentColor: Colors.white,
                         )),
                     const SizedBox(height: 16),
@@ -87,7 +87,7 @@ class RoleSelectionScreen extends StatelessWidget {
                           title: 'I am a tradesman',
                           subtitle: 'List your skills, get hired',
                           description: 'Free to join.',
-                          iconPath: Icons.engineering,
+                          image: 'assets/images/project-manager_8741633 1.png',
                           contentColor: Colors.black,
                         )),
                   ],
@@ -120,7 +120,7 @@ class RoleCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String description;
-  final IconData iconPath;
+  final String image;
   final Color contentColor;
 
   const RoleCard({
@@ -131,7 +131,7 @@ class RoleCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.description,
-    required this.iconPath,
+    required this.image,
     required this.contentColor,
   });
 
@@ -156,16 +156,14 @@ class RoleCard extends StatelessWidget {
               children: [
                 // Avatar/Icon Circle
                 Container(
-                  width: 64,
-                  height: 64,
+
                   decoration: const BoxDecoration(
                     color: Color(0xFF9E3A24), // Circle color from image
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    iconPath,
-                    color: Colors.white,
-                    size: 32,
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Image.asset(image, width: 34, height: 34,),
                   ),
                 ),
                 const SizedBox(width: 16),
