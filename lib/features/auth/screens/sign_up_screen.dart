@@ -62,10 +62,10 @@ class SignUpScreen extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
                     decoration: BoxDecoration(
                       color: const Color(0xFFEBD7C7),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       '+186',
@@ -80,6 +80,7 @@ class SignUpScreen extends StatelessWidget {
                   Expanded(
                     child: CustomTextField(
                       hintText: '543-2365',
+                      textInputType: TextInputType.phone,
                       onChanged: (v) => controller.phoneNumber.value = v,
                     ),
                   ),
@@ -107,19 +108,26 @@ class SignUpScreen extends StatelessWidget {
                           const LabelText(text: 'Sms Code'),
                           const SizedBox(height: 8),
                           PinCodeTextField(
+                            cursorColor: Colors.black,
                             appContext: context,
                             length: 6,
                             onChanged: (v) => controller.smsCode.value = v,
                             pinTheme: PinTheme(
+                                borderWidth: 1,
+                                activeBorderWidth: 1,
+                                selectedBorderWidth: 1,
+                                inactiveBorderWidth: 1,
+                                errorBorderWidth: 1,
                               shape: PinCodeFieldShape.box,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(8),
                               fieldHeight: 50,
-                              fieldWidth: 45,
+                              fieldWidth: 44,
                               activeFillColor: Colors.white,
                               inactiveFillColor: Colors.white,
                               selectedFillColor: Colors.white,
                               activeColor: const Color(0xFFA83F2D),
-                              inactiveColor: Colors.grey.shade400,
+                              inactiveColor: Color(0xFF6D6D6D),
+                              selectedColor: const Color(0xFFA83F2D)
                             ),
                           ),
                           Center(
@@ -130,12 +138,13 @@ class SignUpScreen extends StatelessWidget {
                                   color: Colors.black54,
                                 ),
                                 children: const [
-                                  TextSpan(text: "Don't get it? "),
+                                  TextSpan(text: "Don't get it? ", style: TextStyle(fontSize: 16, color: Color(0xFF6D6D6D))),
                                   TextSpan(
                                     text: 'Resend',
                                     style: TextStyle(
-                                      color: Color(0xFFA83F2D),
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Color(0xFFC34D3C),
+                                      fontWeight: FontWeight.w400,
                                     ),
                                   ),
                                 ],
@@ -174,8 +183,8 @@ class SignUpScreen extends StatelessWidget {
               Text(
                 'Only your first and last name initial will appear publicly.',
                 style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  color: Colors.black45,
+                  fontSize: 16,
+                  color: Color(0xFF6D6D6D),
                 ),
               ),
               const SizedBox(height: 20),
@@ -216,30 +225,32 @@ class SignUpScreen extends StatelessWidget {
 
 class CustomTextField extends StatelessWidget {
   final String hintText;
+  final TextInputType? textInputType;
   final Function(String) onChanged;
 
   const CustomTextField({
     super.key,
     required this.hintText,
-    required this.onChanged,
+    required this.onChanged, this.textInputType
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      keyboardType: textInputType,
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: GoogleFonts.outfit(color: Colors.black26),
+        hintStyle: GoogleFonts.outfit(color: Color(0xFF6D6D6D)),
         filled: true,
         fillColor: Color(0xFFF5EFE6),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(6),
           borderSide: const BorderSide(color: Color(0xFFC34D3C)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(6),
           borderSide: const BorderSide(color: Color(0xFFC34D3C)),
         ),
       ),
@@ -256,9 +267,9 @@ class LabelText extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.outfit(
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-        color: Colors.black87,
+        fontSize: 18,
+        fontWeight: FontWeight.w500,
+        color: Color(0xFF1F1F1F),
       ),
     );
   }

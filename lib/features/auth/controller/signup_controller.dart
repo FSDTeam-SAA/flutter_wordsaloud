@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_wordsaloud/features/auth/controller/role_selection_controller.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/what_do_screen.dart';
 
 class SignupController extends GetxController {
   final RxBool isSmsCodeVisible = false.obs;
@@ -57,5 +59,24 @@ class SignupController extends GetxController {
   void completeSignup() {
     // Logic to finish signup
     print("Signup completed for ${firstName.value}");
+    
+    final roleSelectionController = Get.isRegistered<RoleSelectionController>()
+        ? Get.find<RoleSelectionController>()
+        : null;
+    final isTradesman = roleSelectionController?.selectedRole.value == 1;
+    
+    if (isTradesman) {
+      Get.to(() => const WhatDoScreen());
+    } else {
+      Get.snackbar(
+        "Signup Success",
+        "Registration completed successfully!",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(15),
+        borderRadius: 10,
+      );
+    }
   }
 }
