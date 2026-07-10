@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/role_selection_controller.dart';
+import 'package:flutter_wordsaloud/features/home/screens/home_screen.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/what_do_screen.dart';
 
 class SignupController extends GetxController {
@@ -68,15 +69,8 @@ class SignupController extends GetxController {
     if (isTradesman) {
       Get.to(() => const WhatDoScreen());
     } else {
-      Get.snackbar(
-        "Signup Success",
-        "Registration completed successfully!",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(15),
-        borderRadius: 10,
-      );
+      // Role 0: I need a tradesman → go to HomeScreen
+      Get.offAll(() => const HomeScreen());
     }
   }
 }

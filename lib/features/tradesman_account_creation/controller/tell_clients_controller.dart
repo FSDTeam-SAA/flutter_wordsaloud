@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/you_are_live_screen.dart';
 
 class TellClientsController extends GetxController {
   final RxString pitch = ''.obs;
@@ -36,6 +38,16 @@ class TellClientsController extends GetxController {
   bool get canContinue => pitch.value.trim().isNotEmpty;
 
   void onContinuePressed() {
-    // TODO: submit tradesman profile data
+    // Read the name from SignupController (still in memory)
+    String fullName = '';
+    if (Get.isRegistered<SignupController>()) {
+      final signupCtrl = Get.find<SignupController>();
+      final first = signupCtrl.firstName.value.trim();
+      final last = signupCtrl.lastName.value.trim();
+      fullName = [first, last].where((s) => s.isNotEmpty).join(' ');
+    }
+    Get.to(() => YouAreLiveScreen(
+          tradesmanName: fullName.isNotEmpty ? fullName : 'Tradesman',
+        ));
   }
 }
