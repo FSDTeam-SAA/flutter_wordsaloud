@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
+import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -14,120 +15,172 @@ class SignUpScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5EFE6),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Get.back(),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              RichText(
-                text: TextSpan(
-                  style: GoogleFonts.outfit(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black,
-                  ),
-                  children: const [
-                    TextSpan(text: "Let's get you "),
-                    TextSpan(
-                      text: "set up.",
-                      style: TextStyle(color: Color(0xFFA83F2D)),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () => Get.off(() => const SignInScreen()),
+                      icon: const Icon(Icons.arrow_back, size: 16),
+                      label: const Text('Back'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF6D6D6D),
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 32),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        textStyle: GoogleFonts.outfit(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Get.to(() => SignInScreen()),
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFFA83F2D),
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 32),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        textStyle: GoogleFonts.outfit(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                      child: const Text('Log in'),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Quick verification + a few details',
-                style: GoogleFonts.outfit(
-                  fontSize: 16,
-                  color: Color(0xFF1E1E1E),
-                  fontWeight: FontWeight.w400
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Phone Number
-              const LabelText(text: 'Phone Number'),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEBD7C7),
-                      borderRadius: BorderRadius.circular(6),
+                const SizedBox(height: 18),
+                // Header
+                RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.outfit(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
                     ),
-                    child: Text(
-                      '+186',
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF6D6D6D)
+                    children: const [
+                      TextSpan(text: "Let's get you "),
+                      TextSpan(
+                        text: "set up.",
+                        style: TextStyle(color: Color(0xFFA83F2D)),
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: CustomTextField(
-                      hintText: '543-2365',
-                      textInputType: TextInputType.phone,
-                      onChanged: (v) => controller.phoneNumber.value = v,
-                    ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Enter your email — we\'ll send a code to verify.',
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    color: Color(0xFF1E1E1E),
+                    fontWeight: FontWeight.w400,
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 32),
 
-              // Email
-              const LabelText(text: 'Your Email'),
-              const SizedBox(height: 8),
-              CustomTextField(
-                hintText: 'jeanne@gmail.com',
-                onChanged: (v) => controller.email.value = v,
-              ),
-              const SizedBox(height: 20),
+                // Email
+                const LabelText(text: 'Email Address'),
+                const SizedBox(height: 8),
+                Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomTextField(
+                        hintText: 'jeanne@gmail.com',
+                        onChanged: (v) {
+                          controller.email.value = v;
+                          if (controller.emailError.value.isNotEmpty &&
+                              v.trim().isNotEmpty) {
+                            controller.emailError.value = '';
+                          }
+                        },
+                      ),
+                      if (controller.emailError.value.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          controller.emailError.value,
+                          style: GoogleFonts.outfit(
+                            fontSize: 13,
+                            color: const Color(0xFFA83F2D),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-              // SMS Code
-              Obx(() => Opacity(
+                // SMS Code
+                Obx(
+                  () => Opacity(
                     opacity: controller.isSmsCodeVisible.value ? 1.0 : 0.4,
                     child: IgnorePointer(
                       ignoring: !controller.isSmsCodeVisible.value,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const LabelText(text: 'Sms Code'),
+                          const LabelText(text: 'Verification code'),
                           const SizedBox(height: 8),
-                          PinCodeTextField(
-                            cursorColor: Colors.black,
-                            appContext: context,
-                            length: 6,
-                            onChanged: (v) => controller.smsCode.value = v,
-                            pinTheme: PinTheme(
-                                borderWidth: 1,
-                                activeBorderWidth: 1,
-                                selectedBorderWidth: 1,
-                                inactiveBorderWidth: 1,
-                                errorBorderWidth: 1,
-                              shape: PinCodeFieldShape.box,
-                              borderRadius: BorderRadius.circular(8),
-                              fieldHeight: 50,
-                              fieldWidth: 44,
-                              activeFillColor: Colors.white,
-                              inactiveFillColor: Colors.white,
-                              selectedFillColor: Colors.white,
-                              activeColor: const Color(0xFFA83F2D),
-                              inactiveColor: Color(0xFF6D6D6D),
-                              selectedColor: const Color(0xFFA83F2D)
+                          Obx(
+                            () => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                PinCodeTextField(
+                                  cursorColor: Colors.black,
+                                  appContext: context,
+                                  length: 6,
+                                  onChanged: (v) {
+                                    controller.smsCode.value = v;
+                                    if (controller
+                                            .smsCodeError
+                                            .value
+                                            .isNotEmpty &&
+                                        v.trim().isNotEmpty) {
+                                      controller.smsCodeError.value = '';
+                                    }
+                                  },
+                                  pinTheme: PinTheme(
+                                    borderWidth: 1,
+                                    activeBorderWidth: 1,
+                                    selectedBorderWidth: 1,
+                                    inactiveBorderWidth: 1,
+                                    errorBorderWidth: 1,
+                                    shape: PinCodeFieldShape.box,
+                                    borderRadius: BorderRadius.circular(8),
+                                    fieldHeight: 50,
+                                    fieldWidth: 44,
+                                    activeFillColor: Colors.white,
+                                    inactiveFillColor: Colors.white,
+                                    selectedFillColor: Colors.white,
+                                    activeColor: const Color(0xFFA83F2D),
+                                    inactiveColor: Color(0xFF6D6D6D),
+                                    selectedColor: const Color(0xFFA83F2D),
+                                  ),
+                                ),
+                                if (controller
+                                    .smsCodeError
+                                    .value
+                                    .isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    controller.smsCodeError.value,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 13,
+                                      color: const Color(0xFFA83F2D),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                           Center(
@@ -138,7 +191,13 @@ class SignUpScreen extends StatelessWidget {
                                   color: Colors.black54,
                                 ),
                                 children: const [
-                                  TextSpan(text: "Don't get it? ", style: TextStyle(fontSize: 16, color: Color(0xFF6D6D6D))),
+                                  TextSpan(
+                                    text: "Don't get it? ",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Color(0xFF6D6D6D),
+                                    ),
+                                  ),
                                   TextSpan(
                                     text: 'Resend',
                                     style: TextStyle(
@@ -154,68 +213,136 @@ class SignUpScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                  )),
-              const SizedBox(height: 24),
-
-              // Just a few details
-              const Center(
-                child: LabelText(text: 'Just a few details'),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextField(
-                      hintText: 'Adam',
-                      onChanged: (v) => controller.firstName.value = v,
-                    ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: CustomTextField(
-                      hintText: 'Leivine',
-                      onChanged: (v) => controller.lastName.value = v,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Only your first and last name initial will appear publicly.',
-                style: GoogleFonts.outfit(
-                  fontSize: 16,
-                  color: Color(0xFF6D6D6D),
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
-              // Area
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const LabelText(text: 'Your Area'),
-                  Text(
-                    'Optional',
-                    style: GoogleFonts.outfit(fontSize: 14, color: Colors.black38),
+                // Just a few details
+                const Center(child: LabelText(text: 'Just a few details')),
+                const SizedBox(height: 12),
+                Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CustomTextField(
+                                  hintText: 'Adam',
+                                  onChanged: (v) {
+                                    controller.firstName.value = v;
+                                    if (controller
+                                            .firstNameError
+                                            .value
+                                            .isNotEmpty &&
+                                        v.trim().isNotEmpty) {
+                                      controller.firstNameError.value = '';
+                                    }
+                                  },
+                                ),
+                                if (controller
+                                    .firstNameError
+                                    .value
+                                    .isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    controller.firstNameError.value,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 13,
+                                      color: const Color(0xFFA83F2D),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CustomTextField(
+                                  hintText: 'Leivine',
+                                  onChanged: (v) {
+                                    controller.lastName.value = v;
+                                    if (controller
+                                            .lastNameError
+                                            .value
+                                            .isNotEmpty &&
+                                        v.trim().isNotEmpty) {
+                                      controller.lastNameError.value = '';
+                                    }
+                                  },
+                                ),
+                                if (controller
+                                    .lastNameError
+                                    .value
+                                    .isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    controller.lastNameError.value,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 13,
+                                      color: const Color(0xFFA83F2D),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Only your first and last name initial will appear publicly.',
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          color: Color(0xFF6D6D6D),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                hintText: 'e.g. Berlin',
-                onChanged: (v) => controller.area.value = v,
-              ),
-              const SizedBox(height: 40),
+                ),
+                const SizedBox(height: 20),
 
-              // Button
-              Obx(() => CustomButton(
+                // Area
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const LabelText(text: 'Your Area'),
+                    Text(
+                      'Optional',
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        color: Colors.black38,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                CustomTextField(
+                  hintText: 'e.g. Berlin',
+                  onChanged: (v) => controller.area.value = v,
+                ),
+                const SizedBox(height: 40),
+
+                // Button
+                Obx(
+                  () => CustomButton(
                     text: controller.isSmsCodeVisible.value
                         ? 'Complete sign up'
                         : 'Send verification code',
                     onPressed: controller.onMainButtonPressed,
-                  )),
-              const SizedBox(height: 20),
-            ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),
@@ -231,7 +358,8 @@ class CustomTextField extends StatelessWidget {
   const CustomTextField({
     super.key,
     required this.hintText,
-    required this.onChanged, this.textInputType
+    required this.onChanged,
+    this.textInputType,
   });
 
   @override

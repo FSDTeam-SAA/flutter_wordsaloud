@@ -12,42 +12,53 @@ class SignupController extends GetxController {
   final RxString firstName = "".obs;
   final RxString lastName = "".obs;
   final RxString area = "".obs;
+  final RxString emailError = "".obs;
+  final RxString firstNameError = "".obs;
+  final RxString lastNameError = "".obs;
+  final RxString smsCodeError = "".obs;
 
   void onMainButtonPressed() {
     if (!isSmsCodeVisible.value) {
-      // Validation Check: Empty fields
-      if (phoneNumber.value.trim().isEmpty || email.value.trim().isEmpty) {
-        Get.snackbar(
-          "Information required",
-          "You did not give your phone number or email.",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFFA83F2D),
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(15),
-          borderRadius: 10,
-        );
+      // Validation Check: Empty email fields
+      if (email.value.trim().isEmpty) {
+        emailError.value = "You did not give your email address.";
         return;
       }
 
+      emailError.value = "";
+
       // Validation Check: Correct email format
       if (!GetUtils.isEmail(email.value.trim())) {
-        Get.snackbar(
-          "Invalid Email",
-          "Please enter a correct email address.",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFFA83F2D),
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(15),
-          borderRadius: 10,
-        );
+        emailError.value = "Please enter a correct email address.";
         return;
       }
+
+      emailError.value = "";
 
       // First press: Trigger SMS/Email code sending
       sendVerificationCode();
       isSmsCodeVisible.value = true;
     } else {
-      // Second press: Complete signup
+      // Second press: Validate SMS code, names and complete signup
+      if (smsCode.value.trim().isEmpty) {
+        smsCodeError.value = "Verification code is required.";
+        return;
+      }
+      smsCodeError.value = "";
+
+      if (firstName.value.trim().isEmpty) {
+        firstNameError.value = "First name is required.";
+        return;
+      }
+      firstNameError.value = "";
+
+      if (lastName.value.trim().isEmpty) {
+        lastNameError.value = "Last name is required.";
+        return;
+      }
+      lastNameError.value = "";
+
+      // Area is optional, no validation needed
       completeSignup();
     }
   }

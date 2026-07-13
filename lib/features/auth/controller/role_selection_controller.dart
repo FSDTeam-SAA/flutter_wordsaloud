@@ -1,5 +1,6 @@
-import 'package:get/get.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/sign_up_screen.dart';
+import 'package:get/get.dart';
+
 
 class RoleSelectionController extends GetxController {
   // 0 for User, 1 for Tradesman, null for none
