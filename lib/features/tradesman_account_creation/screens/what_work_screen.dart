@@ -45,7 +45,7 @@ class WhatWorkScreen extends StatelessWidget {
               const SizedBox(height: 10),
               // Title
               Text(
-                'What can you work?',
+                'Where can you work?',
                 style: GoogleFonts.outfit(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,

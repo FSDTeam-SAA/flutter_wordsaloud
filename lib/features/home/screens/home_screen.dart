@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
 import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart';
+import 'package:flutter_wordsaloud/features/home/screens/category_details_screen.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -186,7 +188,7 @@ class HomeScreen extends StatelessWidget {
                     clipBehavior: Clip.none,
                     children: [
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () => Get.to(() => CategoryDetailsScreen(category: cat)),
                         child: Container(width: 128, height: 128,
                           decoration: BoxDecoration(
                             color: Colors.white,
