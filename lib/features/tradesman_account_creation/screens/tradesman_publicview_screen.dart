@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class TradesmanDetailsScreen extends StatelessWidget {
+class TradesmanPublicviewScreen extends StatefulWidget {
   final String name;
   final String location;
   final String avatarLetter;
@@ -13,7 +14,7 @@ class TradesmanDetailsScreen extends StatelessWidget {
   final String rate;
   final String rateUnit;
 
-  const TradesmanDetailsScreen({
+  const TradesmanPublicviewScreen({
     super.key,
     required this.name,
     required this.location,
@@ -26,6 +27,11 @@ class TradesmanDetailsScreen extends StatelessWidget {
     this.rateUnit = 'per day',
   });
 
+  @override
+  State<TradesmanPublicviewScreen> createState() => _TradesmanPublicviewScreenState();
+}
+
+class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
   // Map skill name -> asset image, matching WhatDoScreen
   String _getTradeImage(String tradeName) {
     switch (tradeName.toLowerCase().trim()) {
@@ -55,14 +61,13 @@ class TradesmanDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use pitch if provided, otherwise fall back to a generated description
-    final String formattedCategory = categoryName.endsWith('s')
-        ? categoryName.substring(0, categoryName.length - 1).toLowerCase()
-        : categoryName.toLowerCase();
+    final String formattedCategory = widget.categoryName.endsWith('s')
+        ? widget.categoryName.substring(0, widget.categoryName.length - 1).toLowerCase()
+        : widget.categoryName.toLowerCase();
 
-    final String aboutText = pitch.isNotEmpty
-        ? pitch
-        : 'Skilled $formattedCategory experienced in both home and business work. Strong track record and ready to bring top-quality work to your team.';
+    final String aboutText = widget.pitch.isNotEmpty
+        ? widget.pitch
+        : 'Skilled $formattedCategory experienced in both home and business work. Ready to bring top-quality work to your team.';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5EFE6),
@@ -71,7 +76,7 @@ class TradesmanDetailsScreen extends StatelessWidget {
           // ── Header Section ──────────────────────────────────────────────
           Container(
             height: 206,
-            width: double.infinity, 
+            width: double.infinity,
             color: const Color(0xFF245869),
             padding: const EdgeInsets.only(
               left: 18,
@@ -125,7 +130,7 @@ class TradesmanDetailsScreen extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          avatarLetter,
+                          widget.avatarLetter,
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
@@ -141,7 +146,7 @@ class TradesmanDetailsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            name,
+                            widget.name,
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w400,
@@ -150,7 +155,7 @@ class TradesmanDetailsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '$categoryName • $location',
+                            '${widget.categoryName} • ${widget.location}',
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -167,7 +172,7 @@ class TradesmanDetailsScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                rating,
+                                widget.rating,
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
@@ -239,7 +244,7 @@ class TradesmanDetailsScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   // ── Also Does Section ──────────────────────────
-                  if (extraTrades.isNotEmpty) ...[
+                  if (widget.extraTrades.isNotEmpty) ...[
                     Text(
                       'Also does',
                       style: GoogleFonts.outfit(
@@ -252,7 +257,7 @@ class TradesmanDetailsScreen extends StatelessWidget {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: extraTrades.map((trade) {
+                      children: widget.extraTrades.map((trade) {
                         return Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -291,68 +296,7 @@ class TradesmanDetailsScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                   ],
 
-                  // ── Rate Section ───────────────────────────────
-                  if (rate.isNotEmpty) ...[
-                    Text(
-                      'Rate',
-                      style: GoogleFonts.outfit(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1E1E1E),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5EFE6),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFFEBD7C7),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'TT\$$rate',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w800,
-                                    color: const Color(0xFF1E1E1E),
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: ' / $rateUnit',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF8D7766),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Starting rate — final quote per job.',
-                            style: GoogleFonts.outfit(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              color: const Color(0xFF8D7766),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-
+                  SizedBox(height: 20,),
                   // WhatsApp Button
                   GestureDetector(
                     onTap: () {
@@ -448,68 +392,134 @@ class TradesmanDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Reviews Title
-                  const Text(
-                    'Reviews',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF000000),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Card representing review
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFFF3E5CF),
-                        width: 2,
+                  // ── Rate Section ───────────────────────────────
+                  if (widget.rate.isNotEmpty) ...[
+                    Text(
+                      'Rate',
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1E1E1E),
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Rishi L.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF1E1E1E),
-                              ),
-                            ),
-                            Row(
-                              children: List.generate(
-                                5,
-                                (index) => const Icon(
-                                  Icons.star,
-                                  color: Color(0xFFEAAE4B),
-                                  size: 16,
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5EFE6),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFEBD7C7),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'TT\$${widget.rate}',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFF1E1E1E),
+                                  ),
                                 ),
-                              ),
+                                TextSpan(
+                                  text: ' / ${widget.rateUnit}',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: const Color(0xFF8D7766),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Came same day, fix the leak in 20mins.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF6C6C6C),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            'Starting rate — final quote per job.',
+                            style: GoogleFonts.outfit(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFF8D7766),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // // Reviews Title
+                  // const Text(
+                  //   'Reviews',
+                  //   style: TextStyle(
+                  //     fontSize: 14,
+                  //     fontWeight: FontWeight.w600,
+                  //     color: Color(0xFF000000),
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 8),
+                  // // Card representing review
+                  // Container(
+                  //   decoration: BoxDecoration(
+                  //     color: Colors.white,
+                  //     borderRadius: BorderRadius.circular(16),
+                  //     border: Border.all(
+                  //       color: const Color(0xFFF3E5CF),
+                  //       width: 2,
+                  //     ),
+                  //   ),
+                  //   padding: const EdgeInsets.symmetric(
+                  //     horizontal: 16,
+                  //     vertical: 16,
+                  //   ),
+                  //   child: Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: [
+                  //       Row(
+                  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //         children: [
+                  //           const Text(
+                  //             'Rishi L.',
+                  //             style: TextStyle(
+                  //               fontSize: 16,
+                  //               fontWeight: FontWeight.w600,
+                  //               color: Color(0xFF1E1E1E),
+                  //             ),
+                  //           ),
+                  //           Row(
+                  //             children: List.generate(
+                  //               5,
+                  //                   (index) => const Icon(
+                  //                 Icons.star,
+                  //                 color: Color(0xFFEAAE4B),
+                  //                 size: 16,
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //       const SizedBox(height: 8),
+                  //       const Text(
+                  //         'Came same day, fix the leak in 20mins.',
+                  //         style: TextStyle(
+                  //           fontSize: 12,
+                  //           fontWeight: FontWeight.w500,
+                  //           color: Color(0xFF6C6C6C),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+
+                  SizedBox(height: 50,),
+
+                  CustomButton(icon: Icons.arrow_back_outlined,text: 'Back to dashboard', backgroundColor: Colors.black,borderRadius: 8,height: 45,)
                 ],
               ),
             ),

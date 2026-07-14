@@ -66,52 +66,80 @@ class TellClientsScreen extends StatelessWidget {
               const SizedBox(height: 28),
 
               // Pitch label
-              Obx(() => Text(
-                    'Pitch ${controller.pitch.value.length}/140',
-                    style: GoogleFonts.outfit(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1F1F1F),
-                    ),
-                  )),
+              Obx(
+                () => Text(
+                  'Pitch ${controller.pitch.value.length}/140',
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF1F1F1F),
+                  ),
+                ),
+              ),
               const SizedBox(height: 10),
 
               // Pitch TextField
-              TextField(
-                maxLength: 140,
-                maxLines: 4,
-                onChanged: controller.onPitchChanged,
-                style: GoogleFonts.outfit(
-                  fontSize: 15,
-                  color: Colors.black,
-                ),
-                decoration: InputDecoration(
-                  counterText: '',
-                  hintText:
-                      'WASA-certified plumber. MIC -certified (12 yrs residential. Leaks, pumps, bathroom installs.)',
-                  hintStyle: GoogleFonts.outfit(
-                    color: const Color(0xFF6D6D6D),
-                    fontSize: 14,
-                  ),
-                  filled: true,
-                  fillColor: Color(0xFFFEF8F3),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                        color: Color(0xFFA83F2D), width: 1.5),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                        color: Color(0xFFA83F2D), width: 1.5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFA83F2D), width: 2),
-                  ),
+              Obx(
+                () => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      maxLength: 140,
+                      maxLines: 4,
+                      onChanged: controller.onPitchChanged,
+                      style: GoogleFonts.outfit(
+                        fontSize: 15,
+                        color: Colors.black,
+                      ),
+                      decoration: InputDecoration(
+                        counterText: '',
+                        hintText:
+                            'WASA-certified plumber. MIC -certified (12 yrs residential. Leaks, pumps, bathroom installs.)',
+                        hintStyle: GoogleFonts.outfit(
+                          color: const Color(0xFF6D6D6D),
+                          fontSize: 14,
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFFEF8F3),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFA83F2D),
+                            width: 1.5,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFA83F2D),
+                            width: 1.5,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFA83F2D),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (controller.pitchError.value.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        controller.pitchError.value,
+                        style: GoogleFonts.outfit(
+                          fontSize: 13,
+                          color: const Color(0xFFA83F2D),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               const SizedBox(height: 28),
@@ -139,7 +167,7 @@ class TellClientsScreen extends StatelessWidget {
                       color: Color(0xFF454545),
                     ),
                   ),
-                  SizedBox(width: 11,),
+                  SizedBox(width: 11),
                   // Rate input
                   Expanded(
                     child: TextField(
@@ -157,65 +185,86 @@ class TellClientsScreen extends StatelessWidget {
                         ),
                         filled: true,
                         fillColor: Color(0xFFF5EFE6),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(6),
                           borderSide: const BorderSide(
-                              color: Color(0xFFA83F2D), width: 1.5),
+                            color: Color(0xFFA83F2D),
+                            width: 1.5,
+                          ),
                         ),
-                        enabledBorder:  OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(6),
                           borderSide: BorderSide(
-                              color: Color(0xFFA83F2D), width: 1.5),
+                            color: Color(0xFFA83F2D),
+                            width: 1.5,
+                          ),
                         ),
-                        focusedBorder:  OutlineInputBorder(
+                        focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(6),
                           borderSide: BorderSide(
-                              color: Color(0xFFA83F2D), width: 2),
+                            color: Color(0xFFA83F2D),
+                            width: 2,
+                          ),
                         ),
                       ),
                     ),
                   ),
 
-                  SizedBox(width: 11,),
+                  SizedBox(width: 11),
                   // Per day dropdown
-                  Obx(() => Expanded(
-                    child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: Color(0xFFF5EFE6),
-                            border: Border.all(
-                                color: const Color(0xFFA83F2D), width: 1.5),
-                            borderRadius:  BorderRadius.circular(6),
+                  Obx(
+                    () => Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF5EFE6),
+                          border: Border.all(
+                            color: const Color(0xFFA83F2D),
+                            width: 1.5,
                           ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: controller.rateUnit.value,
-                              icon: const Icon(Icons.arrow_drop_down,
-                                  color: Colors.black),
-                              style: GoogleFonts.outfit(
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                              items: controller.rateUnits
-                                  .map((unit) => DropdownMenuItem(
-                                        value: unit,
-                                        child: Text(unit, style: TextStyle(
-                                          color: Color(0xFF6D6D6D), fontSize: 14
-                                        ),),
-                                      ))
-                                  .toList(),
-                              onChanged: (val) {
-                                if (val != null) {
-                                  controller.selectRateUnit(val);
-                                }
-                              },
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: controller.rateUnit.value,
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.black,
                             ),
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                            items: controller.rateUnits
+                                .map(
+                                  (unit) => DropdownMenuItem(
+                                    value: unit,
+                                    child: Text(
+                                      unit,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                controller.selectRateUnit(val);
+                              }
+                            },
                           ),
                         ),
-                  )),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 28),
@@ -290,8 +339,7 @@ class TellClientsScreen extends StatelessWidget {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: controller.workPhotos.length + 1,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(width: 10),
+                          separatorBuilder: (_, _) => const SizedBox(width: 10),
                           itemBuilder: (context, index) {
                             if (index == controller.workPhotos.length) {
                               return GestureDetector(
@@ -303,8 +351,11 @@ class TellClientsScreen extends StatelessWidget {
                                     color: const Color(0xFF1C1814),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Icon(Icons.add,
-                                      color: Colors.white54, size: 30),
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white54,
+                                    size: 30,
+                                  ),
                                 ),
                               );
                             }
@@ -335,12 +386,10 @@ class TellClientsScreen extends StatelessWidget {
               const SizedBox(height: 50),
 
               // Continue button
-              Obx(() => CustomButton(
-                    text: 'Continue',
-                    onPressed: controller.canContinue
-                        ? controller.onContinuePressed
-                        : null,
-                  )),
+              CustomButton(
+                text: 'Continue',
+                onPressed: controller.onContinuePressed,
+              ),
               const SizedBox(height: 28),
             ],
           ),

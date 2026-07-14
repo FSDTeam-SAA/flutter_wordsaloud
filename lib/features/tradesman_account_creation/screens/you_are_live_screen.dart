@@ -1,18 +1,31 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
+import 'package:flutter_wordsaloud/features/home/screens/dashboard_screen.dart';
 
 class YouAreLiveScreen extends StatelessWidget {
   final String tradesmanName;
+  final String tradesmanSkill;
+  final String homeArea;
+  final String? profileImagePath;
 
   const YouAreLiveScreen({
     super.key,
     this.tradesmanName = 'Devon Ramsaran',
+    this.tradesmanSkill = '',
+    this.homeArea = '',
+    this.profileImagePath,
   });
 
   @override
   Widget build(BuildContext context) {
+    final profileSubtitle = [
+      tradesmanSkill.trim(),
+      homeArea.trim(),
+    ].where((value) => value.isNotEmpty).join(' • ');
+
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1E),
       body: SafeArea(
@@ -30,11 +43,7 @@ class YouAreLiveScreen extends StatelessWidget {
                   color: Color(0xFFEAAE4B),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.black,
-                  size: 42,
-                ),
+                child: const Icon(Icons.check, color: Colors.black, size: 42),
               ),
               const SizedBox(height: 28),
 
@@ -78,10 +87,7 @@ class YouAreLiveScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFF2A241E),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: const Color(0xFFF3E5CF),
-                    width: 1,
-                  ),
+                  border: Border.all(color: const Color(0xFFF3E5CF), width: 1),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,11 +103,22 @@ class YouAreLiveScreen extends StatelessWidget {
                             color: Color(0xFFA83F2D),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 28,
-                          ),
+                          child: profileImagePath != null &&
+                                  profileImagePath!.isNotEmpty
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(26),
+                                  child: Image.file(
+                                    File(profileImagePath!),
+                                    width: 52,
+                                    height: 52,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.person,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
                         ),
                         const SizedBox(width: 14),
                         // Name & sub-label
@@ -119,7 +136,9 @@ class YouAreLiveScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Find skilled workers nearby',
+                                profileSubtitle.isNotEmpty
+                                    ? profileSubtitle
+                                    : 'Find skilled workers nearby',
                                 style: GoogleFonts.outfit(
                                   fontSize: 16,
                                   color: const Color(0xFFFFFFFF),
@@ -127,11 +146,13 @@ class YouAreLiveScreen extends StatelessWidget {
                                 ),
                               ),
 
-                              SizedBox(height: 11,),
+                              SizedBox(height: 11),
                               // Pending Verification badge
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 7),
+                                  horizontal: 14,
+                                  vertical: 7,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF6C5D4A),
                                   borderRadius: BorderRadius.circular(20),
@@ -160,8 +181,12 @@ class YouAreLiveScreen extends StatelessWidget {
               CustomButton(
                 text: 'Go to dashboard',
                 onPressed: () {
-                  // TODO: Navigate to dashboard
-                  Get.back();
+                  Get.offAll(() => DashboardScreen(
+                        tradesmanName: tradesmanName,
+                        tradesmanSkill: tradesmanSkill,
+                        homeArea: homeArea,
+                        profileImagePath: profileImagePath,
+                      ));
                 },
               ),
               const SizedBox(height: 32),
