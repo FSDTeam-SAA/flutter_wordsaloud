@@ -96,7 +96,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               top: 60,
               left: 18,
               right: 18,
-              bottom: 22,
+              bottom: 22 ,
             ),
             child: Column(
               children: [
