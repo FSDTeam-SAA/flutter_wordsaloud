@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/client_profile/screens/profile_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
@@ -53,20 +54,23 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     // User initial avatar
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE8B04B),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          userInitial,
-                          style: GoogleFonts.outfit(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black,
+                    GestureDetector(
+                      onTap: ()=> Get.to(() => ProfileScreen()),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE8B04B),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            userInitial,
+                            style: GoogleFonts.outfit(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
                       ),
@@ -150,136 +154,163 @@ class HomeScreen extends StatelessWidget {
                   ),
                 );
               }
-              return GridView.builder(
-                padding: const EdgeInsets.only(left:18, top: 16, bottom: 18),
-                itemCount: items.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1,
-                  crossAxisSpacing: .2,
-                  mainAxisSpacing: 12,
-                ),
-                itemBuilder: (context, index) {
-                  final cat = items[index];
-                  final bool hasRedBorder = index == 0;
-                  final bool hasTealBorder = cat.isNew && index != 0;
-
-                  Color borderColor = const Color(0xFFF3E5CF);
-
-                  if (hasRedBorder) borderColor = const Color(0xFFA83F2D);
-                  if (hasTealBorder) borderColor = const Color(0xFF22707F);
-
-                  // Subtitle color matches the border (teal for new/teal cards, red-brown for others)
-                  final Color subLabelColor =
-                      hasTealBorder ? const Color(0xFF22707F) : const Color(0xFFA83F2D);
-
-                  // Colors for the circular background of icons (matching mockup diversity)
-                  final List<Color> circleColors = [
-                    const Color(0xFFFDE8E8), // light red/pink
-                    const Color(0xFFE3F2FD), // light blue
-                    const Color(0xFFFFF9C4), // light yellow
-                    const Color(0xFFE8F5E9), // light green
-                    const Color(0xFFFCE4EC), // light pink
-                    const Color(0xFFFFE0B2), // light orange
-                  ];
-                  final Color iconBgColor = circleColors[index % circleColors.length];
-
-                  return Stack(
-                    clipBehavior: Clip.none,
+              return Column(
+                children: [
+                  Row(
                     children: [
-                      GestureDetector(
-                        onTap: () => Get.to(() => CategoryDetailsScreen(category: cat)),
-                        child: Container(width: 128, height: 128,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: borderColor,
-                              width: 2,
-                            ),
-                          ),
-                          padding: const EdgeInsets.only(
-                              top: 20, left: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Icon rounded container
-                              Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: iconBgColor,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Center(
-                                  child: Image.asset(
-                                    cat.image,
-                                    width: 18,
-                                    height: 18,
-                                    fit: BoxFit.contain,
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Browse Trades', style: TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w700,
+                        ),),
+                      ),
+                      Spacer(),
+
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Text('22 Categories', style: TextStyle(
+                          color: Color(0xFFA83F2D), fontWeight: FontWeight.w600
+                        ),),
+                      )
+                    ],
+                  ),
+                  Expanded(
+                    child: GridView.builder(
+                      // padding: EdgeInsets.zero,
+                      padding: const EdgeInsets.only(left:18, top: 10, bottom: 18, right: 18),
+                      itemCount: items.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        childAspectRatio: 1,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemBuilder: (context, index) {
+                        final cat = items[index];
+                        final bool hasRedBorder = index == 0;
+                        final bool hasTealBorder = cat.isNew && index != 0;
+
+                        Color borderColor = const Color(0xFFF3E5CF);
+
+                        if (hasRedBorder) borderColor = const Color(0xFFA83F2D);
+                        if (hasTealBorder) borderColor = const Color(0xFF22707F);
+
+                        // Subtitle color matches the border (teal for new/teal cards, red-brown for others)
+                        final Color subLabelColor =
+                            hasTealBorder ? const Color(0xFF22707F) : const Color(0xFFA83F2D);
+
+                        // Colors for the circular background of icons (matching mockup diversity)
+                        final List<Color> circleColors = [
+                          const Color(0xFFFDE8E8), // light red/pink
+                          const Color(0xFFE3F2FD), // light blue
+                          const Color(0xFFFFF9C4), // light yellow
+                          const Color(0xFFE8F5E9), // light green
+                          const Color(0xFFFCE4EC), // light pink
+                          const Color(0xFFFFE0B2), // light orange
+                        ];
+                        final Color iconBgColor = circleColors[index % circleColors.length];
+
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            GestureDetector(
+                              onTap: () => Get.to(() => CategoryDetailsScreen(category: cat)),
+                              child: SizedBox.expand(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: borderColor,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.only(
+                                      top: 20, left: 8),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Icon rounded container
+                                      Container(
+                                        width: 32,
+                                        height: 32,
+                                        decoration: BoxDecoration(
+                                          color: iconBgColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Image.asset(
+                                            cat.image,
+                                            width: 18,
+                                            height: 18,
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      // Name
+                                      Text(
+                                        cat.name,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.black,
+                                          height: 1.15,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      // Listed count
+                                      Text(
+                                        '${cat.listed} Listed',
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                          color: subLabelColor,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              // Name
-                              Text(
-                                cat.name,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.outfit(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black,
-                                  height: 1.15,
+                            ),
+                            // "New" badge (shifted to top-left overlapping top border)
+                            if (cat.isNew)
+                              Positioned(
+                                top: -10,
+                                left: 12,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: index == 0
+                                          ? const Color(0xFFA83F2D)
+                                          : const Color(0xFF22707F),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'New',
+                                    style: GoogleFonts.outfit(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: index == 0
+                                            ? const Color(0xFFA83F2D)
+                                            : const Color(0xFF22707F),
+                                    ),
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 2),
-                              // Listed count
-                              Text(
-                                '${cat.listed} Listed',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: subLabelColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // "New" badge (shifted to top-left overlapping top border)
-                      if (cat.isNew)
-                        Positioned(
-                          top: -10,
-                          left: 12,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: index == 0
-                                    ? const Color(0xFFA83F2D)
-                                    : const Color(0xFF22707F),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Text(
-                              'New',
-                              style: GoogleFonts.outfit(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: index == 0
-                                      ? const Color(0xFFA83F2D)
-                                      : const Color(0xFF22707F),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
               );
             }),
           ),

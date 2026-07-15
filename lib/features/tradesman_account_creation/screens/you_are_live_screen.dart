@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/tradesman_dashboard.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
@@ -181,7 +182,7 @@ class YouAreLiveScreen extends StatelessWidget {
               CustomButton(
                 text: 'Go to dashboard',
                 onPressed: () {
-                  Get.offAll(() => DashboardScreen(
+                  Get.offAll(() => TradesmanDashboard(
                         tradesmanName: tradesmanName,
                         tradesmanSkill: tradesmanSkill,
                         homeArea: homeArea,

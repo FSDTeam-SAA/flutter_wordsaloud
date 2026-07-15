@@ -149,7 +149,7 @@ class RoleCard extends StatelessWidget {
               ? Border.all(color: const Color(0xFFA83F2D), width: 1)
               : Border.all(color: Colors.transparent, width: 3),
         ),
-        child: Column(
+        child:  Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
