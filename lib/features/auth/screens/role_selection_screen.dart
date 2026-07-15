@@ -9,7 +9,7 @@ class RoleSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(RoleSelectionController());
+    final controller = Get.put(RoleSelectionController(), permanent: true);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5EFE6), // Creamy background
@@ -20,7 +20,11 @@ class RoleSelectionScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header Logo & Text
-              Image.asset('assets/images/Frame 2147234823.png', height: 36, width: 203,),
+              Image.asset(
+                'assets/images/Frame 2147234823.png',
+                height: 36,
+                width: 203,
+              ),
               const SizedBox(height: 43),
 
               // Welcome Text
@@ -66,43 +70,49 @@ class RoleSelectionScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     // Role 1: I need a tradesman
-                    Obx(() => RoleCard(
-                          isSelected: controller.selectedRole.value == 0,
-                          onTap: () => controller.selectRole(0),
-                          backgroundColor: const Color(0xFF1C1814),
-                          title: 'I need a tradesman',
-                          subtitle: 'Find skilled workers in T n T',
-                          description:
-                              'Browse, message, hire. Real reviews from real Trinis.',
-                          image: 'assets/images/material-symbols_person (1).png',
-                          contentColor: Colors.white,
-                        )),
+                    Obx(
+                      () => RoleCard(
+                        isSelected: controller.selectedRole.value == 0,
+                        onTap: () => controller.selectRole(0),
+                        backgroundColor: const Color(0xFF1C1814),
+                        title: 'I need a tradesman',
+                        subtitle: 'Find skilled workers in T n T',
+                        description:
+                            'Browse, message, hire. Real reviews from real Trinis.',
+                        image: 'assets/images/material-symbols_person (1).png',
+                        contentColor: Colors.white,
+                      ),
+                    ),
                     const SizedBox(height: 16),
 
                     // Role 2: I am a tradesman
-                    Obx(() => RoleCard(
-                          isSelected: controller.selectedRole.value == 1,
-                          onTap: () => controller.selectRole(1),
-                          backgroundColor: const Color(0xFFF5C77A),
-                          title: 'I am a tradesman',
-                          subtitle: 'List your skills, get hired',
-                          description: 'Free to join.',
-                          image: 'assets/images/project-manager_8741633 1.png',
-                          contentColor: Colors.black,
-                        )),
+                    Obx(
+                      () => RoleCard(
+                        isSelected: controller.selectedRole.value == 1,
+                        onTap: () => controller.selectRole(1),
+                        backgroundColor: const Color(0xFFF5C77A),
+                        title: 'I am a tradesman',
+                        subtitle: 'List your skills, get hired',
+                        description: 'Free to join.',
+                        image: 'assets/images/project-manager_8741633 1.png',
+                        contentColor: Colors.black,
+                      ),
+                    ),
                   ],
                 ),
               ),
 
               // Continue Button
               Center(
-                child: Obx(() => CustomButton(
-                      text: 'Continue',
-                      icon: Icons.arrow_forward,
-                      onPressed: controller.selectedRole.value != null
-                          ? controller.onContinue
-                          : null,
-                    )),
+                child: Obx(
+                  () => CustomButton(
+                    text: 'Continue',
+                    icon: Icons.arrow_forward,
+                    onPressed: controller.selectedRole.value != null
+                        ? controller.onContinue
+                        : null,
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
             ],
@@ -149,21 +159,20 @@ class RoleCard extends StatelessWidget {
               ? Border.all(color: const Color(0xFFA83F2D), width: 1)
               : Border.all(color: Colors.transparent, width: 3),
         ),
-        child:  Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 // Avatar/Icon Circle
                 Container(
-
                   decoration: const BoxDecoration(
                     color: Color(0xFF9E3A24), // Circle color from image
                     shape: BoxShape.circle,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(18.0),
-                    child: Image.asset(image, width: 34, height: 34,),
+                    child: Image.asset(image, width: 34, height: 34),
                   ),
                 ),
                 const SizedBox(width: 16),

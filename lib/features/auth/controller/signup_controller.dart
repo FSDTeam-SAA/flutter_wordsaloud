@@ -1,8 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
 import 'package:get/get.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/role_selection_controller.dart';
-import 'package:flutter_wordsaloud/features/home/screens/home_screen.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/what_do_screen.dart';
 
 class SignupController extends GetxController {
   final RxBool isSmsCodeVisible = false.obs;
@@ -65,23 +62,10 @@ class SignupController extends GetxController {
 
   void sendVerificationCode() {
     // Logic to send code to email
-    print("Verification code sent to ${email.value}");
   }
 
   void completeSignup() {
     // Logic to finish signup
-    print("Signup completed for ${firstName.value}");
-    
-    final roleSelectionController = Get.isRegistered<RoleSelectionController>()
-        ? Get.find<RoleSelectionController>()
-        : null;
-    final isTradesman = roleSelectionController?.selectedRole.value == 1;
-    
-    if (isTradesman) {
-      Get.to(() => const WhatDoScreen());
-    } else {
-      // Role 0: I need a tradesman → go to HomeScreen
-      Get.offAll(() => const HomeScreen());
-    }
+    Get.offAll(() => const SignInScreen());
   }
 }

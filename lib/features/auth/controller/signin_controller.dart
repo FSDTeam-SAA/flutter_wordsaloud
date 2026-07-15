@@ -1,4 +1,6 @@
+import 'package:flutter_wordsaloud/features/auth/controller/role_selection_controller.dart';
 import 'package:flutter_wordsaloud/features/home/screens/home_screen.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/what_do_screen.dart';
 import 'package:get/get.dart';
 
 class SigninController extends GetxController {
@@ -35,6 +37,16 @@ class SigninController extends GetxController {
     }
 
     codeError.value = '';
-    Get.offAll(() => const HomeScreen());
+
+    final roleSelectionController = Get.isRegistered<RoleSelectionController>()
+        ? Get.find<RoleSelectionController>()
+        : null;
+    final isTradesman = roleSelectionController?.selectedRole.value == 1;
+
+    if (isTradesman) {
+      Get.offAll(() => const WhatDoScreen());
+    } else {
+      Get.offAll(() => const HomeScreen());
+    }
   }
 }
