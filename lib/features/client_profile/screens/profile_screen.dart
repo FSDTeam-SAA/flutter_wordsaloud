@@ -1,5 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/client_profile/controller/client_profile_controller.dart';
+import 'package:flutter_wordsaloud/features/client_profile/screens/about_aturservice_screen.dart';
 import 'package:flutter_wordsaloud/features/client_profile/screens/edit_profile_screen.dart';
+import 'package:flutter_wordsaloud/features/client_profile/screens/help_and_faq_screen.dart';
+import 'package:flutter_wordsaloud/features/client_profile/screens/terms_and_privacy_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -16,6 +22,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(ClientProfileController());
+
     return Scaffold(
       backgroundColor: _backgroundColor,
       body: Column(
@@ -26,62 +34,71 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 22, 12, 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  _SectionLabel('ACCOUNT INFO'),
-                  SizedBox(height: 8),
-                  _ProfileMenuItem(
-                    showChevron: false,
-                    icon: Icons.person,
-                    iconColor: Color(0xFF6D95AC),
-                    label: 'NAME',
-                    value: 'Keisha P.',
-                    backgroundColor: Colors.white,
+                children: [
+                  const _SectionLabel('ACCOUNT INFO'),
+                  const SizedBox(height: 8),
+                  Obx(
+                    () => _ProfileMenuItem(
+                      showChevron: false,
+                      icon: Icons.person,
+                      iconColor: const Color(0xFF6D95AC),
+                      label: 'NAME',
+                      value: controller.name.value,
+                      backgroundColor: Colors.white,
+                    ),
                   ),
-                  SizedBox(height: 8),
-                  _ProfileMenuItem(
-                    showChevron: false,
-                    icon: Icons.phone_iphone,
-                    iconColor: Color(0xFF1F272C),
-                    label: 'PHONE',
-                    value: '+1 868 754-2288',
-                    backgroundColor: Colors.white,
+                  const SizedBox(height: 8),
+                  Obx(
+                    () => _ProfileMenuItem(
+                      showChevron: false,
+                      icon: Icons.phone_iphone,
+                      iconColor: const Color(0xFF1F272C),
+                      label: 'PHONE',
+                      value: controller.phone.value,
+                      backgroundColor: Colors.white,
+                    ),
                   ),
-                  SizedBox(height: 8),
-                  _ProfileMenuItem(
-                    showChevron: false,
-                    icon: Icons.location_on,
-                    iconColor: Color(0xFFE05249),
-                    label: 'AREA',
-                    value: 'Chaguanas',
-                    backgroundColor: Colors.white,
+                  const SizedBox(height: 8),
+                  Obx(
+                    () => _ProfileMenuItem(
+                      showChevron: false,
+                      icon: Icons.location_on,
+                      iconColor: const Color(0xFFE05249),
+                      label: 'AREA',
+                      value: controller.area.value,
+                      backgroundColor: Colors.white,
+                    ),
                   ),
-                  SizedBox(height: 20),
-                  _SectionLabel('HELP & SUPPORT'),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 20),
+                  const _SectionLabel('HELP & SUPPORT'),
+                  const SizedBox(height: 8),
                   _ProfileMenuItem(
                     icon: Icons.question_mark,
                     iconColor: Color(0xFFFF3D32),
                     backgroundColor: Colors.white,
                     value: 'Help & FAQ',
+                    onTap: () => Get.to(() => const HelpAndFaqScreen()),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _ProfileMenuItem(
                     icon: Icons.info,
                     iconColor: Color(0xFF5A7E99),
                     backgroundColor: Colors.white,
                     value: 'About Aturservicett',
+                    onTap: () => Get.to(() => const AboutAturserviceScreen()),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _ProfileMenuItem(
                     icon: Icons.article,
                     iconColor: Color(0xFFA87A4C),
                     backgroundColor: Colors.white,
                     value: 'Terms & Privacy',
+                    onTap: () => Get.to(() => const TermsAndPrivacyScreen()),
                   ),
-                  SizedBox(height: 20),
-                  _SectionLabel('ACCOUNT'),
-                  SizedBox(height: 8),
-                  _ProfileMenuItem(
+                  const SizedBox(height: 20),
+                  const _SectionLabel('ACCOUNT'),
+                  const SizedBox(height: 8),
+                  const _ProfileMenuItem(
                     icon: Icons.logout,
                     iconColor: _headerColor,
                     value: 'Sign out',
@@ -105,6 +122,8 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<ClientProfileController>();
+
     return Container(
       width: double.infinity,
       color: ProfileScreen._headerColor,
@@ -121,46 +140,68 @@ class _ProfileHeader extends StatelessWidget {
               ),
               _HeaderPillButton(
                 label: 'Edit',
-                onTap: () => Get.to(() => const EditProfileScreen()),
+                onTap: () async {
+                  final result = await Get.to<Map<String, String?>>(
+                    () => EditProfileScreen(
+                      initialName: controller.name.value,
+                      initialPhone: controller.phone.value,
+                      initialArea: controller.area.value,
+                      initialImagePath: controller.profileImagePath.value,
+                    ),
+                  );
+
+                  if (result == null) return;
+
+                  controller.updateProfile(
+                    name: result['name'] ?? controller.name.value,
+                    phone: result['phone'] ?? controller.phone.value,
+                    area: result['area'] ?? controller.area.value,
+                    profileImagePath: result['profileImagePath'],
+                  );
+                },
               ),
             ],
           ),
           const SizedBox(height: 10),
-          Container(
-            width: 60,
-            height: 60,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: ProfileScreen._goldColor,
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFFFDA78), width: 4),
-            ),
-            child: Text(
-              'K',
-              style: GoogleFonts.outfit(
-                color: ProfileScreen._darkText,
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
+          Obx(
+            () => Container(
+              width: 60,
+              height: 60,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: ProfileScreen._goldColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFFFDA78), width: 4),
+              ),
+              child: ClipOval(
+                child: _ProfileAvatar(
+                  imagePath: controller.profileImagePath.value,
+                  initial: controller.initial,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Keisha P.',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              height: 1,
+          Obx(
+            () => Text(
+              controller.name.value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                height: 1,
+              ),
             ),
           ),
           const SizedBox(height: 5),
-          Text(
-            'Chaguanas, Trinidad',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+          Obx(
+            () => Text(
+              '${controller.area.value}, Trinidad',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const SizedBox(height: 5),
@@ -173,6 +214,40 @@ class _ProfileHeader extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({required this.imagePath, required this.initial});
+
+  final String? imagePath;
+  final String initial;
+
+  @override
+  Widget build(BuildContext context) {
+    if (imagePath != null && imagePath!.isNotEmpty) {
+      return Image.file(
+        File(imagePath!),
+        width: 60,
+        height: 60,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return Container(
+      width: 60,
+      height: 60,
+      alignment: Alignment.center,
+      color: ProfileScreen._goldColor,
+      child: Text(
+        initial,
+        style: GoogleFonts.outfit(
+          color: ProfileScreen._darkText,
+          fontSize: 24,
+          fontWeight: FontWeight.w900,
+        ),
       ),
     );
   }
@@ -252,6 +327,7 @@ class _ProfileMenuItem extends StatelessWidget {
     this.backgroundColor = ProfileScreen._cardColor,
     this.borderColor = ProfileScreen._borderColor,
     this.showChevron = true,
+    this.onTap,
   });
 
   final IconData icon;
@@ -262,6 +338,7 @@ class _ProfileMenuItem extends StatelessWidget {
   final Color backgroundColor;
   final Color borderColor;
   final bool showChevron;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -269,7 +346,7 @@ class _ProfileMenuItem extends StatelessWidget {
       color: backgroundColor,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
           height: 65,

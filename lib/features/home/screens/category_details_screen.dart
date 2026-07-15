@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
 import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart';
+import 'package:flutter_wordsaloud/features/client_profile/screens/advertise_inquiry_screen.dart';
 import 'package:flutter_wordsaloud/features/home/screens/tradesman_details_screen.dart';
 
 class CategoryDetailsScreen extends StatelessWidget {
@@ -338,13 +339,15 @@ class CategoryDetailsScreen extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => TradesmanDetailsScreen(
-              name: name,
-              location: location,
-              avatarLetter: avatarLetter,
-              rating: '4.9',
-              categoryName: category.name,
-            ));
+        Get.to(
+          () => TradesmanDetailsScreen(
+            name: name,
+            location: location,
+            avatarLetter: avatarLetter,
+            rating: '4.9',
+            categoryName: category.name,
+          ),
+        );
       },
       child: Stack(
         clipBehavior: Clip.none,
@@ -422,7 +425,10 @@ class CategoryDetailsScreen extends StatelessWidget {
               top: -9,
               left: 12,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 2,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -454,13 +460,15 @@ class CategoryDetailsScreen extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => TradesmanDetailsScreen(
-              name: name,
-              location: location,
-              avatarLetter: avatarLetter,
-              rating: rating.split('-').first,
-              categoryName: category.name,
-            ));
+        Get.to(
+          () => TradesmanDetailsScreen(
+            name: name,
+            location: location,
+            avatarLetter: avatarLetter,
+            rating: rating.split('-').first,
+            categoryName: category.name,
+          ),
+        );
       },
       child: Stack(
         clipBehavior: Clip.none,
@@ -586,7 +594,10 @@ class CategoryDetailsScreen extends StatelessWidget {
               top: -9,
               left: 20,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 2,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -609,54 +620,125 @@ class CategoryDetailsScreen extends StatelessWidget {
 
   Widget _buildSponsoredSlotCard() {
     return DashedBorderContainer(
-      color: const Color(0xFFEAAE4B),
-      borderRadius: 16,
+      color: const Color(0xFFC7B9A4),
+      borderRadius: 12,
       strokeWidth: 1.5,
       gap: 5,
       dashLength: 6,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'SPONSORED SLOT AVAILABLE',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF868686),
-                  // letterSpacing: 0.8,
-                ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: CustomPaint(
+          painter: _SponsoredStripePainter(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'SPONSORED SLOT - AVAILABLE',
+                    style: TextStyle(
+                      fontSize: 7,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF8C7F72),
+                      letterSpacing: 3,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1E7DC),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Center(
+                      child: Text('📦', style: TextStyle(fontSize: 18)),
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: const TextSpan(
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F0F0F),
+                      ),
+                      children: [
+                        TextSpan(text: 'Your store could be '),
+                        TextSpan(
+                          text: 'here.',
+                          style: TextStyle(
+                            color: Color(0xFFAE3F30),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Reach Trinis searching plumbers right now.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1F1F1F),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Material(
+                    color: const Color(0xFF0F0F0F),
+                    borderRadius: BorderRadius.circular(18),
+                    child: InkWell(
+                      onTap: () => Get.to(() => const AdvertiseInquiryScreen()),
+                      borderRadius: BorderRadius.circular(18),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        child: Text(
+                          'Inquire about advertising →',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              Container(
-                width: 48,
-                height: 48,
-                decoration:  BoxDecoration(
-                  color: Color(0xFFFFDEDE),
-                  borderRadius: BorderRadius.circular(32),
-                  // shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Text('🎁', style: TextStyle(fontSize: 20)),
-                ),
-              ),
-              const SizedBox(height: 9),
-              Text(
-                'Your store could be here',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1F1F1F),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+class _SponsoredStripePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFF7EEE7)
+      ..strokeWidth = 1;
+
+    for (double x = -size.height; x < size.width + size.height; x += 14) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x + size.height, size.height),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SponsoredStripePainter oldDelegate) => false;
 }
 
 // ── Dashed Border Container Widgets ───────────────────────────────────────────

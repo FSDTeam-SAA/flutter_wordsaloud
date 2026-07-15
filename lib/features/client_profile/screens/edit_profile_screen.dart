@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
-class EditProfileScreen extends StatefulWidget {
+class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({
     super.key,
     this.initialName = 'Keisha P.',
@@ -19,11 +19,6 @@ class EditProfileScreen extends StatefulWidget {
   final String initialArea;
   final String? initialImagePath;
 
-  @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
-}
-
-class _EditProfileScreenState extends State<EditProfileScreen> {
   static const _backgroundColor = Color(0xFFF5EFE6);
   static const _headerColor = Color(0xFFBC4437);
   static const _darkText = Color(0xFF221C18);
@@ -31,60 +26,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   static const _borderColor = Color(0xFFD3C7BD);
   static const _goldColor = Color(0xFFF6C451);
 
-  final _formKey = GlobalKey<FormState>();
-  final _imagePicker = ImagePicker();
-
-  late final TextEditingController _nameController;
-  late final TextEditingController _phoneController;
-  late final TextEditingController _areaController;
-  String? _profileImagePath;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController(text: widget.initialName);
-    _phoneController = TextEditingController(text: widget.initialPhone);
-    _areaController = TextEditingController(text: widget.initialArea);
-    _profileImagePath = widget.initialImagePath;
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _areaController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickProfileImage() async {
-    final image = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-      maxWidth: 1200,
-    );
-
-    if (image == null) return;
-
-    setState(() {
-      _profileImagePath = image.path;
-    });
-  }
-
-  void _saveProfile() {
-    if (!_formKey.currentState!.validate()) return;
-
-    Get.back(
-      result: {
-        'name': _nameController.text.trim(),
-        'phone': _phoneController.text.trim(),
-        'area': _areaController.text.trim(),
-        'profileImagePath': _profileImagePath,
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(
+      ClientEditProfileController(
+        initialName: initialName,
+        initialPhone: initialPhone,
+        initialArea: initialArea,
+        initialImagePath: initialImagePath,
+      ),
+      tag: hashCode.toString(),
+    );
+
     return Scaffold(
       backgroundColor: _backgroundColor,
       body: Column(
@@ -96,7 +49,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               top: 60,
               left: 18,
               right: 18,
-              bottom: 22 ,
+              bottom: 22,
             ),
             child: Column(
               children: [
@@ -108,12 +61,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       icon: Icons.arrow_back,
                       onTap: () => Get.back(),
                     ),
-                    _HeaderPillButton(label: 'Save', onTap: _saveProfile),
+                    _HeaderPillButton(
+                      label: 'Save',
+                      onTap: controller.saveProfile,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 GestureDetector(
-                  onTap: _pickProfileImage,
+                  onTap: controller.pickProfileImage,
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -125,7 +81,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           color: Color(0xFFFFDA78),
                           shape: BoxShape.circle,
                         ),
-                        child: ClipOval(child: _profileImage()),
+                        child: ClipOval(
+                          child: Obx(
+                            () => _ProfileImage(
+                              imagePath: controller.profileImagePath.value,
+                              initial: controller.initialLetter,
+                            ),
+                          ),
+                        ),
                       ),
                       Positioned(
                         right: -2,
@@ -174,14 +137,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(14, 22, 14, 28),
               child: Form(
-                key: _formKey,
+                key: controller.formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const _SectionLabel('ACCOUNT INFO'),
                     const SizedBox(height: 10),
                     _EditProfileField(
-                      controller: _nameController,
+                      controller: controller.nameController,
                       label: 'NAME',
                       hintText: 'Enter your name',
                       icon: Icons.person,
@@ -190,7 +153,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     const SizedBox(height: 12),
                     _EditProfileField(
-                      controller: _phoneController,
+                      controller: controller.phoneController,
                       label: 'PHONE',
                       hintText: 'Enter your phone number',
                       icon: Icons.phone_iphone,
@@ -200,20 +163,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     const SizedBox(height: 12),
                     _EditProfileField(
-                      controller: _areaController,
+                      controller: controller.areaController,
                       label: 'AREA',
                       hintText: 'Enter your area',
                       icon: Icons.location_on,
                       iconColor: const Color(0xFFE05249),
                       textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _saveProfile(),
+                      onFieldSubmitted: (_) => controller.saveProfile(),
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       height: 54,
                       child: ElevatedButton(
-                        onPressed: _saveProfile,
+                        onPressed: controller.saveProfile,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _headerColor,
                           foregroundColor: Colors.white,
@@ -240,32 +203,94 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
     );
   }
+}
 
-  Widget _profileImage() {
-    final imagePath = _profileImagePath;
+class ClientEditProfileController extends GetxController {
+  ClientEditProfileController({
+    required String initialName,
+    required String initialPhone,
+    required String initialArea,
+    String? initialImagePath,
+  }) : profileImagePath = RxnString(initialImagePath) {
+    nameController = TextEditingController(text: initialName);
+    phoneController = TextEditingController(text: initialPhone);
+    areaController = TextEditingController(text: initialArea);
+  }
 
-    if (imagePath != null && imagePath.isNotEmpty) {
-      return Image.file(File(imagePath), fit: BoxFit.cover);
+  final formKey = GlobalKey<FormState>();
+  final _imagePicker = ImagePicker();
+  final RxnString profileImagePath;
+
+  late final TextEditingController nameController;
+  late final TextEditingController phoneController;
+  late final TextEditingController areaController;
+
+  Future<void> pickProfileImage() async {
+    final image = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1200,
+    );
+
+    if (image == null) return;
+
+    profileImagePath.value = image.path;
+  }
+
+  void saveProfile() {
+    if (!formKey.currentState!.validate()) return;
+
+    Get.back<Map<String, String?>>(
+      result: {
+        'name': nameController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'area': areaController.text.trim(),
+        'profileImagePath': profileImagePath.value,
+      },
+    );
+  }
+
+  String get initialLetter {
+    final name = nameController.text.trim();
+    if (name.isEmpty) return 'U';
+    return name.substring(0, 1).toUpperCase();
+  }
+
+  @override
+  void onClose() {
+    nameController.dispose();
+    phoneController.dispose();
+    areaController.dispose();
+    super.onClose();
+  }
+}
+
+class _ProfileImage extends StatelessWidget {
+  const _ProfileImage({required this.imagePath, required this.initial});
+
+  final String? imagePath;
+  final String initial;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedImagePath = imagePath;
+
+    if (selectedImagePath != null && selectedImagePath.isNotEmpty) {
+      return Image.file(File(selectedImagePath), fit: BoxFit.cover);
     }
 
     return Container(
       alignment: Alignment.center,
-      color: _goldColor,
+      color: EditProfileScreen._goldColor,
       child: Text(
-        _initialLetter,
+        initial,
         style: GoogleFonts.outfit(
-          color: _darkText,
+          color: EditProfileScreen._darkText,
           fontSize: 30,
           fontWeight: FontWeight.w900,
         ),
       ),
     );
-  }
-
-  String get _initialLetter {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) return 'U';
-    return name.characters.first.toUpperCase();
   }
 }
 
@@ -324,7 +349,7 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.outfit(
-        color: _EditProfileScreenState._mutedText,
+        color: EditProfileScreen._mutedText,
         fontSize: 10,
         fontWeight: FontWeight.w900,
         letterSpacing: 1.4,
@@ -362,7 +387,7 @@ class _EditProfileField extends StatelessWidget {
       textInputAction: textInputAction,
       onFieldSubmitted: onFieldSubmitted,
       style: GoogleFonts.outfit(
-        color: _EditProfileScreenState._darkText,
+        color: EditProfileScreen._darkText,
         fontSize: 14,
         fontWeight: FontWeight.w700,
       ),
@@ -378,13 +403,13 @@ class _EditProfileField extends StatelessWidget {
         labelText: label,
         hintText: hintText,
         labelStyle: GoogleFonts.outfit(
-          color: _EditProfileScreenState._mutedText,
+          color: EditProfileScreen._mutedText,
           fontSize: 11,
           fontWeight: FontWeight.w900,
           letterSpacing: 1,
         ),
         hintStyle: GoogleFonts.outfit(
-          color: _EditProfileScreenState._mutedText.withValues(alpha: .65),
+          color: EditProfileScreen._mutedText.withValues(alpha: .65),
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
@@ -393,15 +418,15 @@ class _EditProfileField extends StatelessWidget {
           vertical: 16,
         ),
         enabledBorder: _border(),
-        focusedBorder: _border(_EditProfileScreenState._headerColor, 1.4),
-        errorBorder: _border(_EditProfileScreenState._headerColor, 1.2),
-        focusedErrorBorder: _border(_EditProfileScreenState._headerColor, 1.4),
+        focusedBorder: _border(EditProfileScreen._headerColor, 1.4),
+        errorBorder: _border(EditProfileScreen._headerColor, 1.2),
+        focusedErrorBorder: _border(EditProfileScreen._headerColor, 1.4),
       ),
     );
   }
 
   OutlineInputBorder _border([
-    Color color = _EditProfileScreenState._borderColor,
+    Color color = EditProfileScreen._borderColor,
     double width = 1,
   ]) {
     return OutlineInputBorder(

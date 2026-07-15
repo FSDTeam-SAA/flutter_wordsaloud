@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/home/screens/post_review_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -449,13 +450,19 @@ class TradesmanDetailsScreen extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Reviews Title
-                  const Text(
-                    'Reviews',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF000000),
-                    ),
+                  Row(
+                    children: [
+                      const Text(
+                        'Reviews',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF000000),
+                        ),
+                      ),
+                      Spacer(),
+                      TextButton(onPressed: (){Get.to(() => PostReviewScreen());}, child: Text('Add Review'))
+                    ],
                   ),
                   const SizedBox(height: 8),
                   // Card representing review
