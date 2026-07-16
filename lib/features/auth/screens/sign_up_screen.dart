@@ -3,7 +3,11 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
+import 'package:flutter_wordsaloud/core/network/api_client.dart';
+import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
+import 'package:flutter_wordsaloud/features/auth/repositories/auth_repo.dart';
+import 'package:flutter_wordsaloud/features/auth/repositories/auth_repo_impl.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
 
 class SignUpScreen extends StatelessWidget {
@@ -11,6 +15,7 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      Get.put(AuthController());
     final controller = Get.put(SignupController());
 
     return Scaffold(
@@ -107,6 +112,17 @@ class SignUpScreen extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           controller.emailError.value,
+                          style: GoogleFonts.outfit(
+                            fontSize: 13,
+                            color: const Color(0xFFA83F2D),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                      if (controller.apiError.value.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          controller.apiError.value,
                           style: GoogleFonts.outfit(
                             fontSize: 13,
                             color: const Color(0xFFA83F2D),
@@ -333,12 +349,21 @@ class SignUpScreen extends StatelessWidget {
 
                 // Button
                 Obx(
-                  () => CustomButton(
-                    text: controller.isSmsCodeVisible.value
-                        ? 'Complete sign up'
-                        : 'Send verification code',
-                    onPressed: controller.onMainButtonPressed,
-                  ),
+                  () => controller.isLoading.value
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 14),
+                            child: CircularProgressIndicator(
+                              color: Color(0xFFA83F2D),
+                            ),
+                          ),
+                        )
+                      : CustomButton(
+                          text: controller.isSmsCodeVisible.value
+                              ? 'Complete sign up'
+                              : 'Send verification code',
+                          onPressed: controller.onMainButtonPressed,
+                        ),
                 ),
                 const SizedBox(height: 20),
               ],

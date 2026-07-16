@@ -1,9 +1,12 @@
+import 'dart:developer' as DPrint;
+
+import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
 import 'package:get/get.dart';
 
 class SignupController extends GetxController {
   final RxBool isSmsCodeVisible = false.obs;
-  final RxString phoneNumber = "".obs;
+  final RxBool isLoading = false.obs;
   final RxString email = "".obs;
   final RxString smsCode = "".obs;
   final RxString firstName = "".obs;
@@ -13,6 +16,7 @@ class SignupController extends GetxController {
   final RxString firstNameError = "".obs;
   final RxString lastNameError = "".obs;
   final RxString smsCodeError = "".obs;
+  final RxString apiError = "".obs;
 
   void onMainButtonPressed() {
     if (!isSmsCodeVisible.value) {
@@ -31,10 +35,10 @@ class SignupController extends GetxController {
       }
 
       emailError.value = "";
+      apiError.value = "";
 
-      // First press: Trigger SMS/Email code sending
+      // First press: Trigger email OTP sending
       sendVerificationCode();
-      isSmsCodeVisible.value = true;
     } else {
       // Second press: Validate SMS code, names and complete signup
       if (smsCode.value.trim().isEmpty) {
@@ -60,8 +64,29 @@ class SignupController extends GetxController {
     }
   }
 
-  void sendVerificationCode() {
-    // Logic to send code to email
+  Future<void> sendVerificationCode() async {
+    isLoading.value = true;
+    apiError.value = "";
+
+    try {
+      final authCtrl = Get.find<AuthController>();
+      await authCtrl.verifyOTPRegister(email.value.trim());
+
+      // Check if AuthController reported an error
+      if (authCtrl.errorMessage.value.isNotEmpty) {
+        apiError.value = authCtrl.errorMessage.value;
+        authCtrl.clearError();
+      } else {
+        // Success: show verification code field
+        isSmsCodeVisible.value = true;
+        DPrint.log("OTP sent successfully to ${email.value}");
+      }
+    } catch (e) {
+      apiError.value = "Something went wrong. Please try again.";
+      DPrint.log("sendVerificationCode error: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void completeSignup() {
