@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/what_work_screen.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
 
 class Skill {
   final String name;
   final String image;
   final bool isNew;
 
-  const Skill({
-    required this.name,
-    required this.image,
-    this.isNew = false,
-  });
+  const Skill({required this.name, required this.image, this.isNew = false});
 }
 
 class WhatDoController extends GetxController {
+  final TradesmanController _tradesmanController =
+      Get.find<TradesmanController>();
+
   final List<Skill> skills = const [
     Skill(name: 'Phone Tech', image: 'assets/images/fi_5060325.png'),
     Skill(name: 'Computer Tech', image: 'assets/images/fi_10528057.png'),
@@ -43,6 +42,9 @@ class WhatDoController extends GetxController {
 
   // Indices of the selected extra skills (up to 2)
   final RxList<int> selectExtraIndices = <int>[].obs;
+  final RxString errorMessage = ''.obs;
+
+  RxBool get isLoading => _tradesmanController.isLoading;
 
   int get totalSelectedCount =>
       (selectMainIndex.value != null ? 1 : 0) + selectExtraIndices.length;
@@ -59,27 +61,27 @@ class WhatDoController extends GetxController {
   }
 
   void toggleSkill(int index) {
+    if (errorMessage.value.isNotEmpty) {
+      errorMessage.value = '';
+    }
+
     if (selectMainIndex.value == index) {
       // Tapped the main skill -> Deselect it
       if (selectExtraIndices.isNotEmpty) {
         // Promote the first extra to Main
         selectMainIndex.value = selectExtraIndices.removeAt(0);
-      }
-      else {
+      } else {
         selectMainIndex.value = null;
       }
-    }
-    else if (selectExtraIndices.contains(index)) {
+    } else if (selectExtraIndices.contains(index)) {
       // Tapped a selected extra skill -> Deselect it
       selectExtraIndices.remove(index);
-    }
-    else {
+    } else {
       // Tapping an unselected skill
       if (selectMainIndex.value == null) {
         // 1. If no main, it becomes main
         selectMainIndex.value = index;
-      }
-      else if (selectExtraIndices.length < 2) {
+      } else if (selectExtraIndices.length < 2) {
         // 2. If main is selected, add to extras if space available
         selectExtraIndices.add(index);
       } else {
@@ -97,9 +99,22 @@ class WhatDoController extends GetxController {
     }
   }
 
-  void onContinuePressed() {
-    if (selectMainIndex.value != null) {
-      Get.to(() => const WhatWorkScreen());
+  Future<void> onContinuePressed() async {
+    if (selectMainIndex.value == null) {
+      errorMessage.value = 'Please select your main skill.';
+      return;
+    }
+
+    errorMessage.value = '';
+
+    await _tradesmanController.createTradesmanStep1(
+      mainSkillName,
+      selectExtraIndices.map((index) => skills[index].name).toList(),
+    );
+
+    if (_tradesmanController.errorMessage.value.isNotEmpty) {
+      errorMessage.value = _tradesmanController.errorMessage.value;
+      _tradesmanController.clearError();
     }
   }
 }

@@ -1,7 +1,7 @@
-import 'dart:developer' as DPrint;
+import 'dart:developer' as d_print;
 
 import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
+import 'package:flutter_wordsaloud/features/auth/controller/role_selection_controller.dart';
 import 'package:get/get.dart';
 
 class SignupController extends GetxController {
@@ -41,7 +41,7 @@ class SignupController extends GetxController {
       sendVerificationCode();
     } else {
       // Second press: Validate SMS code, names and complete signup
-      if (smsCode.value.trim().isEmpty) {
+      if (smsCode.value.trim().length < 6) {
         smsCodeError.value = "Verification code is required.";
         return;
       }
@@ -79,18 +79,50 @@ class SignupController extends GetxController {
       } else {
         // Success: show verification code field
         isSmsCodeVisible.value = true;
-        DPrint.log("OTP sent successfully to ${email.value}");
+        d_print.log("OTP sent successfully to ${email.value}");
       }
     } catch (e) {
       apiError.value = "Something went wrong. Please try again.";
-      DPrint.log("sendVerificationCode error: $e");
+      d_print.log("sendVerificationCode error: $e");
     } finally {
       isLoading.value = false;
     }
   }
 
-  void completeSignup() {
-    // Logic to finish signup
-    Get.offAll(() => const SignInScreen());
+  Future<void> completeSignup() async {
+    isLoading.value = true;
+    apiError.value = "";
+
+    try {
+      final authCtrl = Get.find<AuthController>();
+      authCtrl.clearError();
+
+      final roleSelectionController =
+          Get.isRegistered<RoleSelectionController>()
+          ? Get.find<RoleSelectionController>()
+          : null;
+      final role = roleSelectionController?.selectedRole.value == 1
+          ? 'tradesman'
+          : 'client';
+
+      await authCtrl.register(
+        firstName.value.trim(),
+        lastName.value.trim(),
+        email.value.trim(),
+        smsCode.value.trim(),
+        role,
+        area.value.trim(),
+      );
+
+      if (authCtrl.errorMessage.value.isNotEmpty) {
+        apiError.value = authCtrl.errorMessage.value;
+        authCtrl.clearError();
+      }
+    } catch (e) {
+      apiError.value = "Something went wrong. Please try again.";
+      d_print.log("completeSignup error: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

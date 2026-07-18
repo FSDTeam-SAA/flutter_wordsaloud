@@ -1,12 +1,17 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
 import 'package:get/get.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/tell_clients_screen.dart';
 
 class WhatWorkController extends GetxController {
+  final TradesmanController _tradesmanController =
+      Get.find<TradesmanController>();
+
   final RxString homeArea = ''.obs;
 
   // Travel range: 0 = 5km Local, 1 = Trinidad wide, 2 = T&T wide
   final RxnInt selectedRange = RxnInt();
+  final RxString errorMessage = ''.obs;
+
+  RxBool get isLoading => _tradesmanController.isLoading;
 
   final List<Map<String, String>> travelRanges = const [
     {'title': '5 km - Local only', 'subtitle': 'My immediate area'},
@@ -15,37 +20,40 @@ class WhatWorkController extends GetxController {
   ];
 
   void selectRange(int index) {
+    if (errorMessage.value.isNotEmpty) {
+      errorMessage.value = '';
+    }
     selectedRange.value = index;
   }
 
-  void onContinuePressed() {
+  void onHomeAreaChanged(String value) {
+    homeArea.value = value;
+    if (errorMessage.value.isNotEmpty && value.trim().isNotEmpty) {
+      errorMessage.value = '';
+    }
+  }
+
+  Future<void> onContinuePressed() async {
     if (homeArea.value.trim().isEmpty) {
-      Get.snackbar(
-        "Home Area Required",
-        "You did not enter the home area.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFA83F2D),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(15),
-        borderRadius: 10,
-      );
+      errorMessage.value = 'You did not enter the home area.';
       return;
     }
 
     if (selectedRange.value == null) {
-      Get.snackbar(
-        "Travel Range Required",
-        "Please select a travel range.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFA83F2D),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(15),
-        borderRadius: 10,
-      );
+      errorMessage.value = 'Please select a travel range.';
       return;
     }
 
-    Get.to(() => const TellClientsScreen());
+    errorMessage.value = '';
+
+    await _tradesmanController.createTradesmanStep2(
+      homeArea.value.trim(),
+      travelRanges[selectedRange.value!]['title']!,
+    );
+
+    if (_tradesmanController.errorMessage.value.isNotEmpty) {
+      errorMessage.value = _tradesmanController.errorMessage.value;
+      _tradesmanController.clearError();
+    }
   }
 }
-

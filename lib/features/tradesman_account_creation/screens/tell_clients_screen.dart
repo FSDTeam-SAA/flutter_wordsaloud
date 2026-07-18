@@ -267,6 +267,21 @@ class TellClientsScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              Obx(
+                () => controller.rateError.value.isNotEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          controller.rateError.value,
+                          style: GoogleFonts.outfit(
+                            fontSize: 13,
+                            color: const Color(0xFFA83F2D),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
               const SizedBox(height: 28),
 
               // Add work photos label
@@ -386,9 +401,34 @@ class TellClientsScreen extends StatelessWidget {
               const SizedBox(height: 50),
 
               // Continue button
-              CustomButton(
-                text: 'Continue',
-                onPressed: controller.onContinuePressed,
+              Obx(
+                () => Column(
+                  children: [
+                    if (controller.apiError.value.isNotEmpty) ...[
+                      Text(
+                        controller.apiError.value,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.outfit(
+                          fontSize: 13,
+                          color: const Color(0xFFA83F2D),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    controller.isLoading.value
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5),
+                            child: CircularProgressIndicator(
+                              color: Color(0xFFA83F2D),
+                            ),
+                          )
+                        : CustomButton(
+                            text: 'Continue',
+                            onPressed: controller.onContinuePressed,
+                          ),
+                  ],
+                ),
               ),
               const SizedBox(height: 28),
             ],

@@ -1,14 +1,23 @@
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/what_do_controller.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/what_work_controller.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/you_are_live_screen.dart';
 
 class TellClientsController extends GetxController {
+  final TradesmanController _tradesmanController =
+      Get.find<TradesmanController>();
+
   final RxString pitch = ''.obs;
   final RxString pitchError = ''.obs;
   final RxString rate = ''.obs;
+  final RxString rateError = ''.obs;
+  final RxString apiError = ''.obs;
   final RxString rateUnit = 'Per day'.obs;
   final RxList<XFile> workPhotos = <XFile>[].obs;
 
@@ -22,16 +31,27 @@ class TellClientsController extends GetxController {
       if (pitchError.value.isNotEmpty && value.trim().isNotEmpty) {
         pitchError.value = '';
       }
+      if (apiError.value.isNotEmpty) {
+        apiError.value = '';
+      }
     }
   }
 
   void onRateChanged(String value) {
     rate.value = value;
+    if (rateError.value.isNotEmpty && value.trim().isNotEmpty) {
+      rateError.value = '';
+    }
+    if (apiError.value.isNotEmpty) {
+      apiError.value = '';
+    }
   }
 
   void selectRateUnit(String value) {
     rateUnit.value = value;
   }
+
+  RxBool get isLoading => _tradesmanController.isLoading;
 
   Future<void> pickPhotos() async {
     final picker = ImagePicker();
@@ -43,9 +63,38 @@ class TellClientsController extends GetxController {
 
   bool get canContinue => pitch.value.trim().isNotEmpty;
 
-  void onContinuePressed() {
+  Future<void> onContinuePressed() async {
     if (!canContinue) {
       pitchError.value = 'Please enter your pitch description.';
+      return;
+    }
+
+    if (rate.value.trim().isEmpty) {
+      rateError.value = 'Please enter your typical rate.';
+      return;
+    }
+
+    final parsedRate = num.tryParse(rate.value.trim());
+    if (parsedRate == null || parsedRate <= 0) {
+      rateError.value = 'Please enter a valid typical rate.';
+      return;
+    }
+
+    pitchError.value = '';
+    rateError.value = '';
+    apiError.value = '';
+
+    final images = workPhotos.map((photo) => File(photo.path)).toList();
+    final isSuccess = await _tradesmanController.createTradesmanStep3(
+      pitch.value.trim(),
+      parsedRate.toString(),
+      rateUnit.value,
+      images,
+    );
+
+    if (!isSuccess) {
+      apiError.value = _tradesmanController.errorMessage.value;
+      _tradesmanController.clearError();
       return;
     }
 
@@ -58,6 +107,10 @@ class TellClientsController extends GetxController {
       fullName = [first, last].where((s) => s.isNotEmpty).join(' ');
     }
 
+    if (fullName.isEmpty && Get.isRegistered<AuthController>()) {
+      fullName = Get.find<AuthController>().currentUserName.value.trim();
+    }
+
     String tradesmanSkill = '';
     if (Get.isRegistered<WhatDoController>()) {
       tradesmanSkill = Get.find<WhatDoController>().mainSkillName.trim();
@@ -68,7 +121,9 @@ class TellClientsController extends GetxController {
       homeArea = Get.find<WhatWorkController>().homeArea.value.trim();
     }
 
-    final String? firstPhotoPath = workPhotos.isNotEmpty ? workPhotos.first.path : null;
+    final String? firstPhotoPath = workPhotos.isNotEmpty
+        ? workPhotos.first.path
+        : null;
 
     Get.to(
       () => YouAreLiveScreen(

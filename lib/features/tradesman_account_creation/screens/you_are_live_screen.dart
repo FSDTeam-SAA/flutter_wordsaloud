@@ -4,7 +4,6 @@ import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/t
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
-import 'package:flutter_wordsaloud/features/home/screens/dashboard_screen.dart';
 
 class YouAreLiveScreen extends StatelessWidget {
   final String tradesmanName;
@@ -14,7 +13,7 @@ class YouAreLiveScreen extends StatelessWidget {
 
   const YouAreLiveScreen({
     super.key,
-    this.tradesmanName = 'Devon Ramsaran',
+    this.tradesmanName = 'Tradesman',
     this.tradesmanSkill = '',
     this.homeArea = '',
     this.profileImagePath,
@@ -104,7 +103,8 @@ class YouAreLiveScreen extends StatelessWidget {
                             color: Color(0xFFA83F2D),
                             shape: BoxShape.circle,
                           ),
-                          child: profileImagePath != null &&
+                          child:
+                              profileImagePath != null &&
                                   profileImagePath!.isNotEmpty
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(26),
@@ -180,14 +180,18 @@ class YouAreLiveScreen extends StatelessWidget {
 
               // Go to dashboard button
               CustomButton(
+                height: 50,
+                borderRadius: 16,
                 text: 'Go to dashboard',
                 onPressed: () {
-                  Get.offAll(() => TradesmanDashboard(
-                        tradesmanName: tradesmanName,
-                        tradesmanSkill: tradesmanSkill,
-                        homeArea: homeArea,
-                        profileImagePath: profileImagePath,
-                      ));
+                  Get.offAll(
+                    () => TradesmanDashboard(
+                      tradesmanName: tradesmanName,
+                      tradesmanSkill: tradesmanSkill,
+                      homeArea: homeArea,
+                      profileImagePath: profileImagePath,
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 32),

@@ -94,7 +94,9 @@ class WhatDoScreen extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: mainName.isNotEmpty ? mainName : 'None',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             const TextSpan(
                               text: ' in main',
@@ -135,14 +137,20 @@ class WhatDoScreen extends StatelessWidget {
                       final Border cardBorder = isMain
                           ? Border.all(color: Colors.transparent)
                           : isSelected
-                              ? Border.all(color: const Color(0xFFA83F2D), width: 1.5)
-                              : Border.all(color: const Color(0xFFCDCDCD), width: 1);
+                          ? Border.all(
+                              color: const Color(0xFFA83F2D),
+                              width: 1.5,
+                            )
+                          : Border.all(
+                              color: const Color(0xFFCDCDCD),
+                              width: 1,
+                            );
 
                       final Color itemColor = isMain
                           ? Colors.white
                           : isSelected
-                              ? Colors.black
-                              : const Color(0xFF6D6D6D);
+                          ? Colors.black
+                          : const Color(0xFF6D6D6D);
 
                       return Stack(
                         clipBehavior: Clip.none,
@@ -151,7 +159,10 @@ class WhatDoScreen extends StatelessWidget {
                             onTap: () => controller.toggleSkill(index),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 150),
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
                               decoration: BoxDecoration(
                                 color: cardBgColor,
                                 borderRadius: BorderRadius.circular(8),
@@ -169,7 +180,9 @@ class WhatDoScreen extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     Image.asset(
-                                      skill.image, width: 24, height: 24,
+                                      skill.image,
+                                      width: 24,
+                                      height: 24,
                                       //color: isMain ? const Color(0xFFEBD7C7) : const Color(0xFF6D6D6D),
                                     ),
                                     const SizedBox(width: 8),
@@ -213,7 +226,10 @@ class WhatDoScreen extends StatelessWidget {
                               top: -8,
                               right: 16,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFEAAE4B),
                                   borderRadius: BorderRadius.circular(16),
@@ -233,7 +249,10 @@ class WhatDoScreen extends StatelessWidget {
                               top: -8,
                               right: 20,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF276A78),
                                   borderRadius: BorderRadius.circular(4),
@@ -259,13 +278,39 @@ class WhatDoScreen extends StatelessWidget {
               Center(
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 20.0, top: 10),
-                  child: Obx(() => CustomButton(
-                        text: 'Continue',
-                        icon: Icons.arrow_forward,
-                        onPressed: controller.selectMainIndex.value != null
-                            ? controller.onContinuePressed
-                            : null,
-                      )),
+                  child: Obx(
+                    () => Column(
+                      children: [
+                        if (controller.errorMessage.value.isNotEmpty) ...[
+                          Text(
+                            controller.errorMessage.value,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.outfit(
+                              fontSize: 13,
+                              color: const Color(0xFFA83F2D),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                        controller.isLoading.value
+                            ? const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 5),
+                                child: CircularProgressIndicator(
+                                  color: Color(0xFFA83F2D),
+                                ),
+                              )
+                            : CustomButton(
+                                text: 'Continue',
+                                icon: Icons.arrow_forward,
+                                onPressed:
+                                    controller.selectMainIndex.value != null
+                                    ? controller.onContinuePressed
+                                    : null,
+                              ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],

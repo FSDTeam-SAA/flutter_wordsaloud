@@ -11,7 +11,7 @@ class SignInScreen extends StatelessWidget {
 
   static const _backgroundColor = Color(0xFFF5EFE6);
   static const _accentColor = Color(0xFFAE3F30);
-  static const _darkTextColor = Color(0xFF1F1F1F);
+  static const _darkTextColor = Color(0xFF4A4A4A);
   static const _mutedTextColor = Color(0xFF6D6D6D);
 
   @override
@@ -96,6 +96,9 @@ class SignInScreen extends StatelessWidget {
                               value.trim().isNotEmpty) {
                             controller.emailError.value = '';
                           }
+                          if (controller.apiError.value.isNotEmpty) {
+                            controller.apiError.value = '';
+                          }
                         },
                       ),
                       if (controller.emailError.value.isNotEmpty) ...[
@@ -109,58 +112,10 @@ class SignInScreen extends StatelessWidget {
                           ),
                         ),
                       ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                CustomButton(text: 'Send code', onPressed: controller.sendCode,height: 50, borderRadius: 16,),
-                //_AuthButton(text: 'Send code', onPressed: controller.sendCode),
-                const SizedBox(height: 14),
-                const _FieldLabel(text: 'VERIFICATION CODE'),
-                const SizedBox(height: 8),
-                Obx(
-                  () => Column(
-                    children: [
-                      PinCodeTextField(
-                        appContext: context,
-                        length: 6,
-                        cursorColor: _darkTextColor,
-                        keyboardType: TextInputType.number,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        textStyle: GoogleFonts.outfit(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: _darkTextColor,
-                        ),
-                        onChanged: (value) {
-                          controller.code.value = value;
-                          if (controller.codeError.value.isNotEmpty &&
-                              value.trim().isNotEmpty) {
-                            controller.codeError.value = '';
-                          }
-                        },
-                        pinTheme: PinTheme(
-                          shape: PinCodeFieldShape.box,
-                          borderRadius: BorderRadius.circular(8),
-                          fieldHeight: 50,
-                          fieldWidth: 44,
-                          borderWidth: 1.4,
-                          activeBorderWidth: 2,
-                          selectedBorderWidth: 2,
-                          inactiveBorderWidth: 2,
-                          errorBorderWidth: 2,
-                          activeFillColor: _backgroundColor,
-                          inactiveFillColor: _backgroundColor,
-                          selectedFillColor: _backgroundColor,
-                          activeColor: _accentColor,
-                          inactiveColor: _accentColor,
-                          selectedColor: _accentColor,
-                        ),
-                      ),
-                      if (controller.codeError.value.isNotEmpty) ...[
-                        const SizedBox(height: 4),
+                      if (controller.apiError.value.isNotEmpty) ...[
+                        const SizedBox(height: 6),
                         Text(
-                          controller.codeError.value,
+                          controller.apiError.value,
                           style: GoogleFonts.outfit(
                             fontSize: 12,
                             color: _accentColor,
@@ -168,30 +123,129 @@ class SignInScreen extends StatelessWidget {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 2),
-                      Text.rich(
-                        TextSpan(
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            color: _mutedTextColor,
-                          ),
-                          children: const [
-                            TextSpan(text: "Didn't get it? "),
-                            TextSpan(
-                              text: 'Resend',
-                              style: TextStyle(
-                                color: _accentColor,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
+                const SizedBox(height: 16),
+                Obx(
+                  () => controller.isSendingCode.value
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5),
+                            child: CircularProgressIndicator(
+                              color: _accentColor,
+                            ),
+                          ),
+                        )
+                      : CustomButton(
+                          text: 'Send code',
+                          onPressed: controller.sendCode,
+                          height: 50,
+                          borderRadius: 16,
+                        ),
+                ),
                 const SizedBox(height: 14),
-                CustomButton(text: 'Log in', onPressed: controller.login, height: 50, borderRadius: 16,),
+                const _FieldLabel(text: 'VERIFICATION CODE'),
+                const SizedBox(height: 8),
+                Obx(() {
+                  final isCodeEnabled = controller.isCodeVisible.value;
+
+                  return Opacity(
+                    opacity: isCodeEnabled ? 1 : 0.45,
+                    child: IgnorePointer(
+                      ignoring: !isCodeEnabled,
+                      child: Column(
+                        children: [
+                          PinCodeTextField(
+                            appContext: context,
+                            length: 6,
+                            enabled: isCodeEnabled,
+                            cursorColor: _darkTextColor,
+                            keyboardType: TextInputType.number,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            textStyle: GoogleFonts.outfit(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: _darkTextColor,
+                            ),
+                            onChanged: (value) {
+                              controller.code.value = value;
+                              if (controller.codeError.value.isNotEmpty &&
+                                  value.trim().isNotEmpty) {
+                                controller.codeError.value = '';
+                              }
+                            },
+                            pinTheme: PinTheme(
+                              shape: PinCodeFieldShape.box,
+                              borderRadius: BorderRadius.circular(8),
+                              fieldHeight: 50,
+                              fieldWidth: 44,
+                              borderWidth: 1.4,
+                              activeBorderWidth: 2,
+                              selectedBorderWidth: 2,
+                              inactiveBorderWidth: 2,
+                              errorBorderWidth: 2,
+                              activeFillColor: _backgroundColor,
+                              inactiveFillColor: _backgroundColor,
+                              selectedFillColor: _backgroundColor,
+                              activeColor: _accentColor,
+                              inactiveColor: _accentColor,
+                              selectedColor: _accentColor,
+                            ),
+                          ),
+                          if (controller.codeError.value.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              controller.codeError.value,
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                color: _accentColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 2),
+                          Text.rich(
+                            TextSpan(
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                color: _mutedTextColor,
+                              ),
+                              children: const [
+                                TextSpan(text: "Didn't get it? "),
+                                TextSpan(
+                                  text: 'Resend',
+                                  style: TextStyle(
+                                    color: _accentColor,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+                const SizedBox(height: 14),
+                Obx(
+                  () => controller.isLoggingIn.value
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5),
+                            child: CircularProgressIndicator(
+                              color: _accentColor,
+                            ),
+                          ),
+                        )
+                      : CustomButton(
+                          text: 'Log in',
+                          onPressed: controller.login,
+                          height: 50,
+                          borderRadius: 16,
+                        ),
+                ),
                 const SizedBox(height: 18),
                 const Divider(color: Color(0xFFE7D9CA), height: 1),
                 const SizedBox(height: 16),
@@ -226,7 +280,10 @@ class SignInScreen extends StatelessWidget {
                             children: const [
                               TextSpan(
                                 text: 'No password to remember or lose. ',
-                                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                ),
                               ),
                               TextSpan(text: 'Just your email.'),
                             ],
@@ -315,39 +372,6 @@ class _EmailField extends StatelessWidget {
           borderSide: const BorderSide(
             color: SignInScreen._accentColor,
             width: 1.4,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AuthButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-
-  const _AuthButton({required this.text, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 38,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: SignInScreen._accentColor,
-          foregroundColor: Colors.white,
-          elevation: 3,
-          shadowColor: SignInScreen._accentColor.withValues(alpha: 0.28),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        child: Text(
-          text,
-          style: GoogleFonts.outfit(
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
           ),
         ),
       ),

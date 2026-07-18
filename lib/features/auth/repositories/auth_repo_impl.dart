@@ -7,7 +7,11 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/network_result.dart';
 import '../../../core/network/constants/api_constants.dart';
 import '../models/request/register_request_model.dart';
+import '../models/request/sign_in_request_model.dart';
+import '../models/request/verify_mail_request_model.dart';
+import '../models/response/login_response_model.dart';
 import '../models/response/register_response_model.dart';
+import '../models/response/verify_email_response_model.dart';
 import 'auth_repo.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -16,7 +20,9 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({required ApiClient apiClient}) : _apiClient = apiClient;
 
   @override
-  NetworkResult<SignUpOtpResponseModel> otpVerify(SignUpOtpRequestModel request) {
+  NetworkResult<SignUpOtpResponseModel> otpVerify(
+    SignUpOtpRequestModel request,
+  ) {
     return _apiClient.post(
       endpoint: ApiConstants.auth.verifyOtp,
       data: request.toJson(),
@@ -24,7 +30,18 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   }
   @override
-  NetworkResult<RegisterResponseModel> register(RegisterRequestModel request){
+  NetworkResult<VerifyEmailResponseModel> emailVerify(
+      VerifyMailRequestModel request,
+      ) {
+    return _apiClient.post(
+      endpoint: ApiConstants.auth.verifyEmail,
+      data: request.toJson(),
+      fromJsonT: (json) => VerifyEmailResponseModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<RegisterResponseModel> register(RegisterRequestModel request) {
     return _apiClient.post(
       endpoint: ApiConstants.auth.register,
       data: request.toJson(),
@@ -32,14 +49,15 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   }
 
-  // @override
-  // NetworkResult<LoginResponseModel> login(LoginRequestModel request) {
-  //   return _apiClient.post(
-  //     endpoint: ApiConstants.auth.login,
-  //     data: request.toJson(),
-  //     fromJsonT: (json) => LoginResponseModel.fromJson(json),
-  //   );
-  // }
+  @override
+  NetworkResult<LoginResponseModel> login(SignInRequestModel request) {
+    return _apiClient.post(
+      endpoint: ApiConstants.auth.login,
+      data: request.toJson(),
+      fromJsonT: (json) => LoginResponseModel.fromJson(json),
+    );
+  }
+
   //
   // @override
   // NetworkResult<ForgotPasswordResponseModel> forgotPassword(

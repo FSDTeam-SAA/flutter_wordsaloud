@@ -76,7 +76,7 @@ class WhatWorkScreen extends StatelessWidget {
 
               // Home Area Input
               TextField(
-                onChanged: (v) => controller.homeArea.value = v,
+                onChanged: controller.onHomeAreaChanged,
                 style: GoogleFonts.outfit(
                   fontSize: 16,
                   color: Colors.black,
@@ -89,23 +89,31 @@ class WhatWorkScreen extends StatelessWidget {
                     fontSize: 16,
                   ),
                   filled: true,
-                  fillColor: Color(0xFFFEF8F3),
+                  fillColor: const Color(0xFFFEF8F3),
                   contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 14),
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFA83F2D), width: 1.5),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFA83F2D),
+                      width: 1.5,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFA83F2D), width: 1.5),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFA83F2D),
+                      width: 1.5,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFA83F2D), width: 2),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFA83F2D),
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
@@ -132,21 +140,24 @@ class WhatWorkScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final range = controller.travelRanges[index];
                     return Obx(() {
-                      final isSelected = controller.selectedRange.value == index;
+                      final isSelected =
+                          controller.selectedRange.value == index;
                       return GestureDetector(
                         onTap: () => controller.selectRange(index),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 150),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 14),
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
                           decoration: BoxDecoration(
-                            color: Color(0xFFFEF8F3),
+                            color: const Color(0xFFFEF8F3),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isSelected
                                   ? const Color(0xFFC34D3C)
                                   : const Color(0xFFCDCDCD),
-                              width: isSelected ? 1: 1,
+                              width: 1,
                             ),
                           ),
                           child: Row(
@@ -161,7 +172,7 @@ class WhatWorkScreen extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
-                                        color: Color(0xFF454545),
+                                        color: const Color(0xFF454545),
                                       ),
                                     ),
                                     const SizedBox(height: 2),
@@ -193,8 +204,11 @@ class WhatWorkScreen extends StatelessWidget {
                                   ),
                                 ),
                                 child: isSelected
-                                    ? const Icon(Icons.check,
-                                        color: Colors.white, size: 16)
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 16,
+                                      )
                                     : null,
                               ),
                             ],
@@ -209,9 +223,34 @@ class WhatWorkScreen extends StatelessWidget {
               // Bottom Continue Button
               Padding(
                 padding: const EdgeInsets.only(bottom: 24.0, top: 12),
-                child: CustomButton(
-                  text: 'Continue',
-                  onPressed: controller.onContinuePressed,
+                child: Obx(
+                  () => Column(
+                    children: [
+                      if (controller.errorMessage.value.isNotEmpty) ...[
+                        Text(
+                          controller.errorMessage.value,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.outfit(
+                            fontSize: 13,
+                            color: const Color(0xFFA83F2D),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      controller.isLoading.value
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 5),
+                              child: CircularProgressIndicator(
+                                color: Color(0xFFA83F2D),
+                              ),
+                            )
+                          : CustomButton(
+                              text: 'Continue',
+                              onPressed: controller.onContinuePressed,
+                            ),
+                    ],
+                  ),
                 ),
               ),
             ],
