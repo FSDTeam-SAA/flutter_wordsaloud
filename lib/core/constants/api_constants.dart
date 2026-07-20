@@ -42,21 +42,11 @@ class ApiConstants {
   /// [Endpoint Groups
   static AuthEndpoints get auth => AuthEndpoints();
   static UserEndpoints get user => UserEndpoints();
-  static GroupEndpoints get group => GroupEndpoints();
   static CommentEndpoints get comment => CommentEndpoints();
   static PostEndpoints get post => PostEndpoints();
-  static FriendEndpoints get friend => FriendEndpoints();
   static NotificationEndpoints get notification => NotificationEndpoints();
-  static StoryEndpoints get story => StoryEndpoints();
   static ChatEndpoints get chat => ChatEndpoints();
-  static SearchEndpoints get search => SearchEndpoints();
-  static PageEndpoints get page => PageEndpoints();
-  static EventEndpoints get event => EventEndpoints();
-  static MarketplaceEndpoints get marketplace => MarketplaceEndpoints();
-  static CollectionEndpoints get collections => CollectionEndpoints();
 
-  /// [Map Configurations]
-  static MapConstants get map => MapConstants();
 }
 
 class SocketEndpoint {
@@ -156,51 +146,6 @@ class UserEndpoints {
   final String searchUsers = '$_base/search/list';
 }
 
-class GroupEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/groups';
-  final String root = _base;
-
-  String manageGroup(String groupId) => '$root/$groupId/manage';
-
-  final String discover = _base;
-
-  final String adminMe = '$_base/admin/me';
-
-  String groupByID(String id) => '$_base/$id';
-
-  String joinGroup(String id) => '$_base/$id/join';
-  String inviteFriendToGroup(String groupId, String friendId) =>
-      '$_base/$groupId/invite/$friendId';
-  String cancelGroupInvite(String groupId, String userId) =>
-      '$_base/$groupId/invite/$userId/cancel';
-  String leaveGroup(String id) => '$_base/$id/leave';
-  String approveMember(String groupId, String userId) =>
-      '$_base/$groupId/approve/$userId';
-  String rejectMember(String groupId, String userId) =>
-      '$_base/$groupId/reject/$userId';
-
-  String groupPosts(String groupId) => '$_base/$groupId/posts';
-
-  String groupMediaPhotos(String groupId) => '$_base/$groupId/media/photos';
-  String groupMediaVideos(String groupId) => '$_base/$groupId/media/videos';
-  String groupAlbumByID(String groupId, String albumId) =>
-      '$_base/$groupId/media/albums/$albumId';
-  String createGroupAlbum(String groupId) => '$_base/$groupId/media/albums';
-
-  String getGroupMembers(String groupId) => '$_base/$groupId/members';
-  String getGroupMembersNotInGroup(String groupId) =>
-      '$_base/$groupId/friends-not-in-group';
-
-  String removeMember(String groupId, String memberId) =>
-      '$_base/$groupId/members/$memberId';
-  String addAdmin(String groupId, String memberId) =>
-      '$_base/$groupId/admin/$memberId';
-
-  String togglePinGroupPost(String groupId, String postId) =>
-      '$_base/$groupId/posts/$postId/pin';
-  String getPinGroupPost(String groupId) => '$_base/$groupId/posts/pinned';
-}
-
 class PostEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/posts';
   final String posts = _base;
@@ -220,21 +165,6 @@ class PostEndpoints {
   String userTimeline(String userId) => '$_base/timeline/$userId';
 }
 
-class FriendEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/friends';
-  final String root = _base;
-
-  final String getNotFriends = '$_base/non-friends';
-  final String getFriendRequests = '$_base/requests';
-  String getFriendRequestsWithMode(String mode) => '$_base/requests?mode=$mode';
-  final String getFriendSuggestions = '$_base/suggestions';
-  final String sendFriendRequest = '$_base/request';
-  String respondFriendRequest(String requestId) => '$_base/request/$requestId';
-  String cancelFriendRequest(String requestId) =>
-      '$_base/request/$requestId/cancel';
-  String unfriend(String friendId) => '$_base/$friendId';
-}
-
 class NotificationEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/notifications';
   final String root = _base;
@@ -242,20 +172,6 @@ class NotificationEndpoints {
   final String readAll = '$_base/read-all';
   String markRead(String id) => '$_base/$id/read';
   String delete(String id) => '$_base/$id';
-}
-
-class StoryEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/stories';
-  final String root = _base;
-
-  final String getStories = _base;
-  final String createStory = _base;
-  final String getMyStories = '$_base/me/list';
-
-  String storyByID(String id) => '$_base/$id';
-  String viewStory(String id) => '$_base/$id/view';
-  String reactStory(String id) => '$_base/$id/react';
-  String deleteStory(String id) => '$_base/$id';
 }
 
 class ChatEndpoints {
@@ -290,75 +206,4 @@ class ChatEndpoints {
   String deleteMessage(String messageId) => '$_base/$messageId';
 
   final String createGroupConversation = '$_base/conversations/group';
-}
-
-class SearchEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/search';
-  final String globalSearch = _base;
-
-  final String searchUsers = '$_base/users';
-}
-
-class PageEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/pages';
-  final String root = _base;
-
-  final String myPages = '$_base/my-pages';
-  final String liked = '$_base/liked';
-  final String discover = '$_base/discover';
-
-  String pageDetails(String id) => '$_base/$id';
-  String updatePage(String id) => '$_base/$id';
-  String followPage(String id) => '$_base/$id/follow';
-  String unfollowPage(String id) => '$_base/$id/follow';
-  String pagePosts(String id) => '$_base/$id/posts';
-  String createPagePost(String id) => '$_base/$id/posts';
-}
-
-class EventEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/events';
-  final String root = _base;
-
-  String eventByID(String id) => '$_base/$id';
-  String rsvp(String id) => '$_base/$id/rsvp';
-  String invite(String id) => '$_base/$id/invite';
-}
-
-class MarketplaceEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/marketplace';
-  final String root = _base;
-
-  final String meta = '$_base/meta';
-  final String listings = '$_base/listings';
-  final String myListings = '$_base/my/listings';
-  final String savedListings = '$_base/saved/me';
-  final String myOffers = '$_base/offers/me';
-
-  String listingDetails(String id) => '$_base/listings/$id';
-  String listingStatus(String id) => '$_base/listings/$id/status';
-  String saveListing(String id) => '$_base/listings/$id/save';
-  String hideListing(String id) => '$_base/listings/$id/hide';
-  String reportListing(String id) => '$_base/listings/$id/report';
-  String messageSeller(String id) => '$_base/listings/$id/message';
-  String listingOffers(String id) => '$_base/listings/$id/offers';
-  String respondOffer(String id) => '$_base/offers/$id/respond';
-  String cancelOffer(String id) => '$_base/offers/$id/cancel';
-  String sellerRatings(String id) => '$_base/ratings/$id';
-}
-
-class CollectionEndpoints {
-  static const String _base = '${ApiConstants.baseUrl}/collections';
-  final String root = _base;
-  final String me = '$_base/me';
-  String userCollections(String userId) => '$_base/user/$userId';
-  String items(String id) => '$_base/$id/items';
-  String update(String id) => '$_base/$id';
-  String delete(String id) => '$_base/$id';
-}
-
-class MapConstants {
-  final String osmUrlTemplate =
-      'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-  final String osmAttribution = '© OpenStreetMap contributors';
-  final String userAgentPackageName = 'com.karim.app';
 }

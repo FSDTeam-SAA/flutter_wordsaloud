@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/dashboard_response_model.dart'
+    as dashboard_model;
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_wordsaloud/features/home/controller/edit_profile_controller.dart';
@@ -21,10 +24,223 @@ class TradesmanEditProfileScreen extends StatefulWidget {
   });
 
   @override
-  State<TradesmanEditProfileScreen> createState() => _TradesmanEditProfileScreenState();
+  State<TradesmanEditProfileScreen> createState() =>
+      _TradesmanEditProfileScreenState();
 }
 
-class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen> {
+class _TradesmanEditProfileScreenState
+    extends State<TradesmanEditProfileScreen> {
+  late final TradesmanController _tradesmanController;
+  late final EditProfileController controller;
+  late final TextEditingController bioTextController;
+  late final TextEditingController rateTextController;
+  late final TextEditingController homeAreaTextController;
+
+  String _tradesmanName = '';
+  String _tradesmanPhone = '';
+  String? _profileImageUrl;
+  bool _isLoadingProfile = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _tradesmanController = Get.find<TradesmanController>();
+    _tradesmanName = widget.tradesmanName;
+    _tradesmanPhone = widget.tradesmanPhone;
+
+    controller = EditProfileController(
+      initialName: widget.tradesmanName,
+      initialPhone: widget.tradesmanPhone,
+      initialMainTrade: widget.tradesmanSkill,
+      initialHomeArea: widget.homeArea,
+      initialProfileImagePath: widget.profileImagePath,
+    );
+
+    bioTextController = TextEditingController(text: controller.pitch.value);
+    rateTextController = TextEditingController(text: controller.rate.value);
+    homeAreaTextController = TextEditingController(
+      text: controller.homeArea.value,
+    );
+
+    bioTextController.addListener(() {
+      controller.pitch.value = bioTextController.text;
+    });
+    rateTextController.addListener(() {
+      controller.rate.value = rateTextController.text;
+    });
+    homeAreaTextController.addListener(() {
+      controller.homeArea.value = homeAreaTextController.text;
+    });
+
+    _loadProfileFromDashboard();
+  }
+
+  @override
+  void dispose() {
+    bioTextController.dispose();
+    rateTextController.dispose();
+    homeAreaTextController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadProfileFromDashboard() async {
+    dashboard_model.TradesmanDashboardResponse? dashboard;
+
+    dashboard = _tradesmanController.dashboardData.value;
+    dashboard ??= await _tradesmanController.fetchDashboard();
+
+    if (!mounted) return;
+    if (dashboard != null) {
+      _applyDashboardProfile(dashboard);
+    }
+
+    setState(() {
+      _isLoadingProfile = false;
+    });
+  }
+
+  void _applyDashboardProfile(
+    dashboard_model.TradesmanDashboardResponse dashboard,
+  ) {
+    final profile = dashboard.profile;
+    final user = profile?.user;
+    final first = user?.firstName?.trim() ?? '';
+    final last = user?.lastName?.trim() ?? '';
+    final fullName = (user?.name?.trim().isNotEmpty ?? false)
+        ? user!.name!.trim()
+        : [first, last].where((part) => part.isNotEmpty).join(' ');
+    final amount = profile?.typicalRate?.amount;
+
+    setState(() {
+      if (fullName.isNotEmpty) _tradesmanName = fullName;
+      if (user?.phoneNumber?.trim().isNotEmpty ?? false) {
+        _tradesmanPhone = user!.phoneNumber!.trim();
+      }
+      _profileImageUrl = user?.profileImage?.url;
+    });
+
+    controller.pitch.value = profile?.pitch ?? '';
+    controller.rate.value = amount == null ? '' : _formatNumber(amount);
+    controller.rateUnit.value = _normalizeRateUnit(profile?.typicalRate?.unit);
+    controller.mainTrade.value = profile?.mainSkill ?? '';
+    controller.extraTrades
+      ..clear()
+      ..addAll(profile?.extraSkills ?? const []);
+    controller.homeArea.value = profile?.homeArea ?? '';
+    controller.travelRange.value = _normalizeTravelRange(profile?.travelRange);
+
+    bioTextController.text = controller.pitch.value;
+    rateTextController.text = controller.rate.value;
+    homeAreaTextController.text = controller.homeArea.value;
+  }
+
+  String _formatNumber(num value) {
+    return value % 1 == 0 ? value.toInt().toString() : value.toString();
+  }
+
+  String _normalizeRateUnit(String? value) {
+    switch (value?.trim().toLowerCase()) {
+      case 'per hour':
+        return 'Per hour';
+      case 'per job':
+        return 'Per job';
+      case 'per day':
+      default:
+        return 'Per day';
+    }
+  }
+
+  String _normalizeTravelRange(String? value) {
+    final normalized = value?.trim().toLowerCase() ?? '';
+    if (normalized.contains('t&t') ||
+        normalized.contains('tt wide') ||
+        normalized.contains('both island')) {
+      return 'T&T wide';
+    }
+    if (normalized.contains('trinidad')) return 'Trinidad wide';
+    if (normalized.contains('local') ||
+        normalized.contains('5km') ||
+        normalized.contains('5 km')) {
+      return '5km - Local only';
+    }
+    return 'Trinidad wide';
+  }
+
+  Future<void> _saveProfile() async {
+    final selectedProfileImagePath = controller.profileImagePath.value;
+    final newProfileImagePath =
+        selectedProfileImagePath != widget.profileImagePath
+        ? selectedProfileImagePath
+        : null;
+
+    final isSuccess = await _tradesmanController.editProfile(
+      pitch: controller.pitch.value.trim(),
+      amount: controller.rate.value.trim(),
+      unit: controller.rateUnit.value,
+      mainSkill: controller.mainTrade.value,
+      extraSkills: List<String>.from(controller.extraTrades),
+      homeArea: controller.homeArea.value.trim(),
+      travelRange: _normalizeTravelRange(controller.travelRange.value),
+      profileImagePath: newProfileImagePath,
+    );
+
+    if (!mounted) return;
+
+    if (!isSuccess) {
+      Get.snackbar(
+        'Error',
+        _tradesmanController.errorMessage.value.isNotEmpty
+            ? _tradesmanController.errorMessage.value
+            : 'Failed to save profile changes.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFA83F2D),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(15),
+      );
+      return;
+    }
+
+    Get.back(
+      result: {
+        'pitch': controller.pitch.value,
+        'rate': controller.rate.value,
+        'rateUnit': controller.rateUnit.value,
+        'mainTrade': controller.mainTrade.value,
+        'extraTrades': List<String>.from(controller.extraTrades),
+        'homeArea': controller.homeArea.value,
+        'profileImagePath': controller.profileImagePath.value,
+      },
+    );
+    Get.snackbar(
+      'Success',
+      'Your profile changes have been saved!',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFF22707F),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(15),
+    );
+  }
+
+  String _getInitials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) return 'TR';
+    if (parts.length == 1) return parts.first[0].toUpperCase();
+    return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+  }
+
+  Widget _buildAvatarInitials() {
+    return Center(
+      child: Text(
+        _getInitials(_tradesmanName),
+        style: GoogleFonts.outfit(
+          fontSize: 26,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
   String _getTradeImage(String tradeName) {
     switch (tradeName.toLowerCase().trim()) {
       case 'phone tech':
@@ -74,39 +290,6 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Instantiate/initialize the controller with passed-in values
-    final EditProfileController controller = Get.put(
-      EditProfileController(
-        initialName: widget.tradesmanName,
-        initialPhone: widget.tradesmanPhone,
-        initialMainTrade: widget.tradesmanSkill,
-        initialHomeArea: widget.homeArea,
-        initialProfileImagePath: widget.profileImagePath,
-        initialPitch: 'WASA-certified plumber. 12 yrs residential. Leaks, pumps, bathroom installs.',
-        initialRate: '350',
-        initialRateUnit: 'per day',
-        initialExtraTrades: const ['Carpenter', 'Tile Man'],
-      ),
-    );
-
-    final TextEditingController bioTextController =
-    TextEditingController(text: controller.pitch.value);
-    final TextEditingController rateTextController =
-    TextEditingController(text: controller.rate.value);
-    final TextEditingController homeAreaTextController =
-    TextEditingController(text: controller.homeArea.value);
-
-    // Sync input fields back to controller
-    bioTextController.addListener(() {
-      controller.pitch.value = bioTextController.text;
-    });
-    rateTextController.addListener(() {
-      controller.rate.value = rateTextController.text;
-    });
-    homeAreaTextController.addListener(() {
-      controller.homeArea.value = homeAreaTextController.text;
-    });
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5EFE6), // Cream background
       appBar: AppBar(
@@ -128,10 +311,18 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
       body: SafeArea(
         child: Column(
           children: [
+            if (_isLoadingProfile)
+              const LinearProgressIndicator(
+                color: Color(0xFFA83F2D),
+                backgroundColor: Color(0xFFEBD7C7),
+              ),
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -143,41 +334,58 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
                           final path = controller.profileImagePath.value;
                           return Stack(
                             children: [
-                              Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFA83F2D),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: path != null && path.isNotEmpty
-                                    ? GestureDetector(
-                                  onTap: controller.pickProfilePhoto,
-                                  child: ClipRRect(
+                              GestureDetector(
+                                onTap: controller.pickProfilePhoto,
+                                child: Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFA83F2D),
                                     borderRadius: BorderRadius.circular(16),
-                                    child: Image.file(
-                                      File(path),
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
-                                    ),
                                   ),
-                                )
-                                    : Center(
-                                  child: Text(
-                                    widget.tradesmanName.isNotEmpty
-                                        ? (widget.tradesmanName[0] +
-                                        (widget.tradesmanName.contains(' ')
-                                            ? widget.tradesmanName.split(' ')[1][0]
-                                            : ''))
-                                        .toUpperCase()
-                                        : 'TR',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 26,
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                                  child: path != null && path.isNotEmpty
+                                      ? GestureDetector(
+                                          onTap: controller.pickProfilePhoto,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            child: Image.file(
+                                              File(path),
+                                              width: 80,
+                                              height: 80,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        )
+                                      : _profileImageUrl != null &&
+                                            _profileImageUrl!.isNotEmpty
+                                      ? GestureDetector(
+                                          onTap: controller.pickProfilePhoto,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            child: Image.network(
+                                              _profileImageUrl!,
+                                              width: 80,
+                                              height: 80,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, _, _) =>
+                                                  _buildAvatarInitials(),
+                                            ),
+                                          ),
+                                        )
+                                      : Center(
+                                          child: Text(
+                                            _getInitials(_tradesmanName),
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 26,
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
                                 ),
                               ),
                               Positioned(
@@ -243,14 +451,16 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildSectionHeader('YOUR PITCH (BIO)'),
-                        Obx(() => Text(
-                          '${controller.pitch.value.length} / 140',
-                          style: GoogleFonts.outfit(
-                            fontSize: 13,
-                            color: const Color(0xFF6D6D6D),
-                            fontWeight: FontWeight.w600,
+                        Obx(
+                          () => Text(
+                            '${controller.pitch.value.length} / 140',
+                            style: GoogleFonts.outfit(
+                              fontSize: 13,
+                              color: const Color(0xFF6D6D6D),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        )),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -263,7 +473,13 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
                         fontWeight: FontWeight.w500,
                         color: Colors.black,
                       ),
-                      buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                      buildCounter:
+                          (
+                            context, {
+                            required currentLength,
+                            required isFocused,
+                            maxLength,
+                          }) => null,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
@@ -339,7 +555,9 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
                                   width: 1.6,
                                 ),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
                             ),
                           ),
                         ),
@@ -356,32 +574,40 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
                               width: 1.5,
                             ),
                           ),
-                          child: Obx(() => DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: controller.rateUnit.value,
-                              icon: const Icon(
-                                Icons.arrow_drop_down,
-                                color: Colors.black,
+                          child: Obx(
+                            () => DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: controller.rateUnit.value,
+                                icon: const Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.black,
+                                ),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    controller.rateUnit.value = newValue;
+                                  }
+                                },
+                                items:
+                                    <String>[
+                                      'Per day',
+                                      'Per hour',
+                                      'Per job',
+                                    ].map<DropdownMenuItem<String>>((
+                                      String value,
+                                    ) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
                               ),
-                              style: GoogleFonts.outfit(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  controller.rateUnit.value = newValue;
-                                }
-                              },
-                              items: <String>['per day', 'per hour', 'per job']
-                                  .map<DropdownMenuItem<String>>((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
                             ),
-                          )),
+                          ),
                         ),
                       ],
                     ),
@@ -418,15 +644,18 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
                               isMain: true,
                               onDelete: () => controller.removeTrade(main),
                             ),
-                          ...extras.map((trade) => _buildTradeChip(
-                            name: trade,
-                            imagePath: _getTradeImage(trade),
-                            isMain: false,
-                            onDelete: () => controller.removeTrade(trade),
-                          )),
+                          ...extras.map(
+                            (trade) => _buildTradeChip(
+                              name: trade,
+                              imagePath: _getTradeImage(trade),
+                              isMain: false,
+                              onDelete: () => controller.removeTrade(trade),
+                            ),
+                          ),
                           if (controller.remainingTrades.isNotEmpty)
                             InkWell(
-                              onTap: () => _showAddTradeDialog(context, controller),
+                              onTap: () =>
+                                  _showAddTradeDialog(context, controller),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 14,
@@ -503,30 +732,39 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
                     // 6. Travel Range Section
                     _buildSectionHeader('TRAVEL RANGE'),
                     const SizedBox(height: 8),
-                    Obx(() => Column(
-                      children: [
-                        _buildTravelRangeTile(
-                          title: '5 km - Local only',
-                          subtitle: 'My immediate area',
-                          isSelected: controller.travelRange.value == '5 km - Local only',
-                          onTap: () => controller.travelRange.value = '5 km - Local only',
-                        ),
-                        const SizedBox(height: 8),
-                        _buildTravelRangeTile(
-                          title: 'Trinidad-wide',
-                          subtitle: 'Anywhere in Trinidad',
-                          isSelected: controller.travelRange.value == 'Trinidad-wide',
-                          onTap: () => controller.travelRange.value = 'Trinidad-wide',
-                        ),
-                        const SizedBox(height: 8),
-                        _buildTravelRangeTile(
-                          title: 'T&T-wide',
-                          subtitle: 'Both islands - ferry/flight',
-                          isSelected: controller.travelRange.value == 'T&T-wide',
-                          onTap: () => controller.travelRange.value = 'T&T-wide',
-                        ),
-                      ],
-                    )),
+                    Obx(
+                      () => Column(
+                        children: [
+                          _buildTravelRangeTile(
+                            title: '5km - Local only',
+                            subtitle: 'My immediate area',
+                            isSelected:
+                                controller.travelRange.value ==
+                                '5km - Local only',
+                            onTap: () => controller.travelRange.value =
+                                '5km - Local only',
+                          ),
+                          const SizedBox(height: 8),
+                          _buildTravelRangeTile(
+                            title: 'Trinidad wide',
+                            subtitle: 'Anywhere in Trinidad',
+                            isSelected:
+                                controller.travelRange.value == 'Trinidad wide',
+                            onTap: () =>
+                                controller.travelRange.value = 'Trinidad wide',
+                          ),
+                          const SizedBox(height: 8),
+                          _buildTravelRangeTile(
+                            title: 'T&T wide',
+                            subtitle: 'Both islands - ferry/flight',
+                            isSelected:
+                                controller.travelRange.value == 'T&T wide',
+                            onTap: () =>
+                                controller.travelRange.value = 'T&T wide',
+                          ),
+                        ],
+                      ),
+                    ),
 
                     const SizedBox(height: 24),
 
@@ -587,14 +825,14 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
                           // Locked Full Name Field
                           _buildLockedField(
                             label: 'FULL NAME',
-                            value: widget.tradesmanName,
+                            value: _tradesmanName,
                             icon: Icons.person_outline,
                           ),
                           const SizedBox(height: 10),
                           // Locked Phone Field
                           _buildLockedField(
                             label: 'PHONE NUMBER',
-                            value: widget.tradesmanPhone,
+                            value: _tradesmanPhone,
                             icon: Icons.phone_android_outlined,
                           ),
                           const SizedBox(height: 16),
@@ -672,41 +910,31 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
                   ),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Persist inputs back to previous screen
-                        Get.back(result: {
-                          'pitch': controller.pitch.value,
-                          'rate': controller.rate.value,
-                          'rateUnit': controller.rateUnit.value,
-                          'mainTrade': controller.mainTrade.value,
-                          'extraTrades': List<String>.from(controller.extraTrades),
-                          'homeArea': controller.homeArea.value,
-                          'profileImagePath': controller.profileImagePath.value,
-                        });
-                        Get.snackbar(
-                          'Success',
-                          'Your profile changes have been saved!',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: const Color(0xFF22707F),
-                          colorText: Colors.white,
-                          margin: const EdgeInsets.all(15),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFA83F2D),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: Obx(
+                      () => ElevatedButton(
+                        onPressed: _tradesmanController.isLoading.value
+                            ? null
+                            : _saveProfile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFA83F2D),
+                          disabledBackgroundColor: const Color(
+                            0xFFA83F2D,
+                          ).withValues(alpha: 0.65),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
                         ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Save changes',
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                        child: Text(
+                          _tradesmanController.isLoading.value
+                              ? 'Saving...'
+                              : 'Save changes',
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -747,10 +975,7 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
         borderRadius: BorderRadius.circular(20),
         border: isMain
             ? null
-            : Border.all(
-          color: const Color(0xFFF3E5CF),
-          width: 1.5,
-        ),
+            : Border.all(color: const Color(0xFFF3E5CF), width: 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -840,18 +1065,18 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
                 height: 22,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected ? const Color(0xFFA83F2D) : Colors.transparent,
+                  color: isSelected
+                      ? const Color(0xFFA83F2D)
+                      : Colors.transparent,
                   border: Border.all(
-                    color: isSelected ? const Color(0xFFA83F2D) : const Color(0xFFCDCDCD),
+                    color: isSelected
+                        ? const Color(0xFFA83F2D)
+                        : const Color(0xFFCDCDCD),
                     width: 1.5,
                   ),
                 ),
                 child: isSelected
-                    ? const Icon(
-                  Icons.check,
-                  size: 14,
-                  color: Colors.white,
-                )
+                    ? const Icon(Icons.check, size: 14, color: Colors.white)
                     : null,
               ),
             ],
@@ -872,18 +1097,11 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFFF3E5CF),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0xFFF3E5CF), width: 1.2),
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: const Color(0xFF8D7766),
-            size: 24,
-          ),
+          Icon(icon, color: const Color(0xFF8D7766), size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -910,64 +1128,64 @@ class _TradesmanEditProfileScreenState extends State<TradesmanEditProfileScreen>
               ],
             ),
           ),
-          const Icon(
-            Icons.lock_outline,
-            color: Color(0xFFEAAE4B),
-            size: 20,
-          ),
+          const Icon(Icons.lock_outline, color: Color(0xFFEAAE4B), size: 20),
         ],
       ),
     );
   }
 
   // Dialog showing remaining trades list
-  void _showAddTradeDialog(BuildContext context, EditProfileController controller) {
+  void _showAddTradeDialog(
+    BuildContext context,
+    EditProfileController controller,
+  ) {
     showDialog(
       context: context,
       builder: (context) {
         final remaining = controller.remainingTrades;
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Text(
             'Select Trade to Add',
             style: GoogleFonts.outfit(fontWeight: FontWeight.w800),
           ),
           content: remaining.isEmpty
               ? Text(
-            'No remaining trades available.',
-            style: GoogleFonts.outfit(fontWeight: FontWeight.w500),
-          )
+                  'No remaining trades available.',
+                  style: GoogleFonts.outfit(fontWeight: FontWeight.w500),
+                )
               : SizedBox(
-            width: double.maxFinite,
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const BouncingScrollPhysics(),
-              itemCount: remaining.length,
-              separatorBuilder: (context, index) => const Divider(
-                color: Color(0xFFEBD7C7),
-              ),
-              itemBuilder: (context, index) {
-                final trade = remaining[index];
-                return ListTile(
-                  leading: Image.asset(
-                    _getTradeImage(trade),
-                    width: 26,
-                    height: 26,
+                  width: double.maxFinite,
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: remaining.length,
+                    separatorBuilder: (context, index) =>
+                        const Divider(color: Color(0xFFEBD7C7)),
+                    itemBuilder: (context, index) {
+                      final trade = remaining[index];
+                      return ListTile(
+                        leading: Image.asset(
+                          _getTradeImage(trade),
+                          width: 26,
+                          height: 26,
+                        ),
+                        title: Text(
+                          trade,
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        onTap: () {
+                          controller.addTrade(trade);
+                          Get.back();
+                        },
+                      );
+                    },
                   ),
-                  title: Text(
-                    trade,
-                    style: GoogleFonts.outfit(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  onTap: () {
-                    controller.addTrade(trade);
-                    Get.back();
-                  },
-                );
-              },
-            ),
-          ),
+                ),
           actions: [
             TextButton(
               onPressed: () => Get.back(),

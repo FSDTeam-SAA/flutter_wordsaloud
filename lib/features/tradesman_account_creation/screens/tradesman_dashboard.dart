@@ -1,13 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/dashboard_response_model.dart'
+    as dashboard_model;
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/tradesman_edit_profile_screen.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/tradesman_publicview_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_wordsaloud/features/home/screens/tradesman_details_screen.dart';
 import 'package:flutter_wordsaloud/features/home/screens/home_screen.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
-import 'package:flutter_wordsaloud/features/home/screens/edit_profile_screen.dart';
 
 class TradesmanDashboard extends StatefulWidget {
   final String tradesmanName;
@@ -28,22 +29,198 @@ class TradesmanDashboard extends StatefulWidget {
 }
 
 class _TradesmanDashboardState extends State<TradesmanDashboard> {
+  late final TradesmanController _controller;
   late String _tradesmanName;
   late String _tradesmanSkill;
   late String _homeArea;
   String? _profileImagePath;
+  String? _profileImageUrl;
+  String _verificationStatus = 'Pending Verification';
   String _pitch = '';
   List<String> _extraTrades = const [];
   String _rate = '';
   String _rateUnit = 'per day';
+  List<String> _recentWorkPhotoUrls = const [];
+  num _overallRating = 4.9;
+  int _reviewsTotal = 87;
+  int _jobsCount = 0;
+  int _viewsThisWeek = 42;
+  int _tradesListed = 3;
+  int _daysOnPlatform = 14;
+  List<dashboard_model.RatingBreakdown> _ratingBreakdown = const [];
+  List<dashboard_model.RecentReview> _recentReviews = const [];
 
   @override
   void initState() {
     super.initState();
+    _controller = Get.find<TradesmanController>();
     _tradesmanName = widget.tradesmanName;
     _tradesmanSkill = widget.tradesmanSkill;
     _homeArea = widget.homeArea;
     _profileImagePath = widget.profileImagePath;
+    _loadDashboard();
+  }
+
+  Future<void> _loadDashboard() async {
+    final dashboard = await _controller.fetchDashboard();
+    if (!mounted || dashboard == null) return;
+
+    _applyDashboard(dashboard);
+  }
+
+  void _applyDashboard(dashboard_model.TradesmanDashboardResponse dashboard) {
+    final profile = dashboard.profile;
+    final user = profile?.user;
+    final first = user?.firstName?.trim() ?? '';
+    final last = user?.lastName?.trim() ?? '';
+    final fullName = (user?.name?.trim().isNotEmpty ?? false)
+        ? user!.name!.trim()
+        : [first, last].where((value) => value.isNotEmpty).join(' ');
+    final amount = profile?.typicalRate?.amount;
+
+    setState(() {
+      if (fullName.isNotEmpty) _tradesmanName = fullName;
+      if (profile?.mainSkill?.trim().isNotEmpty ?? false) {
+        _tradesmanSkill = profile!.mainSkill!.trim();
+      }
+      if (profile?.homeArea?.trim().isNotEmpty ?? false) {
+        _homeArea = profile!.homeArea!.trim();
+      }
+      if (profile?.pitch?.trim().isNotEmpty ?? false) {
+        _pitch = profile!.pitch!.trim();
+      }
+      if (profile?.extraSkills != null) {
+        _extraTrades = profile!.extraSkills!;
+      }
+      if (amount != null) {
+        _rate = _formatNumber(amount);
+      }
+      if (profile?.typicalRate?.unit?.trim().isNotEmpty ?? false) {
+        _rateUnit = profile!.typicalRate!.unit!.trim();
+      }
+      _recentWorkPhotoUrls =
+          profile?.workPhotos
+              ?.map((photo) => photo.url)
+              .whereType<String>()
+              .where((url) => url.trim().isNotEmpty)
+              .toList() ??
+          const [];
+      _profileImageUrl = user?.profileImage?.url;
+      _verificationStatus =
+          dashboard.verification?.label ??
+          _formatStatusLabel(
+            dashboard.verification?.status ?? profile?.verificationStatus,
+          );
+      _overallRating =
+          dashboard.overallRating ?? profile?.ratingAverage ?? _overallRating;
+      _reviewsTotal =
+          dashboard.reviewsTotal ?? profile?.ratingCount ?? _reviewsTotal;
+      _jobsCount = profile?.jobsCount ?? _jobsCount;
+      _viewsThisWeek = dashboard.viewsThisWeek ?? _viewsThisWeek;
+      _tradesListed = dashboard.tradesListed ?? _tradesListed;
+      _daysOnPlatform = dashboard.daysOnPlatform ?? _daysOnPlatform;
+      _ratingBreakdown = dashboard.ratingBreakdown ?? const [];
+      _recentReviews = dashboard.recentReviews ?? const [];
+    });
+  }
+
+  String _formatNumber(num value) {
+    return value % 1 == 0 ? value.toInt().toString() : value.toString();
+  }
+
+  String _formatRating(num value) {
+    return value % 1 == 0 ? value.toInt().toString() : value.toStringAsFixed(1);
+  }
+
+  int _ratingCountValue(int star) {
+    for (final item in _ratingBreakdown) {
+      if (item.star == star) return item.count ?? 0;
+    }
+    return 0;
+  }
+
+  String _ratingCount(int star) {
+    return _ratingCountValue(star).toString();
+  }
+
+  double _ratingPercent(int star) {
+    if (_reviewsTotal <= 0) return 0;
+    return _ratingCountValue(star) / _reviewsTotal;
+  }
+
+  Widget _buildAvatarInitials() {
+    return Center(
+      child: Text(
+        _getInitials(_tradesmanName),
+        style: GoogleFonts.outfit(
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+
+  String _formatStatusLabel(String? status) {
+    final value = status?.trim();
+    if (value == null || value.isEmpty) return 'Pending Verification';
+    return value
+        .split(RegExp(r'[_\s-]+'))
+        .where((part) => part.isNotEmpty)
+        .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
+        .join(' ');
+  }
+
+  Color _verificationColor(String status) {
+    final value = status.toLowerCase();
+    if (value.contains('verified') || value.contains('approved')) {
+      return const Color(0xFF22707F);
+    }
+    if (value.contains('reject') || value.contains('declined')) {
+      return const Color(0xFFA83F2D);
+    }
+    return const Color(0xFF6C5D4A);
+  }
+
+  IconData _verificationIcon(String status) {
+    final value = status.toLowerCase();
+    if (value.contains('verified') || value.contains('approved')) {
+      return Icons.check;
+    }
+    if (value.contains('reject') || value.contains('declined')) {
+      return Icons.close;
+    }
+    return Icons.hourglass_bottom;
+  }
+
+  String _reviewerDisplayName(String? name) {
+    final value = name?.trim();
+    if (value == null || value.isEmpty) return 'Client';
+    final parts = value.split(RegExp(r'\s+'));
+    if (parts.length < 2) return parts.first;
+    return '${parts.first} ${parts.last[0].toUpperCase()}.';
+  }
+
+  String _timeAgo(String? isoDate) {
+    if (isoDate == null || isoDate.isEmpty) return '';
+    final parsed = DateTime.tryParse(isoDate);
+    if (parsed == null) return '';
+
+    final difference = DateTime.now().difference(parsed.toLocal());
+    if (difference.inDays >= 1) {
+      return '${difference.inDays} ${difference.inDays == 1 ? 'day' : 'days'} ago';
+    }
+    if (difference.inHours >= 1) {
+      return '${difference.inHours} ${difference.inHours == 1 ? 'hour' : 'hours'} ago';
+    }
+    if (difference.inMinutes >= 1) {
+      return '${difference.inMinutes} ${difference.inMinutes == 1 ? 'minute' : 'minutes'} ago';
+    }
+    return 'Just now';
+  }
+
+  int _clampedStars(int stars) {
+    return stars.clamp(0, 5);
   }
 
   // Extract initials for the avatar (e.g. Devon Ramsaran -> DR)
@@ -76,9 +253,12 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final displaySkill = _tradesmanSkill.isNotEmpty ? _tradesmanSkill : 'Plumber';
+    final displaySkill = _tradesmanSkill.isNotEmpty
+        ? _tradesmanSkill
+        : 'Plumber';
     final displayArea = _homeArea.isNotEmpty ? _homeArea : 'San Fernando';
     final displaySub = '$displaySkill • $displayArea';
+    final displayRating = _formatRating(_overallRating);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5EFE6), // Cream background
@@ -86,7 +266,9 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
         children: [
           // ── Header (Red/Brown Background) ─────────────────
           Container(
-            color: const Color(0xFFAE3F30), // consistent with home screen header
+            color: const Color(
+              0xFFAE3F30,
+            ), // consistent with home screen header
             width: double.infinity,
             padding: const EdgeInsets.only(
               left: 18,
@@ -118,27 +300,32 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                         color: const Color(0xFFF5C77A),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: _profileImagePath != null &&
-                          _profileImagePath!.isNotEmpty
+                      child:
+                          _profileImageUrl != null &&
+                              _profileImageUrl!.isNotEmpty
                           ? ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.file(
-                          File(_profileImagePath!),
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                          : Center(
-                        child: Text(
-                          _getInitials(_tradesmanName),
-                          style: GoogleFonts.outfit(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.network(
+                                _profileImageUrl!,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) =>
+                                    _buildAvatarInitials(),
+                              ),
+                            )
+                          : _profileImagePath != null &&
+                                _profileImagePath!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.file(
+                                File(_profileImagePath!),
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : _buildAvatarInitials(),
                     ),
                     const SizedBox(width: 14),
                     // Name & Skill details
@@ -160,7 +347,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                             style: GoogleFonts.outfit(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -171,20 +358,20 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF22707F), // Teal verified badge color
+                              color: _verificationColor(_verificationStatus),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
-                                  Icons.check,
+                                Icon(
+                                  _verificationIcon(_verificationStatus),
                                   color: Colors.white,
                                   size: 11,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Verified',
+                                  _verificationStatus,
                                   style: GoogleFonts.outfit(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
@@ -222,7 +409,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          '4.9',
+                          displayRating,
                           style: GoogleFonts.outfit(
                             fontSize: 48,
                             fontWeight: FontWeight.w800,
@@ -236,7 +423,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                             Row(
                               children: List.generate(
                                 5,
-                                    (index) => const Icon(
+                                (index) => const Icon(
                                   Icons.star,
                                   color: Color(0xFFEAAE4B),
                                   size: 20,
@@ -255,11 +442,11 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '87 reviews',
+                              '$_reviewsTotal reviews',
                               style: GoogleFonts.outfit(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.white.withOpacity(0.70),
+                                color: Colors.white.withValues(alpha: 0.70),
                               ),
                             ),
                           ],
@@ -270,14 +457,18 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
 
                   // 2. Views/Trades Row
                   Padding(
-                    padding: const EdgeInsets.only(left: 18, right: 18, top: 16),
+                    padding: const EdgeInsets.only(
+                      left: 18,
+                      right: 18,
+                      top: 16,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
                           child: _buildStatCard(
                             emojiOrAsset: '👁️',
                             emojiColor: const Color(0xFFFDE8E8),
-                            number: '42',
+                            number: _viewsThisWeek.toString(),
                             label: 'VIEWS THIS WEEK',
                           ),
                         ),
@@ -286,7 +477,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                           child: _buildStatCard(
                             emojiOrAsset: '🔧',
                             emojiColor: const Color(0xFFE3F2FD),
-                            number: '3',
+                            number: _tradesListed.toString(),
                             label: 'TRADES LISTED',
                           ),
                         ),
@@ -321,7 +512,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                               ),
                             ),
                             Text(
-                              '87 reviews total',
+                              '$_reviewsTotal reviews total',
                               style: GoogleFonts.outfit(
                                 fontSize: 12,
                                 color: const Color(0xFF6D6D6D),
@@ -331,22 +522,47 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                           ],
                         ),
                         const SizedBox(height: 18),
-                        _buildBreakdownRow('5', 0.86, '75'),
+                        _buildBreakdownRow(
+                          '5',
+                          _ratingPercent(5),
+                          _ratingCount(5),
+                        ),
                         const SizedBox(height: 8),
-                        _buildBreakdownRow('4', 0.10, '9'),
+                        _buildBreakdownRow(
+                          '4',
+                          _ratingPercent(4),
+                          _ratingCount(4),
+                        ),
                         const SizedBox(height: 8),
-                        _buildBreakdownRow('3', 0.02, '2'),
+                        _buildBreakdownRow(
+                          '3',
+                          _ratingPercent(3),
+                          _ratingCount(3),
+                        ),
                         const SizedBox(height: 8),
-                        _buildBreakdownRow('2', 0.01, '1'),
+                        _buildBreakdownRow(
+                          '2',
+                          _ratingPercent(2),
+                          _ratingCount(2),
+                        ),
                         const SizedBox(height: 8),
-                        _buildBreakdownRow('1', 0.00, '0'),
+                        _buildBreakdownRow(
+                          '1',
+                          _ratingPercent(1),
+                          _ratingCount(1),
+                        ),
                       ],
                     ),
                   ),
 
                   // 4. Recent Reviews Section
                   Padding(
-                    padding: const EdgeInsets.only(left: 18, right: 18, top: 22, bottom: 8),
+                    padding: const EdgeInsets.only(
+                      left: 18,
+                      right: 18,
+                      top: 22,
+                      bottom: 8,
+                    ),
                     child: Text(
                       'RECENT REVIEWS',
                       style: GoogleFonts.outfit(
@@ -358,23 +574,32 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                     ),
                   ),
 
-                  _buildReviewCard(
-                    reviewer: 'Marcia J.',
-                    stars: 5,
-                    description: 'Came same day, fix the leak in 20 mins. Fair price too.',
-                    timeAgo: '2 days ago',
-                  ),
-                  const SizedBox(height: 10),
-                  _buildReviewCard(
-                    reviewer: 'Anthony P.',
-                    stars: 5,
-                    description: 'Solid work, doh make joke. Would call again.',
-                    timeAgo: '5 days ago',
-                  ),
+                  if (_recentReviews.isEmpty)
+                    _buildNoReviewsCard()
+                  else
+                    ..._recentReviews.map(
+                      (review) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _buildReviewCard(
+                          reviewer: _reviewerDisplayName(review.reviewerName),
+                          stars: review.rating ?? 0,
+                          description:
+                              review.comment?.trim().isNotEmpty ?? false
+                              ? review.comment!.trim()
+                              : 'No comment provided.',
+                          timeAgo: _timeAgo(review.createdAt),
+                        ),
+                      ),
+                    ),
 
                   // 5. Quick Actions Section
                   Padding(
-                    padding: const EdgeInsets.only(left: 18, right: 18, top: 22, bottom: 8),
+                    padding: const EdgeInsets.only(
+                      left: 18,
+                      right: 18,
+                      top: 22,
+                      bottom: 8,
+                    ),
                     child: Text(
                       'QUICK ACTIONS',
                       style: GoogleFonts.outfit(
@@ -392,13 +617,15 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                     icon: Icons.edit_outlined,
                     iconBg: const Color(0xFFFCE4EC),
                     onTap: () async {
-                      final result = await Get.to(() => TradesmanEditProfileScreen(
-                        tradesmanName: _tradesmanName,
-                        tradesmanPhone: '+1 868 754-2288',
-                        tradesmanSkill: _tradesmanSkill,
-                        homeArea: _homeArea,
-                        profileImagePath: _profileImagePath,
-                      ));
+                      final result = await Get.to(
+                        () => TradesmanEditProfileScreen(
+                          tradesmanName: _tradesmanName,
+                          tradesmanPhone: '+1 868 754-2288',
+                          tradesmanSkill: _tradesmanSkill,
+                          homeArea: _homeArea,
+                          profileImagePath: _profileImagePath,
+                        ),
+                      );
                       if (result != null && result is Map) {
                         setState(() {
                           if (result['mainTrade'] != null) {
@@ -420,7 +647,9 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                             _rateUnit = result['rateUnit'];
                           }
                           if (result['extraTrades'] != null) {
-                            _extraTrades = List<String>.from(result['extraTrades']);
+                            _extraTrades = List<String>.from(
+                              result['extraTrades'],
+                            );
                           }
                         });
                       }
@@ -433,17 +662,22 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                     icon: Icons.visibility_outlined,
                     iconBg: const Color(0xFFFFF9C4),
                     onTap: () {
-                      Get.to(() => TradesmanPublicviewScreen(
-                        name: _tradesmanName,
-                        location: displayArea,
-                        avatarLetter: _getInitials(_tradesmanName),
-                        rating: '4.9',
-                        categoryName: displaySkill,
-                        pitch: _pitch,
-                        extraTrades: _extraTrades,
-                        rate: _rate,
-                        rateUnit: _rateUnit,
-                      ));
+                      Get.to(
+                        () => TradesmanPublicviewScreen(
+                          name: _tradesmanName,
+                          location: displayArea,
+                          avatarLetter: _getInitials(_tradesmanName),
+                          rating: displayRating,
+                          reviewsCount: _reviewsTotal,
+                          jobsCount: _jobsCount,
+                          categoryName: displaySkill,
+                          pitch: _pitch,
+                          extraTrades: _extraTrades,
+                          recentWorkPhotoUrls: _recentWorkPhotoUrls,
+                          rate: _rate,
+                          rateUnit: _rateUnit,
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 10),
@@ -492,7 +726,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '14 days on Aturservicett',
+                            '$_daysOnPlatform days on Aturservicett',
                             style: GoogleFonts.outfit(
                               fontSize: 12,
                               color: const Color(0xFF5A493B),
@@ -526,10 +760,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFF3E5CF),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFF3E5CF), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -542,10 +773,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: Text(
-                emojiOrAsset,
-                style: const TextStyle(fontSize: 18),
-              ),
+              child: Text(emojiOrAsset, style: const TextStyle(fontSize: 18)),
             ),
           ),
           const SizedBox(height: 12),
@@ -572,7 +800,11 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
   }
 
   // Helper widget for Rating Breakdown bar
-  Widget _buildBreakdownRow(String starText, double percentage, String countText) {
+  Widget _buildBreakdownRow(
+    String starText,
+    double percentage,
+    String countText,
+  ) {
     return Row(
       children: [
         SizedBox(
@@ -587,11 +819,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
           ),
         ),
         const SizedBox(width: 4),
-        const Icon(
-          Icons.star,
-          color: Color(0xFFEAAE4B),
-          size: 15,
-        ),
+        const Icon(Icons.star, color: Color(0xFFEAAE4B), size: 15),
         const SizedBox(width: 12),
         Expanded(
           child: Stack(
@@ -638,6 +866,26 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
   }
 
   // Helper widget for Review card
+  Widget _buildNoReviewsCard() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 18),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF3E5CF), width: 1.5),
+      ),
+      child: Text(
+        'No reviews available.',
+        style: GoogleFonts.outfit(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF6D6D6D),
+        ),
+      ),
+    );
+  }
+
   Widget _buildReviewCard({
     required String reviewer,
     required int stars,
@@ -650,10 +898,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFF3E5CF),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFF3E5CF), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -671,8 +916,8 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
               ),
               Row(
                 children: List.generate(
-                  stars,
-                      (index) => const Icon(
+                  _clampedStars(stars),
+                  (index) => const Icon(
                     Icons.star,
                     color: Color(0xFFEAAE4B),
                     size: 16,
@@ -720,10 +965,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFF3E5CF),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFF3E5CF), width: 1.5),
       ),
       child: InkWell(
         onTap: onTap,

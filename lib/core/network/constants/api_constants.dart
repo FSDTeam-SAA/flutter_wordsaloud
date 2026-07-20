@@ -93,6 +93,9 @@ class TradesmanEndpoints {
   final String whatCan = '${ApiConstants.baseUrl}/tradesman/onboarding/skills';
   final String whereWork = '${ApiConstants.baseUrl}/tradesman/onboarding/work-area';
   final String tellClient = '${ApiConstants.baseUrl}/tradesman/onboarding/pitch';
+  final String goLive = '${ApiConstants.baseUrl}/tradesman/onboarding/go-live';
+  final String dashboard = '${ApiConstants.baseUrl}/tradesman/me/dashboard';
+  final String updateProfile = '${ApiConstants.baseUrl}/tradesman/me/profile';
   // String fetchCategory(String userId) =>;
 }
 

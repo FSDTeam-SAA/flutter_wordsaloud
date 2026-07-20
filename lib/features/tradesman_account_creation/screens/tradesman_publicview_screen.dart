@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -8,9 +7,12 @@ class TradesmanPublicviewScreen extends StatefulWidget {
   final String location;
   final String avatarLetter;
   final String rating;
+  final int reviewsCount;
+  final int jobsCount;
   final String categoryName;
   final String pitch;
   final List<String> extraTrades;
+  final List<String> recentWorkPhotoUrls;
   final String rate;
   final String rateUnit;
 
@@ -20,49 +22,80 @@ class TradesmanPublicviewScreen extends StatefulWidget {
     required this.location,
     required this.avatarLetter,
     required this.rating,
+    this.reviewsCount = 0,
+    this.jobsCount = 0,
     required this.categoryName,
     this.pitch = '',
     this.extraTrades = const [],
+    this.recentWorkPhotoUrls = const [],
     this.rate = '',
     this.rateUnit = 'per day',
   });
 
   @override
-  State<TradesmanPublicviewScreen> createState() => _TradesmanPublicviewScreenState();
+  State<TradesmanPublicviewScreen> createState() =>
+      _TradesmanPublicviewScreenState();
 }
 
 class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
   // Map skill name -> asset image, matching WhatDoScreen
   String _getTradeImage(String tradeName) {
     switch (tradeName.toLowerCase().trim()) {
-      case 'phone tech':    return 'assets/images/fi_5060325.png';
-      case 'computer tech': return 'assets/images/fi_10528057.png';
-      case 'plumber':       return 'assets/images/fi_6342703.png';
-      case 'electrician':   return 'assets/images/fi_9781304.png';
-      case 'carpenter':     return 'assets/images/fi_12479483.png';
-      case 'joinery':       return 'assets/images/fi_14106303.png';
-      case 'mobile mech':   return 'assets/images/fi_186239.png';
-      case 'painter':       return 'assets/images/fi_1995467.png';
-      case 'appliance':     return 'assets/images/fi_2012957.png';
-      case 'ac tech':       return 'assets/images/fi_7969720.png';
-      case 'tile man':      return 'assets/images/fi_11932525.png';
-      case 'mason':         return 'assets/images/fi_18029670.png';
-      case 'glass man':     return 'assets/images/fi_896123.png';
-      case 'roofer':        return 'assets/images/fi_14620736.png';
-      case 'welder/gate':   return 'assets/images/fi_9439147.png';
-      case 'pool cleaner':  return 'assets/images/fi_15551378.png';
-      case 'tree cutter':   return 'assets/images/fi_6327310.png';
-      case 'landscaper':    return 'assets/images/fi_10033506.png';
-      case 'auto body':     return 'assets/images/fi_6332022.png';
-      case 'contractor':    return 'assets/images/fi_4490380.png';
-      default:              return 'assets/images/fi_5060325.png';
+      case 'phone tech':
+        return 'assets/images/fi_5060325.png';
+      case 'computer tech':
+        return 'assets/images/fi_10528057.png';
+      case 'plumber':
+        return 'assets/images/fi_6342703.png';
+      case 'electrician':
+        return 'assets/images/fi_9781304.png';
+      case 'carpenter':
+        return 'assets/images/fi_12479483.png';
+      case 'joinery':
+        return 'assets/images/fi_14106303.png';
+      case 'mobile mech':
+        return 'assets/images/fi_186239.png';
+      case 'painter':
+        return 'assets/images/fi_1995467.png';
+      case 'appliance':
+        return 'assets/images/fi_2012957.png';
+      case 'ac tech':
+        return 'assets/images/fi_7969720.png';
+      case 'tile man':
+        return 'assets/images/fi_11932525.png';
+      case 'mason':
+        return 'assets/images/fi_18029670.png';
+      case 'glass man':
+        return 'assets/images/fi_896123.png';
+      case 'roofer':
+        return 'assets/images/fi_14620736.png';
+      case 'welder/gate':
+        return 'assets/images/fi_9439147.png';
+      case 'pool cleaner':
+        return 'assets/images/fi_15551378.png';
+      case 'tree cutter':
+        return 'assets/images/fi_6327310.png';
+      case 'landscaper':
+        return 'assets/images/fi_10033506.png';
+      case 'auto body':
+        return 'assets/images/fi_6332022.png';
+      case 'contractor':
+        return 'assets/images/fi_4490380.png';
+      default:
+        return 'assets/images/fi_5060325.png';
     }
+  }
+
+  String _pluralLabel(int count, String singular) {
+    return '$count ${count == 1 ? singular : '${singular}s'}';
   }
 
   @override
   Widget build(BuildContext context) {
     final String formattedCategory = widget.categoryName.endsWith('s')
-        ? widget.categoryName.substring(0, widget.categoryName.length - 1).toLowerCase()
+        ? widget.categoryName
+              .substring(0, widget.categoryName.length - 1)
+              .toLowerCase()
         : widget.categoryName.toLowerCase();
 
     final String aboutText = widget.pitch.isNotEmpty
@@ -180,18 +213,18 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
                                 ),
                               ),
                               const SizedBox(width: 18),
-                              const Text(
-                                '87 Reviews',
-                                style: TextStyle(
+                              Text(
+                                _pluralLabel(widget.reviewsCount, 'review'),
+                                style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   color: Color(0xD8FFFFFF),
                                 ),
                               ),
                               const SizedBox(width: 18),
-                              const Text(
-                                '142 jobs',
-                                style: TextStyle(
+                              Text(
+                                _pluralLabel(widget.jobsCount, 'job'),
+                                style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   color: Color(0xD8FFFFFF),
@@ -296,7 +329,7 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
                     const SizedBox(height: 20),
                   ],
 
-                  SizedBox(height: 20,),
+                  SizedBox(height: 20),
                   // WhatsApp Button
                   GestureDetector(
                     onTap: () {
@@ -345,11 +378,7 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.phone,
-                            color: Colors.white,
-                            size: 23.95,
-                          ),
+                          Icon(Icons.phone, color: Colors.white, size: 23.95),
                           SizedBox(width: 8),
                           Text(
                             'Call directly',
@@ -376,20 +405,23 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
                   ),
                   const SizedBox(height: 8),
                   // Horizontal Recent Work Boxes
-                  SizedBox(
-                    height: 106.08,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      children: [
-                        _buildRecentWorkPhoto(),
-                        const SizedBox(width: 12),
-                        _buildRecentWorkPhoto(),
-                        const SizedBox(width: 12),
-                        _buildRecentWorkPhoto(),
-                      ],
+                  if (widget.recentWorkPhotoUrls.isEmpty)
+                    _buildNoRecentWork()
+                  else
+                    SizedBox(
+                      height: 106.08,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: widget.recentWorkPhotoUrls.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          return _buildRecentWorkPhoto(
+                            widget.recentWorkPhotoUrls[index],
+                          );
+                        },
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 16),
 
                   // ── Rate Section ───────────────────────────────
@@ -516,10 +548,9 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
                   //     ],
                   //   ),
                   // ),
+                  SizedBox(height: 50),
 
-                  SizedBox(height: 50,),
-
-                  CustomButton(icon: Icons.arrow_back_outlined,text: 'Back to dashboard', backgroundColor: Colors.black,borderRadius: 8,height: 45,)
+                  //CustomButton(icon: Icons.arrow_back_outlined, onPressed: text: 'Back to dashboard', backgroundColor: Colors.black,borderRadius: 8,height: 45,)
                 ],
               ),
             ),
@@ -529,13 +560,41 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
     );
   }
 
-  Widget _buildRecentWorkPhoto() {
+  Widget _buildNoRecentWork() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEBD7C7), width: 1.5),
+      ),
+      child: Text(
+        'No recent work photos available.',
+        style: GoogleFonts.outfit(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF8D7766),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentWorkPhoto(String imageUrl) {
     return Container(
       width: 110,
       height: 110,
       decoration: BoxDecoration(
         color: const Color(0xFFDDD5C8),
         borderRadius: BorderRadius.circular(12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const Center(
+          child: Icon(Icons.broken_image_outlined, color: Color(0xFF8D7766)),
+        ),
       ),
     );
   }

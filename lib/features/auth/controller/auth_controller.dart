@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/services/auth_storage_service.dart';
 import '../../home/screens/home_screen.dart';
+import '../../tradesman_account_creation/screens/tradesman_dashboard.dart';
 import '../../tradesman_account_creation/screens/what_do_screen.dart';
 import '../models/request/register_request_model.dart';
 import '../repositories/auth_repo.dart';
@@ -124,7 +125,14 @@ class AuthController extends BaseController {
         );
 
         if (role.toLowerCase() == "tradesman") {
-          Get.offAll(() => const WhatDoScreen());
+          final isProfileCompleted = await _authStorageService
+              .isTradesmanProfileCompleted(userId: user.id);
+
+          Get.offAll(
+            () => isProfileCompleted
+                ? const TradesmanDashboard(tradesmanName: 'Tradesman')
+                : const WhatDoScreen(),
+          );
         } else {
           Get.offAll(() => const HomeScreen());
         }

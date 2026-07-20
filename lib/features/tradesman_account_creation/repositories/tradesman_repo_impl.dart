@@ -7,6 +7,8 @@ import '../../../core/network/network_result.dart';
 import '../../../core/network/constants/api_constants.dart';
 import '../model/request/tradesman_area_request_model.dart';
 import '../model/request/tradesman_skill_request_model.dart';
+import '../model/response/dashboard_response_model.dart';
+import '../model/response/go_live_response_model.dart';
 import '../model/response/tradesman_area_response_model.dart';
 import '../model/response/tradesman_skill_response_model.dart';
 
@@ -44,6 +46,33 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
       endpoint: ApiConstants.tradesman.tellClient,
       formData: formData,
       fromJsonT: (json) => TellClientsResponseModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<GoLiveResponseModel> goLive() {
+    return _apiClient.post(
+      endpoint: ApiConstants.tradesman.goLive,
+      fromJsonT: (json) => GoLiveResponseModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<TradesmanDashboardResponse> updateProfile(FormData formData) {
+    return _apiClient.put(
+      endpoint: ApiConstants.tradesman.updateProfile,
+      formData: formData,
+      fromJsonT: (json) =>
+          TradesmanDashboardResponse.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  NetworkResult<TradesmanDashboardResponse> dashboard() {
+    return _apiClient.get(
+      endpoint: ApiConstants.tradesman.dashboard,
+      fromJsonT: (json) =>
+          TradesmanDashboardResponse.fromJson(json as Map<String, dynamic>),
     );
   }
   // @override

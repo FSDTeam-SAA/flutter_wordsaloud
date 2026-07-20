@@ -8,13 +8,14 @@ class EditProfileController extends GetxController {
   // Editable Rx variables
   final RxString pitch = ''.obs;
   final RxString rate = ''.obs;
-  final RxString rateUnit = 'per day'.obs;
-  
+  final RxString rateUnit = 'Per day'.obs;
+
   final RxString mainTrade = ''.obs;
   final RxList<String> extraTrades = <String>[].obs;
-  
+
   final RxString homeArea = ''.obs;
-  final RxString travelRange = 'Trinidad-wide'.obs; // matches screenshot selected option
+  final RxString travelRange =
+      'Trinidad wide'.obs; // matches screenshot selected option
   final RxnString profileImagePath = RxnString();
 
   // All available trades/skills in the application
@@ -46,11 +47,11 @@ class EditProfileController extends GetxController {
     required this.initialPhone,
     String initialPitch = '',
     String initialRate = '',
-    String initialRateUnit = 'per day',
+    String initialRateUnit = 'Per day',
     String initialMainTrade = '',
     List<String> initialExtraTrades = const [],
     String initialHomeArea = '',
-    String initialTravelRange = 'Trinidad-wide',
+    String initialTravelRange = 'Trinidad wide',
     String? initialProfileImagePath,
   }) {
     pitch.value = initialPitch;
@@ -97,9 +98,10 @@ class EditProfileController extends GetxController {
   void addTrade(String tradeName) {
     if (mainTrade.isEmpty) {
       mainTrade.value = tradeName;
-    } else {
-      extraTrades.add(tradeName);
+      return;
     }
+
+    extraTrades.add(tradeName);
   }
 
   // Filter out already selected trades for the "Add Trade" dialog

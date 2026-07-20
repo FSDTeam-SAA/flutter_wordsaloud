@@ -35,6 +35,10 @@ class AuthStorageService {
     ]);
   }
 
+  String _tradesmanProfileCompletedKey(String userId) {
+    return '${KeyConst.tradesmanProfileCompleted}_$userId';
+  }
+
   // Store just access token
   Future<void> storeAccessToken({required String accessToken}) async {
     await _secureStorage.write(key: KeyConst.accessToken, value: accessToken);
@@ -81,6 +85,26 @@ class AuthStorageService {
     return await _secureStorage.read(key: KeyConst.role);
   }
 
+  Future<void> setTradesmanProfileCompleted({String? userId}) async {
+    final storedUserId = userId ?? await getUserId();
+    if (storedUserId == null || storedUserId.isEmpty) return;
+
+    await _secureStorage.write(
+      key: _tradesmanProfileCompletedKey(storedUserId),
+      value: 'true',
+    );
+  }
+
+  Future<bool> isTradesmanProfileCompleted({String? userId}) async {
+    final storedUserId = userId ?? await getUserId();
+    if (storedUserId == null || storedUserId.isEmpty) return false;
+
+    final profileCompleted = await _secureStorage.read(
+      key: _tradesmanProfileCompletedKey(storedUserId),
+    );
+    return profileCompleted == 'true';
+  }
+
   // Get all auth data at once
   Future<Map<String, String?>> getAllAuthData() async {
     return {
@@ -97,6 +121,7 @@ class AuthStorageService {
       _secureStorage.delete(key: KeyConst.accessToken),
       _secureStorage.delete(key: KeyConst.refreshToken),
       _secureStorage.delete(key: KeyConst.userId),
+      _secureStorage.delete(key: KeyConst.role),
     ]);
   }
 

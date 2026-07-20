@@ -6,6 +6,7 @@ class KeyConst {
   static const String refreshToken = 'refresh_token';
   static const String role = 'role';
   static const String userId = 'user_id';
+  static const String tradesmanProfileCompleted = 'tradesman_profile_completed';
 
   static const String email = 'email';
   static const String password = 'password';
