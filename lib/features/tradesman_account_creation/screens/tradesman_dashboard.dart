@@ -8,7 +8,6 @@ import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/t
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_wordsaloud/features/home/screens/home_screen.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
 
 class TradesmanDashboard extends StatefulWidget {
   final String tradesmanName;
@@ -699,7 +698,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                     textColor: const Color(0xFFA83F2D),
                     hideArrow: true,
                     onTap: () {
-                      Get.offAll(() => const RoleSelectionScreen());
+                      _controller.signOut();
                     },
                   ),
 

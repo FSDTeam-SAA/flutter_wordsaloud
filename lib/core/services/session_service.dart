@@ -17,6 +17,12 @@ class SessionService extends GetxService {
 
   void clearToken() {
     accessToken.value = "";
+    refreshToken.value = "";
+    userId.value = "";
     role.value = "";
+    email.value = "";
+    firstName.value = "";
+    lastName.value = "";
+    profileImage.value = "";
   }
 }
