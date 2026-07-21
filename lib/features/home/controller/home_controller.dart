@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
 
 class TradeCategory {
   final String name;
@@ -15,7 +16,7 @@ class TradeCategory {
 }
 
 class HomeController extends GetxController {
-  final List<TradeCategory> categories = const [
+  final List<TradeCategory> _fallbackCategories = const [
     TradeCategory(
       name: 'Phone Tech',
       image: 'assets/images/fi_5060325.png',
@@ -64,6 +65,44 @@ class HomeController extends GetxController {
   ];
 
   final RxString searchQuery = ''.obs;
+  final RxList<TradeCategory> categories = <TradeCategory>[].obs;
+  final RxBool isLoadingSkills = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    categories.assignAll(_fallbackCategories);
+  }
+
+  Future<void> fetchSkillList() async {
+    if (!Get.isRegistered<TradesmanController>()) return;
+
+    final tradesmanController = Get.find<TradesmanController>();
+    isLoadingSkills.value = true;
+    final skills = await tradesmanController.fetchSkillList();
+    isLoadingSkills.value = false;
+
+    if (skills.isEmpty) return;
+
+    final countsBySkill = <String, int>{};
+    for (final skill in skills) {
+      final name = skill.skill?.trim();
+      if (name == null || name.isEmpty) continue;
+      countsBySkill[_skillKey(name)] = skill.listedCount ?? 0;
+    }
+
+    categories.assignAll(
+      _fallbackCategories.map((category) {
+        final listedCount = countsBySkill[_skillKey(category.name)];
+        return TradeCategory(
+          name: category.name,
+          image: category.image,
+          isNew: category.isNew,
+          listed: listedCount ?? category.listed,
+        );
+      }),
+    );
+  }
 
   List<TradeCategory> get filteredCategories {
     if (searchQuery.value.trim().isEmpty) return categories;
@@ -72,5 +111,22 @@ class HomeController extends GetxController {
           (c) => c.name.toLowerCase().contains(searchQuery.value.toLowerCase()),
         )
         .toList();
+  }
+
+  String _skillKey(String value) {
+    final normalized = value.trim().toLowerCase();
+    switch (normalized) {
+      case 'appliance':
+      case 'appliance fix':
+        return 'appliance';
+      case 'fabricator/welder':
+      case 'welder/gate':
+        return 'welder';
+      case 'mechanic':
+      case 'mobile mech':
+        return 'mechanic';
+      default:
+        return normalized;
+    }
   }
 }

@@ -8,6 +8,9 @@ import '../../../core/network/constants/api_constants.dart';
 import '../model/request/tradesman_area_request_model.dart';
 import '../model/request/tradesman_skill_request_model.dart';
 import '../model/response/dashboard_response_model.dart';
+import '../model/response/get_all_tradesman_response_model.dart';
+import '../model/response/get_skill_listed_count_response_model.dart';
+import '../model/response/get_specific_tradesman_response_model.dart';
 import '../model/response/go_live_response_model.dart';
 import '../model/response/tradesman_area_response_model.dart';
 import '../model/response/tradesman_skill_response_model.dart';
@@ -73,6 +76,46 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
       endpoint: ApiConstants.tradesman.dashboard,
       fromJsonT: (json) =>
           TradesmanDashboardResponse.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  NetworkResult<GetSpecificTradesmanResponseModel> getSpecifiedTradesman(
+    String tradesmanId,
+  ) {
+    return _apiClient.get(
+      endpoint: ApiConstants.user.tradesmanDetails(tradesmanId),
+      fromJsonT: GetSpecificTradesmanResponseModel.fromData,
+    );
+  }
+
+  @override
+  NetworkResult<List<SkillModel>> getSkillList() {
+    return _apiClient.get(
+      endpoint: ApiConstants.user.home,
+      fromJsonT: skillListFromJson,
+    );
+  }
+
+  @override
+  NetworkResult<GetAllTradesmanResponseModel> getTradesman({
+    required String skill,
+    String search = '',
+    String area = '',
+    String sort = 'rating',
+    int page = 1,
+    int limit = 20,
+  }) {
+    return _apiClient.get(
+      endpoint: ApiConstants.user.categoryDetails(
+        skill: skill,
+        search: search,
+        area: area,
+        sort: sort,
+        page: page,
+        limit: limit,
+      ),
+      fromJsonT: GetAllTradesmanResponseModel.fromData,
     );
   }
   // @override

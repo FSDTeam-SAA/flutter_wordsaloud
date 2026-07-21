@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/tradesman_area_request_model.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/go_live_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/tell_clients_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/tradesman_area_response_model.dart';
@@ -8,6 +10,7 @@ import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/res
 import '../../../core/network/network_result.dart';
 import '../model/request/tradesman_skill_request_model.dart';
 import '../model/response/dashboard_response_model.dart';
+import '../model/response/get_specific_tradesman_response_model.dart';
 
 abstract class TradesmanRepo {
   NetworkResult<TradesmanSkillResponseModel> whatCanDo(
@@ -20,4 +23,16 @@ abstract class TradesmanRepo {
   NetworkResult<GoLiveResponseModel> goLive();
   NetworkResult<TradesmanDashboardResponse> dashboard();
   NetworkResult<TradesmanDashboardResponse> updateProfile(FormData formData);
+  NetworkResult<List<SkillModel>> getSkillList();
+  NetworkResult<GetSpecificTradesmanResponseModel> getSpecifiedTradesman(
+    String tradesmanId,
+  );
+  NetworkResult<GetAllTradesmanResponseModel> getTradesman({
+    required String skill,
+    String search,
+    String area,
+    String sort,
+    int page,
+    int limit,
+  });
 }

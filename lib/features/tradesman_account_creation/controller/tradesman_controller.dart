@@ -10,6 +10,9 @@ import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.d
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/tradesman_area_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/tradesman_skill_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/dashboard_response_model.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_specific_tradesman_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/repositories/tradesman_repo.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/tell_clients_screen.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/tradesman_dashboard.dart';
@@ -24,6 +27,13 @@ class TradesmanController extends BaseController {
   final MultiFormDataManager _multiFormDataManager = MultiFormDataManager();
   final Rxn<TradesmanDashboardResponse> dashboardData =
       Rxn<TradesmanDashboardResponse>();
+  final Rxn<GetSpecificTradesmanResponseModel> getSpecificTradesman =
+      Rxn<GetSpecificTradesmanResponseModel>();
+  final RxList<SkillModel> skillList = <SkillModel>[].obs;
+  final RxList<Tradesman> allTradesman = <Tradesman>[].obs;
+  final RxBool isSkillListLoading = false.obs;
+  final RxBool isTradesmanLoading = false.obs;
+  final RxBool isSingleTradesmanLoading = false.obs;
 
   Future<void> createTradesmanStep1(
     String mainSkill,
@@ -174,6 +184,89 @@ class TradesmanController extends BaseController {
         d_print.log("Fetch dashboard success: ${success.data}");
         setLoading(false);
         return success.data;
+      },
+    );
+  }
+
+  Future<List<SkillModel>> fetchSkillList() async {
+    clearError();
+    isSkillListLoading.value = true;
+    final result = await _tradesmanRepo.getSkillList();
+
+    return result.fold(
+      (fail) {
+        setError(fail.message);
+        d_print.log("Fetch skill list failed: ${fail.message}");
+        isSkillListLoading.value = false;
+        return skillList;
+      },
+      (success) {
+        skillList.assignAll(success.data);
+        d_print.log("Fetch skill list success: ${success.data}");
+        isSkillListLoading.value = false;
+        return success.data;
+      },
+    );
+  }
+
+  Future<GetSpecificTradesmanResponseModel?> getSingleTradesman(
+    String tradesmanId,
+  ) async {
+    clearError();
+    if (tradesmanId.trim().isEmpty) return null;
+
+    isSingleTradesmanLoading.value = true;
+    getSpecificTradesman.value = null;
+    final result = await _tradesmanRepo.getSpecifiedTradesman(tradesmanId);
+
+    return result.fold(
+      (fail) {
+        setError(fail.message);
+        d_print.log("Fetch single tradesman failed: ${fail.message}");
+        isSingleTradesmanLoading.value = false;
+        return null;
+      },
+      (success) {
+        getSpecificTradesman.value = success.data;
+        d_print.log("Fetch single tradesman success: ${success.data}");
+        isSingleTradesmanLoading.value = false;
+        return success.data;
+      },
+    );
+  }
+
+  Future<List<Tradesman>> fetchTradesman({
+    required String skill,
+    String search = '',
+    String area = '',
+    String sort = 'rating',
+    int page = 1,
+    int limit = 20,
+  }) async {
+    clearError();
+    isTradesmanLoading.value = true;
+    allTradesman.clear();
+    final result = await _tradesmanRepo.getTradesman(
+      skill: skill,
+      search: search,
+      area: area,
+      sort: sort,
+      page: page,
+      limit: limit,
+    );
+
+    return result.fold(
+      (fail) {
+        setError(fail.message);
+        d_print.log("Fetch tradesman failed: ${fail.message}");
+        isTradesmanLoading.value = false;
+        return allTradesman;
+      },
+      (success) {
+        allTradesman.assignAll(success.data.data);
+        d_print.log("Fetch tradesman success: ${success.data.data}");
+        isTradesmanLoading.value = false;
+        return success.data.data;
       },
     );
   }

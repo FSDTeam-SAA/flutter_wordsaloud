@@ -1,0 +1,297 @@
+class GetAllTradesmanResponseModel {
+  final List<Tradesman> data;
+  final Meta meta;
+
+  GetAllTradesmanResponseModel({required this.data, required this.meta});
+
+  factory GetAllTradesmanResponseModel.fromJson(Map<String, dynamic> json) {
+    final rawData = json['data'] ?? json['tradesmen'] ?? json['items'] ?? [];
+    return GetAllTradesmanResponseModel(
+      data: tradesmanListFromJson(rawData),
+      meta: Meta.fromJson(
+        json['meta'] is Map ? Map<String, dynamic>.from(json['meta']) : {},
+      ),
+    );
+  }
+
+  factory GetAllTradesmanResponseModel.fromData(dynamic data) {
+    return GetAllTradesmanResponseModel(
+      data: tradesmanListFromJson(data),
+      meta: Meta.empty(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'data': data.map((e) => e.toJson()).toList(),
+      'meta': meta.toJson(),
+    };
+  }
+}
+
+List<Tradesman> tradesmanListFromJson(dynamic json) {
+  if (json is! List) return const [];
+
+  return json
+      .whereType<Map>()
+      .map((item) => Tradesman.fromJson(Map<String, dynamic>.from(item)))
+      .toList();
+}
+
+class Tradesman {
+  final TypicalRate typicalRate;
+  final ContactChangeRequest contactChangeRequest;
+  final String id;
+  final User user;
+  final List<String> extraSkills;
+  final String pitch;
+  final String verificationStatus;
+  final bool isLive;
+  final bool isVip;
+  final int ratingAverage;
+  final int ratingCount;
+  final int jobsCount;
+  final List<dynamic> workPhotos;
+  final String mainSkill;
+  final String homeArea;
+  final String travelRange;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  Tradesman({
+    required this.typicalRate,
+    required this.contactChangeRequest,
+    required this.id,
+    required this.user,
+    required this.extraSkills,
+    required this.pitch,
+    required this.verificationStatus,
+    required this.isLive,
+    required this.isVip,
+    required this.ratingAverage,
+    required this.ratingCount,
+    required this.jobsCount,
+    required this.workPhotos,
+    required this.mainSkill,
+    required this.homeArea,
+    required this.travelRange,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory Tradesman.fromJson(Map<String, dynamic> json) {
+    return Tradesman(
+      typicalRate: TypicalRate.fromJson(
+        json['typicalRate'] is Map
+            ? Map<String, dynamic>.from(json['typicalRate'])
+            : {},
+      ),
+      contactChangeRequest: ContactChangeRequest.fromJson(
+        json['contactChangeRequest'] is Map
+            ? Map<String, dynamic>.from(json['contactChangeRequest'])
+            : {},
+      ),
+      id: json['_id']?.toString() ?? '',
+      user: User.fromJson(
+        json['user'] is Map ? Map<String, dynamic>.from(json['user']) : {},
+      ),
+      extraSkills: List<String>.from(json['extraSkills'] ?? const []),
+      pitch: json['pitch']?.toString() ?? '',
+      verificationStatus: json['verificationStatus']?.toString() ?? '',
+      isLive: json['isLive'] == true,
+      isVip: json['isVip'] == true,
+      ratingAverage: (json['ratingAverage'] as num?)?.toInt() ?? 0,
+      ratingCount: (json['ratingCount'] as num?)?.toInt() ?? 0,
+      jobsCount: (json['jobsCount'] as num?)?.toInt() ?? 0,
+      workPhotos: List<dynamic>.from(json['workPhotos'] ?? const []),
+      mainSkill: json['mainSkill']?.toString() ?? '',
+      homeArea: json['homeArea']?.toString() ?? '',
+      travelRange: json['travelRange']?.toString() ?? '',
+      createdAt:
+          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt:
+          DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'typicalRate': typicalRate.toJson(),
+      'contactChangeRequest': contactChangeRequest.toJson(),
+      '_id': id,
+      'user': user.toJson(),
+      'extraSkills': extraSkills,
+      'pitch': pitch,
+      'verificationStatus': verificationStatus,
+      'isLive': isLive,
+      'isVip': isVip,
+      'ratingAverage': ratingAverage,
+      'ratingCount': ratingCount,
+      'jobsCount': jobsCount,
+      'workPhotos': workPhotos,
+      'mainSkill': mainSkill,
+      'homeArea': homeArea,
+      'travelRange': travelRange,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+}
+
+class TypicalRate {
+  final int amount;
+  final String unit;
+
+  TypicalRate({required this.amount, required this.unit});
+
+  factory TypicalRate.fromJson(Map<String, dynamic> json) {
+    return TypicalRate(
+      amount: (json['amount'] as num?)?.toInt() ?? 0,
+      unit: json['unit']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'amount': amount, 'unit': unit};
+  }
+}
+
+class ContactChangeRequest {
+  final String requestedName;
+  final String requestedPhoneNumber;
+  final String reason;
+  final String status;
+  final dynamic requestedAt;
+
+  ContactChangeRequest({
+    required this.requestedName,
+    required this.requestedPhoneNumber,
+    required this.reason,
+    required this.status,
+    required this.requestedAt,
+  });
+
+  factory ContactChangeRequest.fromJson(Map<String, dynamic> json) {
+    return ContactChangeRequest(
+      requestedName: json['requestedName'] ?? '',
+      requestedPhoneNumber: json['requestedPhoneNumber'] ?? '',
+      reason: json['reason'] ?? '',
+      status: json['status'] ?? '',
+      requestedAt: json['requestedAt'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'requestedName': requestedName,
+      'requestedPhoneNumber': requestedPhoneNumber,
+      'reason': reason,
+      'status': status,
+      'requestedAt': requestedAt,
+    };
+  }
+}
+
+class User {
+  final ProfileImage profileImage;
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String area;
+  final String name;
+  final String userId;
+
+  User({
+    required this.profileImage,
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    required this.area,
+    required this.name,
+    required this.userId,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      profileImage: ProfileImage.fromJson(
+        json['profileImage'] is Map
+            ? Map<String, dynamic>.from(json['profileImage'])
+            : {},
+      ),
+      id: json['_id']?.toString() ?? '',
+      firstName: json['firstName']?.toString() ?? '',
+      lastName: json['lastName']?.toString() ?? '',
+      area: json['area']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      userId: json['id']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'profileImage': profileImage.toJson(),
+      '_id': id,
+      'firstName': firstName,
+      'lastName': lastName,
+      'area': area,
+      'name': name,
+      'id': userId,
+    };
+  }
+}
+
+class ProfileImage {
+  final String publicId;
+  final String url;
+
+  ProfileImage({required this.publicId, required this.url});
+
+  factory ProfileImage.fromJson(Map<String, dynamic> json) {
+    return ProfileImage(
+      publicId: json['public_id'] ?? '',
+      url: json['url'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'public_id': publicId, 'url': url};
+  }
+}
+
+class Meta {
+  final int total;
+  final int page;
+  final int limit;
+  final int totalPages;
+
+  Meta({
+    required this.total,
+    required this.page,
+    required this.limit,
+    required this.totalPages,
+  });
+
+  factory Meta.fromJson(Map<String, dynamic> json) {
+    return Meta(
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      page: (json['page'] as num?)?.toInt() ?? 1,
+      limit: (json['limit'] as num?)?.toInt() ?? 20,
+      totalPages: (json['totalPages'] as num?)?.toInt() ?? 1,
+    );
+  }
+
+  factory Meta.empty() {
+    return Meta(total: 0, page: 1, limit: 20, totalPages: 0);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'total': total,
+      'page': page,
+      'limit': limit,
+      'totalPages': totalPages,
+    };
+  }
+}

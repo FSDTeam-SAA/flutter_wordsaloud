@@ -6,14 +6,27 @@ import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.da
 import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart';
 import 'package:flutter_wordsaloud/features/home/screens/category_details_screen.dart';
 
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(HomeController());
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends State<HomeScreen> {
+  late final HomeController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<HomeController>()
+        ? Get.find<HomeController>()
+        : Get.put(HomeController());
+    controller.fetchSkillList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Get the signed-in user's first name initial for the avatar
     String userInitial = 'K';
     if (Get.isRegistered<SignupController>()) {
@@ -29,7 +42,11 @@ class HomeScreen extends StatelessWidget {
           Container(
             color: const Color(0xFFAE3F30),
             padding: const EdgeInsets.only(
-                left: 18, right: 18, top: 52, bottom: 24),
+              left: 18,
+              right: 18,
+              top: 52,
+              bottom: 24,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -55,7 +72,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     // User initial avatar
                     GestureDetector(
-                      onTap: ()=> Get.to(() => ProfileScreen()),
+                      onTap: () => Get.to(() => ProfileScreen()),
                       child: Container(
                         width: 44,
                         height: 44,
@@ -107,33 +124,43 @@ class HomeScreen extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  child: Obx(() => TextField(
-                        onChanged: (v) => controller.searchQuery.value = v,
-                        style: GoogleFonts.outfit(
+                  child: Obx(
+                    () => TextField(
+                      onChanged: (v) => controller.searchQuery.value = v,
+                      style: GoogleFonts.outfit(
+                        fontSize: 15,
+                        color: Colors.black,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Search ...',
+                        hintStyle: GoogleFonts.outfit(
+                          color: const Color(0xFF9E9E9E),
                           fontSize: 15,
-                          color: Colors.black,
                         ),
-                        decoration: InputDecoration(
-                          hintText: 'Search ...',
-                          hintStyle: GoogleFonts.outfit(
-                            color: const Color(0xFF9E9E9E),
-                            fontSize: 15,
-                          ),
-                          prefixIcon: const Icon(Icons.search,
-                              color: Color(0xFF9E9E9E), size: 22),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 14, horizontal: 4),
-                          suffixIcon: controller.searchQuery.value.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear,
-                                      color: Color(0xFF9E9E9E), size: 18),
-                                  onPressed: () =>
-                                      controller.searchQuery.value = '',
-                                )
-                              : null,
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Color(0xFF9E9E9E),
+                          size: 22,
                         ),
-                      )),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 4,
+                        ),
+                        suffixIcon: controller.searchQuery.value.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(
+                                  Icons.clear,
+                                  color: Color(0xFF9E9E9E),
+                                  size: 18,
+                                ),
+                                onPressed: () =>
+                                    controller.searchQuery.value = '',
+                              )
+                            : null,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -160,31 +187,45 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Browse Trades', style: TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.w700,
-                        ),),
+                        child: Text(
+                          'Browse Trades',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                       Spacer(),
 
                       Padding(
                         padding: const EdgeInsets.only(right: 8.0),
-                        child: Text('22 Categories', style: TextStyle(
-                          color: Color(0xFFA83F2D), fontWeight: FontWeight.w600
-                        ),),
-                      )
+                        child: Text(
+                          '${controller.categories.length} Categories',
+                          style: TextStyle(
+                            color: Color(0xFFA83F2D),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   Expanded(
                     child: GridView.builder(
                       // padding: EdgeInsets.zero,
-                      padding: const EdgeInsets.only(left:18, top: 10, bottom: 18, right: 18),
-                      itemCount: items.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        childAspectRatio: 1,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
+                      padding: const EdgeInsets.only(
+                        left: 18,
+                        top: 10,
+                        bottom: 18,
+                        right: 18,
                       ),
+                      itemCount: items.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            childAspectRatio: 1,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                          ),
                       itemBuilder: (context, index) {
                         final cat = items[index];
                         final bool hasRedBorder = index == 0;
@@ -192,12 +233,17 @@ class HomeScreen extends StatelessWidget {
 
                         Color borderColor = const Color(0xFFF3E5CF);
 
-                        if (hasRedBorder) borderColor = const Color(0xFFA83F2D);
-                        if (hasTealBorder) borderColor = const Color(0xFF22707F);
+                        if (hasRedBorder) {
+                          borderColor = const Color(0xFFA83F2D);
+                        }
+                        if (hasTealBorder) {
+                          borderColor = const Color(0xFF22707F);
+                        }
 
                         // Subtitle color matches the border (teal for new/teal cards, red-brown for others)
-                        final Color subLabelColor =
-                            hasTealBorder ? const Color(0xFF22707F) : const Color(0xFFA83F2D);
+                        final Color subLabelColor = hasTealBorder
+                            ? const Color(0xFF22707F)
+                            : const Color(0xFFA83F2D);
 
                         // Colors for the circular background of icons (matching mockup diversity)
                         final List<Color> circleColors = [
@@ -208,13 +254,16 @@ class HomeScreen extends StatelessWidget {
                           const Color(0xFFFCE4EC), // light pink
                           const Color(0xFFFFE0B2), // light orange
                         ];
-                        final Color iconBgColor = circleColors[index % circleColors.length];
+                        final Color iconBgColor =
+                            circleColors[index % circleColors.length];
 
                         return Stack(
                           clipBehavior: Clip.none,
                           children: [
                             GestureDetector(
-                              onTap: () => Get.to(() => CategoryDetailsScreen(category: cat)),
+                              onTap: () => Get.to(
+                                () => CategoryDetailsScreen(category: cat),
+                              ),
                               child: SizedBox.expand(
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -226,9 +275,12 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   ),
                                   padding: const EdgeInsets.only(
-                                      top: 20, left: 8),
+                                    top: 20,
+                                    left: 8,
+                                  ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       // Icon rounded container
                                       Container(
@@ -282,7 +334,9 @@ class HomeScreen extends StatelessWidget {
                                 left: 12,
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 3),
+                                    horizontal: 10,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(20),
@@ -296,11 +350,11 @@ class HomeScreen extends StatelessWidget {
                                   child: Text(
                                     'New',
                                     style: GoogleFonts.outfit(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: index == 0
-                                            ? const Color(0xFFA83F2D)
-                                            : const Color(0xFF22707F),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: index == 0
+                                          ? const Color(0xFFA83F2D)
+                                          : const Color(0xFF22707F),
                                     ),
                                   ),
                                 ),

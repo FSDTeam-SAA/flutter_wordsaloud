@@ -40,6 +40,7 @@ class ApiConstants {
   static ProfileEndpoints get profile => ProfileEndpoints();
   static HomeEndpoints get home => HomeEndpoints();
   static TradesmanEndpoints get tradesman => TradesmanEndpoints();
+  static UserEndpoints get user => UserEndpoints();
   static ChatEndpoints get chat => ChatEndpoints();
   static RatingEndpoints get rating => RatingEndpoints();
 }
@@ -70,7 +71,8 @@ class ProfileEndpoints {
   final String fetchDelivered =
       '${ApiConstants.baseUrl}/orders/my?filter=completed';
 
-  String deleteProfile(String userId) => '${ApiConstants.baseUrl}/profile/$userId';
+  String deleteProfile(String userId) =>
+      '${ApiConstants.baseUrl}/profile/$userId';
   // String fetchCategory(String userId) =>;
 }
 
@@ -83,7 +85,8 @@ class HomeEndpoints {
   final String favorite = '${ApiConstants.baseUrl}/favorites';
   final String removeFavorite = '${ApiConstants.baseUrl}/favorites';
   String popular(String day) => '${ApiConstants.baseUrl}/items?day=$day';
-  String allPopular({int page = 1, int limit = 10}) => '${ApiConstants.baseUrl}/items?page=$page&limit=$limit';
+  String allPopular({int page = 1, int limit = 10}) =>
+      '${ApiConstants.baseUrl}/items?page=$page&limit=$limit';
   final String addCart = '${ApiConstants.baseUrl}/cart/add';
   final String removeCart = '${ApiConstants.baseUrl}/cart/remove';
   final String removeOneCart = '${ApiConstants.baseUrl}/cart/reduce';
@@ -91,11 +94,42 @@ class HomeEndpoints {
 
 class TradesmanEndpoints {
   final String whatCan = '${ApiConstants.baseUrl}/tradesman/onboarding/skills';
-  final String whereWork = '${ApiConstants.baseUrl}/tradesman/onboarding/work-area';
-  final String tellClient = '${ApiConstants.baseUrl}/tradesman/onboarding/pitch';
+  final String whereWork =
+      '${ApiConstants.baseUrl}/tradesman/onboarding/work-area';
+  final String tellClient =
+      '${ApiConstants.baseUrl}/tradesman/onboarding/pitch';
   final String goLive = '${ApiConstants.baseUrl}/tradesman/onboarding/go-live';
   final String dashboard = '${ApiConstants.baseUrl}/tradesman/me/dashboard';
   final String updateProfile = '${ApiConstants.baseUrl}/tradesman/me/profile';
+  // String fetchCategory(String userId) =>;
+}
+
+class UserEndpoints {
+  final String home = '${ApiConstants.baseUrl}/tradesman/categories';
+  String tradesmanDetails(String id) => '${ApiConstants.baseUrl}/tradesman/$id';
+
+  String categoryDetails({
+    String skill = '',
+    String search = '',
+    String area = '',
+    String sort = 'rating',
+    int page = 1,
+    int limit = 20,
+  }) {
+    final query = Uri(
+      queryParameters: {
+        'skill': skill,
+        'search': search,
+        'area': area,
+        'sort': sort,
+        'page': page.toString(),
+        'limit': limit.toString(),
+      },
+    ).query;
+
+    return '${ApiConstants.baseUrl}/tradesman?$query';
+  }
+
   // String fetchCategory(String userId) =>;
 }
 

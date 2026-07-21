@@ -5,11 +5,28 @@ import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.da
 import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart';
 import 'package:flutter_wordsaloud/features/client_profile/screens/advertise_inquiry_screen.dart';
 import 'package:flutter_wordsaloud/features/home/screens/tradesman_details_screen.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart'
+    as tradesman_model;
 
-class CategoryDetailsScreen extends StatelessWidget {
+class CategoryDetailsScreen extends StatefulWidget {
   final TradeCategory category;
 
   const CategoryDetailsScreen({super.key, required this.category});
+
+  @override
+  State<CategoryDetailsScreen> createState() => _CategoryDetailsScreenState();
+}
+
+class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
+  late final TradesmanController _tradesmanController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tradesmanController = Get.find<TradesmanController>();
+    _tradesmanController.fetchTradesman(skill: widget.category.name);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +38,11 @@ class CategoryDetailsScreen extends StatelessWidget {
     }
 
     // Format the title (e.g. Plumber -> Plumbers)
-    final String displayTitle = category.name.endsWith('s')
-        ? category.name
-        : (category.name == 'Welder/Gate'
+    final String displayTitle = widget.category.name.endsWith('s')
+        ? widget.category.name
+        : (widget.category.name == 'Welder/Gate'
               ? 'Welder/Gates'
-              : '${category.name}s');
+              : '${widget.category.name}s');
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5EFE6),
@@ -110,218 +127,119 @@ class CategoryDetailsScreen extends StatelessWidget {
 
           // ── Scrollable Body ─────────────────────────────────────────────
           Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 12 plumber Near You
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 18,
-                      top: 20,
-                      right: 18,
-                    ),
-                    child: Text(
-                      '12 ${category.name.toLowerCase()} Near You',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1F1F1F),
+            child: Obx(() {
+              final tradesmen = _tradesmanController.allTradesman.toList();
+              final vipTradesmen = tradesmen
+                  .where((tradesman) => tradesman.isVip)
+                  .toList();
+              final isLoading = _tradesmanController.isTradesmanLoading.value;
+
+              if (isLoading && tradesmen.isEmpty) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Color(0xFFA83F2D)),
+                );
+              }
+
+              return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 18,
+                        top: 20,
+                        right: 18,
+                      ),
+                      child: Text(
+                        '${tradesmen.length} ${widget.category.name.toLowerCase()} Near You',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1F1F1F),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(
-                    color: Color(0xFFFFF8F2),
-                    thickness: 1.0,
-                    height: 1.0,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // VIP Featured Row Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
+                    const SizedBox(height: 16),
+                    const Divider(
+                      color: Color(0xFFFFF8F2),
+                      thickness: 1.0,
+                      height: 1.0,
+                    ),
+                    const SizedBox(height: 16),
+                    if (vipTradesmen.isNotEmpty) ...[
+                      _buildVipHeader(),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 160,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 8,
+                          ),
+                          itemCount: vipTradesmen.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            return _buildVipCardFromTradesman(
+                              vipTradesmen[index],
+                              hasGoldBorder: index == 0,
+                            );
+                          },
+                        ),
+                      ),
+                      _buildVipDots(vipTradesmen.length),
+                      const SizedBox(height: 16),
+                      const Divider(
+                        color: Color(0xFFFFF8F2),
+                        thickness: 1.0,
+                        height: 1.0,
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Text(
+                        'All ${widget.category.name} sorted by Rating',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1F1F1F),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (tradesmen.isEmpty)
+                      _buildEmptyState()
+                    else
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        child: Column(
                           children: [
-                            const Icon(
-                              Icons.star,
-                              color: Color(0xFFEAAE4B),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'VIP Featured',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFFAE3F30),
+                            for (
+                              int index = 0;
+                              index < tradesmen.length;
+                              index++
+                            ) ...[
+                              _buildVerticalCardFromTradesman(
+                                tradesmen[index],
+                                isTopRated: index == 0,
                               ),
-                            ),
+                              const SizedBox(height: 12),
+                              if (index == 1) ...[
+                                _buildSponsoredSlotCard(),
+                                const SizedBox(height: 12),
+                              ],
+                            ],
                           ],
                         ),
-                        Text(
-                          'SPONSORED',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFFA83F2D),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // VIP Grid/Horizontal List
-                  SizedBox(
-                    height: 160,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 8,
                       ),
-                      children: [
-                        // Card 1: VIP Active
-                        _buildVipCard(
-                          name: 'Rishi L.',
-                          location: 'Tunapuna 7.km',
-                          avatarLetter: 'R',
-                          hasVipBadge: true,
-                          hasGoldBorder: true,
-                        ),
-                        const SizedBox(width: 12),
-                        // Card 2: Regular VIP
-                        _buildVipCard(
-                          name: 'Rishi L.',
-                          location: 'Tunapuna 7.km',
-                          avatarLetter: 'R',
-                          hasVipBadge: false,
-                          hasGoldBorder: false,
-                        ),
-                        const SizedBox(width: 12),
-                        // Card 3: Regular VIP
-                        _buildVipCard(
-                          name: 'Rishi L.',
-                          location: 'Tunapuna 7.km',
-                          avatarLetter: 'R',
-                          hasVipBadge: false,
-                          hasGoldBorder: false,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Indicator dots
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 20,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFA83F2D),
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFEAAE4B),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFEAAE4B),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(
-                    color: Color(0xFFFFF8F2),
-                    thickness: 1.0,
-                    height: 1.0,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // All Plumber sorted by Rating Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    child: Text(
-                      'All ${category.name} sorted by Rating',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1F1F1F),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Vertical Lists of Plumbers
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    child: Column(
-                      children: [
-                        // Card 1: Top Rated
-                        _buildVerticalCard(
-                          name: 'Rishi L.',
-                          location: 'Tunapuna 7.km',
-                          avatarLetter: 'T',
-                          rating: '4.9-56 reviews',
-                          price: '325',
-                          priceUnit: 'day',
-                          isTopRated: true,
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Card 2: Normal Rated
-                        _buildVerticalCard(
-                          name: 'Rishi L.',
-                          location: 'Tunapuna 7.km',
-                          avatarLetter: 'T',
-                          rating: '4.9-56 reviews',
-                          price: '325',
-                          priceUnit: 'day',
-                          isTopRated: false,
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Card 3: Sponsored slot
-                        _buildSponsoredSlotCard(),
-                        const SizedBox(height: 12),
-
-                        // Card 4: Normal Rated
-                        _buildVerticalCard(
-                          name: 'Rishi L.',
-                          location: 'Tunapuna 7.km',
-                          avatarLetter: 'T',
-                          rating: '4.9-56 reviews',
-                          price: '325',
-                          priceUnit: 'day',
-                          isTopRated: false,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              );
+            }),
           ),
         ],
       ),
@@ -330,22 +248,212 @@ class CategoryDetailsScreen extends StatelessWidget {
 
   // ── Helper UI Builders ──────────────────────────────────────────────────────
 
+  Widget _buildVipHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.star, color: Color(0xFFEAAE4B), size: 18),
+              SizedBox(width: 4),
+              Text(
+                'VIP Featured',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFAE3F30),
+                ),
+              ),
+            ],
+          ),
+          const Text(
+            'SPONSORED',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFFA83F2D),
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVipDots(int count) {
+    final visibleCount = count.clamp(1, 3);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(visibleCount, (index) {
+        final isActive = index == 0;
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          width: isActive ? 20 : 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color: isActive ? const Color(0xFFA83F2D) : const Color(0xFFEAAE4B),
+            borderRadius: isActive ? BorderRadius.circular(3) : null,
+            shape: isActive ? BoxShape.rectangle : BoxShape.circle,
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFF3E5CF), width: 1.5),
+        ),
+        child: const Text(
+          'No tradesmen found for this category yet.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF6D6D6D),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVipCardFromTradesman(
+    tradesman_model.Tradesman tradesman, {
+    required bool hasGoldBorder,
+  }) {
+    return _buildVipCard(
+      name: _displayName(tradesman),
+      location: _displayLocation(tradesman),
+      avatarLetter: _initials(_displayName(tradesman)),
+      hasVipBadge: true,
+      hasGoldBorder: hasGoldBorder,
+      tradesman: tradesman,
+    );
+  }
+
+  Widget _buildVerticalCardFromTradesman(
+    tradesman_model.Tradesman tradesman, {
+    required bool isTopRated,
+  }) {
+    return _buildVerticalCard(
+      name: _displayName(tradesman),
+      location: _displayLocation(tradesman),
+      avatarLetter: _initials(_displayName(tradesman)),
+      rating: _ratingLabel(tradesman),
+      price: tradesman.typicalRate.amount.toString(),
+      priceUnit: _rateUnitLabel(tradesman.typicalRate.unit),
+      isTopRated: isTopRated,
+      tradesman: tradesman,
+    );
+  }
+
+  void _openTradesmanDetails(
+    tradesman_model.Tradesman tradesman, {
+    required String name,
+    required String location,
+    required String avatarLetter,
+    required String rating,
+  }) {
+    Get.to(
+      () => TradesmanDetailsScreen(
+        tradesmanId: tradesman.id,
+        name: name,
+        location: location,
+        avatarLetter: avatarLetter,
+        rating: rating.split('-').first,
+        categoryName: widget.category.name,
+        pitch: tradesman.pitch,
+        extraTrades: tradesman.extraSkills,
+        rate: tradesman.typicalRate.amount > 0
+            ? tradesman.typicalRate.amount.toString()
+            : '',
+        rateUnit: _rateUnitLabel(tradesman.typicalRate.unit),
+      ),
+    );
+  }
+
+  String _displayName(tradesman_model.Tradesman tradesman) {
+    final user = tradesman.user;
+    final fullName = user.name.trim().isNotEmpty
+        ? user.name.trim()
+        : [
+            user.firstName,
+            user.lastName,
+          ].where((part) => part.trim().isNotEmpty).join(' ');
+
+    if (fullName.trim().isEmpty) return 'Tradesman';
+
+    final parts = fullName.trim().split(RegExp(r'\s+'));
+    if (parts.length == 1) return parts.first;
+    return '${parts.first} ${parts.last[0].toUpperCase()}.';
+  }
+
+  String _displayLocation(tradesman_model.Tradesman tradesman) {
+    final area = tradesman.homeArea.trim().isNotEmpty
+        ? tradesman.homeArea.trim()
+        : tradesman.user.area.trim();
+    return area.isNotEmpty ? area : 'Trinidad';
+  }
+
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) return 'T';
+    if (parts.length == 1) return parts.first[0].toUpperCase();
+    return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+  }
+
+  String _ratingLabel(tradesman_model.Tradesman tradesman) {
+    final rating = tradesman.ratingAverage <= 0
+        ? 'New'
+        : tradesman.ratingAverage.toString();
+    final reviewLabel = tradesman.ratingCount == 1 ? 'review' : 'reviews';
+    return '$rating-${tradesman.ratingCount} $reviewLabel';
+  }
+
+  String _rateUnitLabel(String unit) {
+    final normalized = unit.trim().toLowerCase();
+    if (normalized.contains('hour')) return 'hour';
+    if (normalized.contains('job')) return 'job';
+    return 'day';
+  }
+
   Widget _buildVipCard({
     required String name,
     required String location,
     required String avatarLetter,
     required bool hasVipBadge,
     required bool hasGoldBorder,
+    tradesman_model.Tradesman? tradesman,
   }) {
     return GestureDetector(
       onTap: () {
+        if (tradesman != null) {
+          _openTradesmanDetails(
+            tradesman,
+            name: name,
+            location: location,
+            avatarLetter: avatarLetter,
+            rating: _ratingLabel(tradesman),
+          );
+          return;
+        }
+
         Get.to(
           () => TradesmanDetailsScreen(
             name: name,
             location: location,
             avatarLetter: avatarLetter,
             rating: '4.9',
-            categoryName: category.name,
+            categoryName: widget.category.name,
           ),
         );
       },
@@ -457,16 +565,28 @@ class CategoryDetailsScreen extends StatelessWidget {
     required String price,
     required String priceUnit,
     required bool isTopRated,
+    tradesman_model.Tradesman? tradesman,
   }) {
     return GestureDetector(
       onTap: () {
+        if (tradesman != null) {
+          _openTradesmanDetails(
+            tradesman,
+            name: name,
+            location: location,
+            avatarLetter: avatarLetter,
+            rating: rating,
+          );
+          return;
+        }
+
         Get.to(
           () => TradesmanDetailsScreen(
             name: name,
             location: location,
             avatarLetter: avatarLetter,
             rating: rating.split('-').first,
-            categoryName: category.name,
+            categoryName: widget.category.name,
           ),
         );
       },
