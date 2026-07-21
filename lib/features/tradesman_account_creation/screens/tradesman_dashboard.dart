@@ -300,8 +300,19 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child:
-                          _profileImageUrl != null &&
-                              _profileImageUrl!.isNotEmpty
+                          _profileImagePath != null &&
+                              _profileImagePath!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.file(
+                                File(_profileImagePath!),
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : _profileImageUrl != null &&
+                                _profileImageUrl!.isNotEmpty
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(16),
                               child: Image.network(
@@ -311,17 +322,6 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, _, _) =>
                                     _buildAvatarInitials(),
-                              ),
-                            )
-                          : _profileImagePath != null &&
-                                _profileImagePath!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Image.file(
-                                File(_profileImagePath!),
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
                               ),
                             )
                           : _buildAvatarInitials(),
@@ -621,6 +621,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                           tradesmanName: _tradesmanName,
                           tradesmanPhone: '+1 868 754-2288',
                           tradesmanSkill: _tradesmanSkill,
+                          extraTrades: _extraTrades,
                           homeArea: _homeArea,
                           profileImagePath: _profileImagePath,
                         ),
@@ -635,6 +636,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                           }
                           if (result['profileImagePath'] != null) {
                             _profileImagePath = result['profileImagePath'];
+                            _profileImageUrl = null;
                           }
                           if (result['pitch'] != null) {
                             _pitch = result['pitch'];

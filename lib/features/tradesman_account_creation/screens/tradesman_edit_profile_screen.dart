@@ -11,6 +11,7 @@ class TradesmanEditProfileScreen extends StatefulWidget {
   final String tradesmanName;
   final String tradesmanPhone;
   final String tradesmanSkill;
+  final List<String> extraTrades;
   final String homeArea;
   final String? profileImagePath;
 
@@ -19,6 +20,7 @@ class TradesmanEditProfileScreen extends StatefulWidget {
     required this.tradesmanName,
     required this.tradesmanPhone,
     required this.tradesmanSkill,
+    this.extraTrades = const [],
     required this.homeArea,
     this.profileImagePath,
   });
@@ -52,6 +54,7 @@ class _TradesmanEditProfileScreenState
       initialName: widget.tradesmanName,
       initialPhone: widget.tradesmanPhone,
       initialMainTrade: widget.tradesmanSkill,
+      initialExtraTrades: widget.extraTrades,
       initialHomeArea: widget.homeArea,
       initialProfileImagePath: widget.profileImagePath,
     );
@@ -86,8 +89,8 @@ class _TradesmanEditProfileScreenState
   Future<void> _loadProfileFromDashboard() async {
     dashboard_model.TradesmanDashboardResponse? dashboard;
 
-    dashboard = _tradesmanController.dashboardData.value;
-    dashboard ??= await _tradesmanController.fetchDashboard();
+    dashboard = await _tradesmanController.fetchDashboard();
+    dashboard ??= _tradesmanController.dashboardData.value;
 
     if (!mounted) return;
     if (dashboard != null) {
@@ -123,9 +126,13 @@ class _TradesmanEditProfileScreenState
     controller.rate.value = amount == null ? '' : _formatNumber(amount);
     controller.rateUnit.value = _normalizeRateUnit(profile?.typicalRate?.unit);
     controller.mainTrade.value = profile?.mainSkill ?? '';
+    final extraSkills = _mergeTrades(
+      profile?.extraSkills ?? const [],
+      controller.extraTrades,
+    );
     controller.extraTrades
       ..clear()
-      ..addAll(profile?.extraSkills ?? const []);
+      ..addAll(extraSkills);
     controller.homeArea.value = profile?.homeArea ?? '';
     controller.travelRange.value = _normalizeTravelRange(profile?.travelRange);
 
@@ -164,6 +171,26 @@ class _TradesmanEditProfileScreenState
       return '5km - Local only';
     }
     return 'Trinidad wide';
+  }
+
+  List<String> _mergeTrades(Iterable<String> primary, Iterable<String> backup) {
+    final trades = <String>[];
+    for (final trade in [...primary, ...backup]) {
+      final value = trade.trim();
+      if (value.isEmpty) continue;
+
+      final isDuplicate = trades.any(
+        (selected) => selected.toLowerCase() == value.toLowerCase(),
+      );
+      final isMainTrade =
+          controller.mainTrade.value.trim().toLowerCase() ==
+          value.toLowerCase();
+
+      if (!isDuplicate && !isMainTrade) {
+        trades.add(value);
+      }
+    }
+    return trades;
   }
 
   Future<void> _saveProfile() async {
@@ -1143,6 +1170,10 @@ class _TradesmanEditProfileScreenState
       context: context,
       builder: (context) {
         final remaining = controller.remainingTrades;
+        final dialogHeight = (MediaQuery.of(context).size.height * 0.55).clamp(
+          220.0,
+          460.0,
+        );
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -1158,8 +1189,8 @@ class _TradesmanEditProfileScreenState
                 )
               : SizedBox(
                   width: double.maxFinite,
+                  height: dialogHeight,
                   child: ListView.separated(
-                    shrinkWrap: true,
                     physics: const BouncingScrollPhysics(),
                     itemCount: remaining.length,
                     separatorBuilder: (context, index) =>

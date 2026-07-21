@@ -57,8 +57,12 @@ class EditProfileController extends GetxController {
     pitch.value = initialPitch;
     rate.value = initialRate;
     rateUnit.value = initialRateUnit;
-    mainTrade.value = initialMainTrade;
-    extraTrades.addAll(initialExtraTrades);
+    mainTrade.value = _displayTradeName(initialMainTrade);
+    for (final trade in initialExtraTrades.map(_displayTradeName)) {
+      if (trade.isNotEmpty && !_isSelectedTrade(trade)) {
+        extraTrades.add(trade);
+      }
+    }
     homeArea.value = initialHomeArea;
     travelRange.value = initialTravelRange;
     profileImagePath.value = initialProfileImagePath;
@@ -82,7 +86,7 @@ class EditProfileController extends GetxController {
 
   // Remove a trade from selections
   void removeTrade(String tradeName) {
-    if (mainTrade.value == tradeName) {
+    if (_sameTrade(mainTrade.value, tradeName)) {
       if (extraTrades.isNotEmpty) {
         mainTrade.value = extraTrades.first;
         extraTrades.removeAt(0);
@@ -90,24 +94,47 @@ class EditProfileController extends GetxController {
         mainTrade.value = '';
       }
     } else {
-      extraTrades.remove(tradeName);
+      extraTrades.removeWhere((trade) => _sameTrade(trade, tradeName));
     }
   }
 
   // Add a trade to selections
   void addTrade(String tradeName) {
+    final normalizedTrade = _displayTradeName(tradeName);
+    if (normalizedTrade.isEmpty || _isSelectedTrade(normalizedTrade)) return;
+
     if (mainTrade.isEmpty) {
-      mainTrade.value = tradeName;
+      mainTrade.value = normalizedTrade;
       return;
     }
 
-    extraTrades.add(tradeName);
+    extraTrades.add(normalizedTrade);
   }
 
   // Filter out already selected trades for the "Add Trade" dialog
   List<String> get remainingTrades {
     return availableTrades.where((trade) {
-      return mainTrade.value != trade && !extraTrades.contains(trade);
+      return !_isSelectedTrade(trade);
     }).toList();
+  }
+
+  String _displayTradeName(String tradeName) {
+    final value = tradeName.trim();
+    if (value.isEmpty) return '';
+
+    for (final trade in availableTrades) {
+      if (_sameTrade(trade, value)) return trade;
+    }
+
+    return value;
+  }
+
+  bool _isSelectedTrade(String tradeName) {
+    return _sameTrade(mainTrade.value, tradeName) ||
+        extraTrades.any((trade) => _sameTrade(trade, tradeName));
+  }
+
+  bool _sameTrade(String first, String second) {
+    return first.trim().toLowerCase() == second.trim().toLowerCase();
   }
 }
