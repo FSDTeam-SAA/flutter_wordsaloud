@@ -15,6 +15,7 @@ class TradesmanPublicviewScreen extends StatefulWidget {
   final List<String> recentWorkPhotoUrls;
   final String rate;
   final String rateUnit;
+  final bool showPreviewBanner;
 
   const TradesmanPublicviewScreen({
     super.key,
@@ -30,6 +31,7 @@ class TradesmanPublicviewScreen extends StatefulWidget {
     this.recentWorkPhotoUrls = const [],
     this.rate = '',
     this.rateUnit = 'per day',
+    this.showPreviewBanner = false,
   });
 
   @override
@@ -106,15 +108,16 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
       backgroundColor: const Color(0xFFF5EFE6),
       body: Column(
         children: [
+          if (widget.showPreviewBanner) _buildPreviewBanner(),
           // ── Header Section ──────────────────────────────────────────────
           Container(
-            height: 206,
+            height: widget.showPreviewBanner ? 172 : 206,
             width: double.infinity,
             color: const Color(0xFF245869),
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               left: 18,
               right: 18,
-              top: 52,
+              top: widget.showPreviewBanner ? 20 : 52,
               bottom: 24,
             ),
             child: Column(
@@ -556,6 +559,55 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewBanner() {
+    return SafeArea(
+      bottom: false,
+      child: Container(
+        height: 36,
+        width: double.infinity,
+        color: const Color(0xFFF4C24F),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              decoration: const BoxDecoration(
+                color: Color(0xFF1F1716),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.visibility,
+                size: 14,
+                color: Color(0xFFF4C24F),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Preview — this is what clients see',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1F1716),
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: () => Get.back(),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+              icon: const Icon(Icons.close, size: 16, color: Color(0xFF1F1716)),
+            ),
+          ],
+        ),
       ),
     );
   }

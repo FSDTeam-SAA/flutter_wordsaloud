@@ -7,7 +7,9 @@ import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart
 import 'package:flutter_wordsaloud/features/home/screens/category_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool showCustomerModeBanner;
+
+  const HomeScreen({super.key, this.showCustomerModeBanner = false});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -38,13 +40,14 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFFF5EFE6),
       body: Column(
         children: [
+          if (widget.showCustomerModeBanner) _buildCustomerModeBanner(),
           // ── Header ──────────────────────────────────────────────────────
           Container(
             color: const Color(0xFFAE3F30),
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               left: 18,
               right: 18,
-              top: 52,
+              top: widget.showCustomerModeBanner ? 20 : 52,
               bottom: 24,
             ),
             child: Column(
@@ -369,6 +372,53 @@ class _HomeScreenState extends State<HomeScreen> {
             }),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCustomerModeBanner() {
+    return SafeArea(
+      bottom: false,
+      child: Container(
+        width: double.infinity,
+        color: const Color(0xFF1F1716),
+        padding: const EdgeInsets.only(left: 6, right: 4, top: 5, bottom: 5),
+        child: Row(
+          children: [
+            const Icon(Icons.person, size: 16, color: Color(0xFF6E9DB7)),
+            const SizedBox(width: 4),
+            Expanded(
+              child: RichText(
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                text: TextSpan(
+                  style: GoogleFonts.outfit(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    height: 1.05,
+                  ),
+                  children: const [
+                    TextSpan(
+                      text: "You're browsing as a\n",
+                      style: TextStyle(color: Color(0xFFF4C24F)),
+                    ),
+                    TextSpan(
+                      text: 'customer',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: Get.back,
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+              icon: const Icon(Icons.arrow_back, size: 16, color: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }

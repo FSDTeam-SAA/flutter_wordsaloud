@@ -677,6 +677,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                           recentWorkPhotoUrls: _recentWorkPhotoUrls,
                           rate: _rate,
                           rateUnit: _rateUnit,
+                          showPreviewBanner: true,
                         ),
                       );
                     },
@@ -688,7 +689,9 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                     icon: Icons.swap_horiz,
                     iconBg: const Color(0xFFE0F2F1),
                     onTap: () {
-                      Get.offAll(() => const HomeScreen());
+                      Get.to(
+                        () => const HomeScreen(showCustomerModeBanner: true),
+                      );
                     },
                   ),
                   const SizedBox(height: 10),
