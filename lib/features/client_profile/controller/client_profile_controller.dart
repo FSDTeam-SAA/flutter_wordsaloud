@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter_wordsaloud/core/base/base_controller.dart';
+import 'package:flutter_wordsaloud/core/services/auth_storage_service.dart';
+import 'package:flutter_wordsaloud/core/services/session_service.dart';
+import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_client_profile_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/update_profile_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/repositories/tradesman_repo.dart';
@@ -10,6 +13,7 @@ import 'package:get/get.dart';
 
 class ClientProfileController extends BaseController {
   late final TradesmanRepo _tradesmanRepo = Get.find<TradesmanRepo>();
+  final AuthStorageService _authStorageService = AuthStorageService();
 
   final Rxn<GetClientProfileResponseModel> clientProfile =
       Rxn<GetClientProfileResponseModel>();
@@ -115,6 +119,24 @@ class ClientProfileController extends BaseController {
       return false;
     } finally {
       setLoading(false);
+    }
+  }
+
+  Future<void> signOut() async {
+    clearError();
+
+    try {
+      await _authStorageService.clearAuthData();
+      clientProfile.value = null;
+
+      if (Get.isRegistered<SessionService>()) {
+        Get.find<SessionService>().clearToken();
+      }
+
+      Get.offAll(() => const RoleSelectionScreen());
+    } catch (e) {
+      setError('Something went wrong. Please try again.');
+      d_print.log('Sign out failed: $e');
     }
   }
 

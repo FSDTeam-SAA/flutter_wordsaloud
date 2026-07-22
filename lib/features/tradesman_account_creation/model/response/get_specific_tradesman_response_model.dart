@@ -13,7 +13,7 @@ class GetSpecificTradesmanResponseModel {
     final profileJson = json['profile'] is Map
         ? Map<String, dynamic>.from(json['profile'])
         : json;
-    final rawReviews = json['reviews'] is List ? json['reviews'] as List : [];
+    final rawReviews = _extractReviews(json);
 
     return GetSpecificTradesmanResponseModel(
       profile: Profile.fromJson(profileJson),
@@ -110,7 +110,13 @@ class Profile {
       isLive: json['isLive'] == true,
       isVip: json['isVip'] == true,
       ratingAverage: json['ratingAverage'] is num ? json['ratingAverage'] : 0,
-      ratingCount: (json['ratingCount'] as num?)?.toInt() ?? 0,
+      ratingCount: _intFromAny(
+        json['ratingCount'] ??
+            json['reviewCount'] ??
+            json['reviewsCount'] ??
+            json['totalReviews'] ??
+            json['reviewsTotal'],
+      ),
       jobsCount: (json['jobsCount'] as num?)?.toInt() ?? 0,
       workPhotos: List<dynamic>.from(json['workPhotos'] ?? const []),
       mainSkill: json['mainSkill']?.toString() ?? '',
@@ -145,6 +151,30 @@ class Profile {
       'travelRange': travelRange,
     };
   }
+}
+
+List _extractReviews(Map<String, dynamic> json) {
+  final reviews = json['reviews'];
+  if (reviews is List) return reviews;
+  if (reviews is Map) {
+    final reviewMap = Map<String, dynamic>.from(reviews);
+    final data = reviewMap['data'] ?? reviewMap['items'] ?? reviewMap['docs'];
+    if (data is List) return data;
+  }
+
+  final profile = json['profile'];
+  if (profile is Map) {
+    final profileMap = Map<String, dynamic>.from(profile);
+    final profileReviews = profileMap['reviews'];
+    if (profileReviews is List) return profileReviews;
+  }
+
+  return const [];
+}
+
+int _intFromAny(dynamic value) {
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }
 
 class TypicalRate {
@@ -304,7 +334,12 @@ class Review {
           ? reviewerName
           : json['reviewerName']?.toString() ?? 'Anonymous',
       rating: (json['rating'] as num?)?.toInt() ?? 0,
-      comment: json['comment']?.toString() ?? json['review']?.toString() ?? '',
+      comment:
+          json['comment']?.toString() ??
+          json['reviewText']?.toString() ??
+          json['review']?.toString() ??
+          json['text']?.toString() ??
+          '',
       createdAt: json['createdAt']?.toString() ?? '',
     );
   }

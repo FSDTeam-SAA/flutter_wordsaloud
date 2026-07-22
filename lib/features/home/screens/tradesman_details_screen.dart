@@ -162,7 +162,14 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
       final displayRating = profile != null
           ? _formatRating(profile.ratingAverage)
           : widget.rating;
-      final displayReviewCount = profile?.ratingCount ?? 87;
+      final fetchedReviews = profile != null
+          ? fetchedTradesman?.reviews ?? const <specific_model.Review>[]
+          : const <specific_model.Review>[];
+      final displayReviewCount = profile != null
+          ? (profile.ratingCount > 0
+                ? profile.ratingCount
+                : fetchedReviews.length)
+          : 0;
       final displayJobsCount = profile?.jobsCount ?? 142;
       final displayPitch = profile?.pitch.trim().isNotEmpty ?? false
           ? profile!.pitch
@@ -182,9 +189,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
               .where((url) => url.isNotEmpty)
               .toList() ??
           const <String>[];
-      final reviews = profile != null
-          ? fetchedTradesman?.reviews ?? const <specific_model.Review>[]
-          : const <specific_model.Review>[];
+      final reviews = fetchedReviews;
 
       // Use pitch if provided, otherwise fall back to a generated description
       final String formattedCategory = displayCategory.endsWith('s')

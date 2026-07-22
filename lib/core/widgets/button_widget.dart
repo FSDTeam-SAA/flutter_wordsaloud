@@ -6,6 +6,7 @@ class CustomButton extends StatelessWidget {
   final IconData? icon;
   final Color? backgroundColor;
   final Color? foregroundColor;
+  final Color? textColor;
   final double? width;
   final double? height;
   final double borderRadius;
@@ -17,6 +18,7 @@ class CustomButton extends StatelessWidget {
     this.icon,
     this.backgroundColor = const Color(0xFFAE3F30),
     this.foregroundColor = Colors.white,
+    this.textColor = Colors.white,
     this.width = double.infinity,
     this.height = 64,
     this.borderRadius = 32,
@@ -44,13 +46,13 @@ class CustomButton extends StatelessWidget {
             Icon(icon, size: 20, color: Colors.white),
           ],
           Text(
-            text,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white
-            ),
+          text,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: textColor ?? Colors.white
           ),
+        ),
 
         ],
       ),

@@ -205,6 +205,8 @@ class YouAreLiveScreen extends StatelessWidget {
                             ),
                           )
                         : CustomButton(
+                      backgroundColor: Color(0xFFE5A742),
+                            textColor: Colors.black,
                             height: 50,
                             borderRadius: 16,
                             text: 'Go to dashboard',

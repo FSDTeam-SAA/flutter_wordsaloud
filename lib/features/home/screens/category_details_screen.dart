@@ -9,6 +9,8 @@ import 'package:flutter_wordsaloud/features/tradesman_account_creation/controlle
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart'
     as tradesman_model;
 
+import '../../client_profile/screens/profile_screen.dart';
+
 class CategoryDetailsScreen extends StatefulWidget {
   final TradeCategory category;
 
@@ -89,20 +91,23 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                       ),
                     ),
                     // User initial avatar
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE8B04B),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          userInitial,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black,
+                    InkWell(
+                      onTap: () => Get.to(() => ProfileScreen()),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE8B04B),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            userInitial,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
                       ),
@@ -414,7 +419,9 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
   String _ratingLabel(tradesman_model.Tradesman tradesman) {
     final rating = tradesman.ratingAverage <= 0
         ? 'New'
-        : tradesman.ratingAverage.toString();
+        : tradesman.ratingAverage % 1 == 0
+        ? tradesman.ratingAverage.toInt().toString()
+        : tradesman.ratingAverage.toStringAsFixed(1);
     final reviewLabel = tradesman.ratingCount == 1 ? 'review' : 'reviews';
     return '$rating-${tradesman.ratingCount} $reviewLabel';
   }

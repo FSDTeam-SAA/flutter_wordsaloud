@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   const _SectionLabel('ACCOUNT'),
                   const SizedBox(height: 8),
-                  const _ProfileMenuItem(
+                  _ProfileMenuItem(
                     icon: Icons.logout,
                     iconColor: _headerColor,
                     value: 'Sign out',
@@ -106,6 +106,7 @@ class ProfileScreen extends StatelessWidget {
                     backgroundColor: Color(0xFFFFF3F1),
                     borderColor: Color(0xFFEABCB5),
                     showChevron: false,
+                    onTap: controller.signOut,
                   ),
                 ],
               ),

@@ -30,6 +30,18 @@ class GetAllTradesmanResponseModel {
 }
 
 List<Tradesman> tradesmanListFromJson(dynamic json) {
+  if (json is Map) {
+    final map = Map<String, dynamic>.from(json);
+    return tradesmanListFromJson(
+      map['data'] ??
+          map['tradesmen'] ??
+          map['items'] ??
+          map['results'] ??
+          map['docs'] ??
+          const [],
+    );
+  }
+
   if (json is! List) return const [];
 
   return json
@@ -48,7 +60,7 @@ class Tradesman {
   final String verificationStatus;
   final bool isLive;
   final bool isVip;
-  final int ratingAverage;
+  final num ratingAverage;
   final int ratingCount;
   final int jobsCount;
   final List<dynamic> workPhotos;
@@ -80,40 +92,135 @@ class Tradesman {
   });
 
   factory Tradesman.fromJson(Map<String, dynamic> json) {
+    final profileJson = json['profile'] is Map
+        ? Map<String, dynamic>.from(json['profile'])
+        : json['tradesman'] is Map
+        ? Map<String, dynamic>.from(json['tradesman'])
+        : json;
+
     return Tradesman(
       typicalRate: TypicalRate.fromJson(
-        json['typicalRate'] is Map
-            ? Map<String, dynamic>.from(json['typicalRate'])
+        profileJson['typicalRate'] is Map
+            ? Map<String, dynamic>.from(profileJson['typicalRate'])
             : {},
       ),
       contactChangeRequest: ContactChangeRequest.fromJson(
-        json['contactChangeRequest'] is Map
-            ? Map<String, dynamic>.from(json['contactChangeRequest'])
+        profileJson['contactChangeRequest'] is Map
+            ? Map<String, dynamic>.from(profileJson['contactChangeRequest'])
             : {},
       ),
-      id: json['_id']?.toString() ?? '',
+      id: profileJson['_id']?.toString() ?? json['_id']?.toString() ?? '',
       user: User.fromJson(
-        json['user'] is Map ? Map<String, dynamic>.from(json['user']) : {},
+        profileJson['user'] is Map
+            ? Map<String, dynamic>.from(profileJson['user'])
+            : json['user'] is Map
+            ? Map<String, dynamic>.from(json['user'])
+            : {},
       ),
-      extraSkills: List<String>.from(json['extraSkills'] ?? const []),
-      pitch: json['pitch']?.toString() ?? '',
-      verificationStatus: json['verificationStatus']?.toString() ?? '',
-      isLive: json['isLive'] == true,
-      isVip: json['isVip'] == true,
-      ratingAverage: (json['ratingAverage'] as num?)?.toInt() ?? 0,
-      ratingCount: (json['ratingCount'] as num?)?.toInt() ?? 0,
-      jobsCount: (json['jobsCount'] as num?)?.toInt() ?? 0,
-      workPhotos: List<dynamic>.from(json['workPhotos'] ?? const []),
-      mainSkill: json['mainSkill']?.toString() ?? '',
-      homeArea: json['homeArea']?.toString() ?? '',
-      travelRange: json['travelRange']?.toString() ?? '',
+      extraSkills: List<String>.from(profileJson['extraSkills'] ?? const []),
+      pitch: profileJson['pitch']?.toString() ?? '',
+      verificationStatus: profileJson['verificationStatus']?.toString() ?? '',
+      isLive: profileJson['isLive'] == true,
+      isVip: profileJson['isVip'] == true,
+      ratingAverage: _ratingAverageFromJson(json, profileJson),
+      ratingCount: _ratingCountFromJson(json, profileJson),
+      jobsCount: (profileJson['jobsCount'] as num?)?.toInt() ?? 0,
+      workPhotos: List<dynamic>.from(profileJson['workPhotos'] ?? const []),
+      mainSkill: profileJson['mainSkill']?.toString() ?? '',
+      homeArea: profileJson['homeArea']?.toString() ?? '',
+      travelRange: profileJson['travelRange']?.toString() ?? '',
       createdAt:
-          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+          DateTime.tryParse(profileJson['createdAt']?.toString() ?? '') ??
           DateTime.fromMillisecondsSinceEpoch(0),
       updatedAt:
-          DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
+          DateTime.tryParse(profileJson['updatedAt']?.toString() ?? '') ??
           DateTime.fromMillisecondsSinceEpoch(0),
     );
+  }
+
+  static num _ratingAverageFromJson(
+    Map<String, dynamic> json,
+    Map<String, dynamic> profileJson,
+  ) {
+    return _numFromAny(
+      _firstNonNull([
+        profileJson['ratingAverage'],
+        profileJson['averageRating'],
+        profileJson['avgRating'],
+        profileJson['ratingAvg'],
+        json['ratingAverage'],
+        json['averageRating'],
+        json['avgRating'],
+        json['ratingAvg'],
+        _nestedValue(profileJson, ['rating', 'average']),
+        _nestedValue(profileJson, ['ratings', 'average']),
+        _nestedValue(profileJson, ['reviews', 'average']),
+        _nestedValue(json, ['rating', 'average']),
+        _nestedValue(json, ['ratings', 'average']),
+        _nestedValue(json, ['reviews', 'average']),
+        profileJson['rating'] is num || profileJson['rating'] is String
+            ? profileJson['rating']
+            : null,
+        json['rating'] is num || json['rating'] is String
+            ? json['rating']
+            : null,
+      ]),
+    );
+  }
+
+  static int _ratingCountFromJson(
+    Map<String, dynamic> json,
+    Map<String, dynamic> profileJson,
+  ) {
+    final count = _intFromAny(
+      _firstNonNull([
+        profileJson['ratingCount'],
+        profileJson['reviewCount'],
+        profileJson['reviewsCount'],
+        profileJson['totalReviews'],
+        profileJson['reviewsTotal'],
+        json['ratingCount'],
+        json['reviewCount'],
+        json['reviewsCount'],
+        json['totalReviews'],
+        json['reviewsTotal'],
+        _nestedValue(profileJson, ['rating', 'count']),
+        _nestedValue(profileJson, ['ratings', 'count']),
+        _nestedValue(profileJson, ['reviews', 'count']),
+        _nestedValue(json, ['rating', 'count']),
+        _nestedValue(json, ['ratings', 'count']),
+        _nestedValue(json, ['reviews', 'count']),
+        _nestedValue(profileJson, ['_count', 'reviews']),
+        _nestedValue(json, ['_count', 'reviews']),
+      ]),
+    );
+
+    if (count > 0) return count;
+
+    final reviews =
+        profileJson['reviews'] ??
+        json['reviews'] ??
+        _nestedValue(profileJson, ['reviews', 'data']) ??
+        _nestedValue(json, ['reviews', 'data']);
+    if (reviews is List) return reviews.length;
+
+    return 0;
+  }
+
+  static dynamic _firstNonNull(List<dynamic> values) {
+    for (final value in values) {
+      if (value != null) return value;
+    }
+    return null;
+  }
+
+  static dynamic _nestedValue(Map<String, dynamic> json, List<String> keys) {
+    dynamic current = json;
+    for (final key in keys) {
+      if (current is! Map) return null;
+      current = current[key];
+    }
+    return current;
   }
 
   Map<String, dynamic> toJson() {
@@ -138,6 +245,16 @@ class Tradesman {
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
+}
+
+num _numFromAny(dynamic value) {
+  if (value is num) return value;
+  return num.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+int _intFromAny(dynamic value) {
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }
 
 class TypicalRate {
