@@ -1,6 +1,8 @@
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
+import '../screens/terms_and_privacy_screen.dart';
+
 class TermsAndPrivacyController extends GetxController {
   final headerSubtitle =
       'Our commitments to you and how we protect your\ndata'.obs;
@@ -21,7 +23,7 @@ class TermsAndPrivacyController extends GetxController {
       icon: '🔒',
       title: 'Privacy Policy',
       subtitle:
-          'What data we collect, why we\ncollect it, and how we protect it',
+      'What data we collect, why we\ncollect it, and how we protect it',
     ),
   ].obs;
 
@@ -32,16 +34,4 @@ class TermsAndPrivacyController extends GetxController {
     'Aturservicett is a directory -- we don\'t handle payments between users',
     'You can request account deletion at any time',
   ].obs;
-}
-
-class PolicyItem {
-  final String icon;
-  final String title;
-  final String subtitle;
-
-  const PolicyItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
 }

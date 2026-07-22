@@ -5,7 +5,7 @@ import 'package:flutter_wordsaloud/features/client_profile/controller/client_pro
 import 'package:flutter_wordsaloud/features/client_profile/screens/about_aturservice_screen.dart';
 import 'package:flutter_wordsaloud/features/client_profile/screens/edit_profile_screen.dart';
 import 'package:flutter_wordsaloud/features/client_profile/screens/help_and_faq_screen.dart';
-import 'package:flutter_wordsaloud/features/client_profile/screens/privacy_policy_screen.dart';
+import 'package:flutter_wordsaloud/features/client_profile/screens/terms_and_privacy_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -92,8 +92,8 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.article,
                     iconColor: Color(0xFFA87A4C),
                     backgroundColor: Colors.white,
-                    value: 'Privacy Policy',
-                    onTap: () => Get.to(() => const PrivacyPolicyScreen()),
+                    value: 'Terms & Privacy',
+                    onTap: () => Get.to(() => const TermsAndPrivacyScreen()),
                   ),
                   const SizedBox(height: 20),
                   const _SectionLabel('ACCOUNT'),
