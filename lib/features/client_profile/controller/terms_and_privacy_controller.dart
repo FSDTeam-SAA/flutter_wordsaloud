@@ -1,9 +1,7 @@
-import 'package:flutter_wordsaloud/features/client_profile/screens/terms_&_condition_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/client_profile/screens/privacy_and_policy_screen.dart';
+import 'package:flutter_wordsaloud/features/client_profile/screens/terms_and_condition_screen.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-
-import '../screens/terms_and_privacy_screen.dart';
 
 class TermsAndPrivacyController extends GetxController {
   final headerSubtitle =
@@ -19,13 +17,19 @@ class TermsAndPrivacyController extends GetxController {
       icon: '📜',
       title: 'Terms & Conditions',
       subtitle:
-      'How Aturservicett works, and what\nyou agree to when using the app', onPressed: (){Get.to(() => TermsAndPrivacyScreen());},
+          'How Aturservicett works, and what\nyou agree to when using the app',
+      onPressed: () {
+        Get.to(() => const TermsAndConditionScreen());
+      },
     ),
     PolicyItem(
       icon: '🔒',
       title: 'Privacy Policy',
       subtitle:
-      'What data we collect, why we\ncollect it, and how we protect it', onPressed: (){Get.to(() => const TermsAndConditionScreen());},
+          'What data we collect, why we\ncollect it, and how we protect it',
+      onPressed: () {
+        Get.to(() => const PrivacyAndPolicyScreen());
+      },
     ),
   ].obs;
 
@@ -36,4 +40,18 @@ class TermsAndPrivacyController extends GetxController {
     'Aturservicett is a directory -- we don\'t handle payments between users',
     'You can request account deletion at any time',
   ].obs;
+}
+
+class PolicyItem {
+  const PolicyItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onPressed,
+  });
+
+  final String icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onPressed;
 }

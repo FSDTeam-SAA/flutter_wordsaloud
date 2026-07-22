@@ -42,17 +42,17 @@ class PrivacyAndPolicyScreen extends StatelessWidget {
                       _PolicyText(
                         label: 'When you sign up:',
                         text:
-                        'your email address, first name and last name, and optionally your general area.',
+                            'your email address, first name and last name, and optionally your general area.',
                       ),
                       _PolicyText(
                         label: 'If you are a tradesman:',
                         text:
-                        'the trades you offer, your service radius, your rate, a short bio, your phone number used for the WhatsApp button, and any photos you upload.',
+                            'the trades you offer, your service radius, your rate, a short bio, your phone number used for the WhatsApp button, and any photos you upload.',
                       ),
                       _PolicyText(
                         label: 'When you use the app:',
                         text:
-                        'basic technical information about your device, and which screens you visit, used to keep the app working and to improve it.',
+                            'basic technical information about your device, and which screens you visit, used to keep the app working and to improve it.',
                       ),
                       _PolicyText(
                         label: 'When you contact us:',
@@ -89,11 +89,11 @@ class PrivacyAndPolicyScreen extends StatelessWidget {
                     paragraphs: [
                       _PolicyText(
                         text:
-                        'We use standard security measures including encrypted connections, encrypted storage, and access controls that limit who on our team can see your data. Since we use passwordless login with email verification code only, there is no user password to be stolen or leaked.',
+                            'We use standard security measures including encrypted connections, encrypted storage, and access controls that limit who on our team can see your data. Since we use passwordless login with email verification code only, there is no user password to be stolen or leaked.',
                       ),
                       _PolicyText(
                         text:
-                        'No system is 100% secure. If we ever have a data breach affecting you, we will notify you and the relevant authorities as required by law.',
+                            'No system is 100% secure. If we ever have a data breach affecting you, we will notify you and the relevant authorities as required by law.',
                       ),
                     ],
                   ),
@@ -109,7 +109,7 @@ class PrivacyAndPolicyScreen extends StatelessWidget {
                   _PolicySection(
                     title: '7. Your Rights',
                     intro:
-                    'Under the Trinidad & Tobago Data Protection Act 2011, and consistent with international standards, you have the right to:',
+                        'Under the Trinidad & Tobago Data Protection Act 2011, and consistent with international standards, you have the right to:',
                     bullets: [
                       'Ask what personal information we hold about you.',
                       'Ask us to correct information that is wrong or incomplete.',
@@ -118,14 +118,14 @@ class PrivacyAndPolicyScreen extends StatelessWidget {
                       'Complain to the Office of the Information Commissioner of Trinidad & Tobago if you believe we mishandled your information.',
                     ],
                     footer:
-                    'To exercise any of these rights, email us at $_supportEmail. We will respond within 30 days.',
+                        'To exercise any of these rights, email us at $_supportEmail. We will respond within 30 days.',
                   ),
                   _PolicySection(
                     title: '8. Children',
                     paragraphs: [
                       _PolicyText(
                         text:
-                        "Clients must be at least 13 years old. If you're under 18, we assume you have your parent's or guardian's permission.",
+                            "Clients must be at least 13 years old. If you're under 18, we assume you have your parent's or guardian's permission.",
                       ),
                       _PolicyText(
                         label: 'Tradesmen',
@@ -133,7 +133,7 @@ class PrivacyAndPolicyScreen extends StatelessWidget {
                       ),
                       _PolicyText(
                         text:
-                        "If you're a parent and believe your child gave us information without your permission, email $_supportEmail and we'll delete it.",
+                            "If you're a parent and believe your child gave us information without your permission, email $_supportEmail and we'll delete it.",
                       ),
                     ],
                   ),
@@ -142,7 +142,7 @@ class PrivacyAndPolicyScreen extends StatelessWidget {
                     paragraphs: [
                       _PolicyText(
                         text:
-                        'The services we rely on are based outside Trinidad & Tobago and may store your information in the United States, the European Union, or elsewhere. By using Aturservicett, you agree to this transfer. We require our providers to maintain security and privacy protections consistent with the T&T Data Protection Act 2011.',
+                            'The services we rely on are based outside Trinidad & Tobago and may store your information in the United States, the European Union, or elsewhere. By using Aturservicett, you agree to this transfer. We require our providers to maintain security and privacy protections consistent with the T&T Data Protection Act 2011.',
                       ),
                     ],
                   ),
@@ -155,7 +155,7 @@ class PrivacyAndPolicyScreen extends StatelessWidget {
                       ),
                       _PolicyText(
                         text:
-                        'You can also lodge a complaint with the Office of the Information Commissioner of Trinidad & Tobago if you believe we have mishandled your information.',
+                            'You can also lodge a complaint with the Office of the Information Commissioner of Trinidad & Tobago if you believe we have mishandled your information.',
                       ),
                     ],
                   ),
@@ -233,7 +233,7 @@ class _PolicySection extends StatelessWidget {
             if (paragraphs.isNotEmpty) ...[
               const SizedBox(height: 9),
               ...paragraphs.map(
-                    (paragraph) => Padding(
+                (paragraph) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: paragraph,
                 ),
@@ -294,16 +294,16 @@ class _ServiceTable extends StatelessWidget {
     ('Resend', 'Sends email verification codes and essential account emails.'),
     ('Supabase', 'Stores account, profile, and review data securely.'),
     (
-    'WhatsApp (Meta)',
-    'Handles all client-to-tradesman conversations after the hand-off. WhatsApp\'s own policy applies to those messages.',
+      'WhatsApp (Meta)',
+      'Handles all client-to-tradesman conversations after the hand-off. WhatsApp\'s own policy applies to those messages.',
     ),
     (
-    'Google AdSense',
-    'Shows advertisements in limited parts of the app. Google\'s own policy applies.',
+      'Google AdSense',
+      'Shows advertisements in limited parts of the app. Google\'s own policy applies.',
     ),
     (
-    'Apple / Google',
-    'Distribute the app through their app stores under their own policies.',
+      'Apple / Google',
+      'Distribute the app through their app stores under their own policies.',
     ),
   ];
 
@@ -438,24 +438,24 @@ class _BulletList extends StatelessWidget {
       children: bullets
           .map(
             (bullet) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '-',
-                style: GoogleFonts.outfit(
-                  color: PrivacyAndPolicyScreen._headerColor,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w900,
-                ),
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '-',
+                    style: GoogleFonts.outfit(
+                      color: PrivacyAndPolicyScreen._headerColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: _BodyText(bullet)),
+                ],
               ),
-              const SizedBox(width: 8),
-              Expanded(child: _BodyText(bullet)),
-            ],
-          ),
-        ),
-      )
+            ),
+          )
           .toList(),
     );
   }

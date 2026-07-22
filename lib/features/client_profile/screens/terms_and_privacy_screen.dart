@@ -5,7 +5,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../controller/terms_and _privacy_controller.dart';
+import '../controller/terms_and_privacy_controller.dart';
 
 class TermsAndPrivacyScreen extends StatelessWidget {
   const TermsAndPrivacyScreen({super.key});
@@ -24,7 +24,13 @@ class TermsAndPrivacyScreen extends StatelessWidget {
       backgroundColor: _backgroundColor,
       body: Column(
         children: [
-          Hearder(headerColor: _headerColor, goldColor: _goldColor, text1: 'Terms & ', text2: 'Privacy', suvbtitle: 'Our commitments to you and how we protect your data'),
+          Hearder(
+            headerColor: _headerColor,
+            goldColor: _goldColor,
+            text1: 'Terms & ',
+            text2: 'Privacy',
+            suvbtitle: 'Our commitments to you and how we protect your data',
+          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(18),
@@ -32,20 +38,20 @@ class TermsAndPrivacyScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Obx(
-                        () => Column(
+                    () => Column(
                       children: controller.policyItems
                           .map(
                             (item) => Padding(
-                          padding: const EdgeInsets.only(bottom: 9),
-                          child: _PolicyMenuItem(item: item),
-                        ),
-                      )
+                              padding: const EdgeInsets.only(bottom: 9),
+                              child: _PolicyMenuItem(item: item),
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Obx(
-                        () => _MattersCard(
+                    () => _MattersCard(
                       title: controller.mattersTitle.value,
                       points: controller.mattersMost,
                     ),
@@ -54,7 +60,7 @@ class TermsAndPrivacyScreen extends StatelessWidget {
                   const _SectionLabel('QUESTIONS?'),
                   const SizedBox(height: 14),
                   Obx(
-                        () => _QuestionsCard(
+                    () => _QuestionsCard(
                       title: controller.questionsTitle.value,
                       subtitle: controller.questionsSubtitle.value,
                       email: controller.supportEmail.value,
@@ -69,21 +75,6 @@ class TermsAndPrivacyScreen extends StatelessWidget {
     );
   }
 }
-
-
-class PolicyItem {
-  const PolicyItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onPressed
-  });
-  final String icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onPressed;
-}
-
 
 class _PolicyMenuItem extends StatelessWidget {
   const _PolicyMenuItem({required this.item});
@@ -104,7 +95,6 @@ class _PolicyMenuItem extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: TermsAndPrivacyScreen._borderColor),
-
           ),
           child: Row(
             children: [
@@ -153,7 +143,8 @@ class _PolicyMenuItem extends StatelessWidget {
             ],
           ),
         ),
-      ),);
+      ),
+    );
   }
 }
 
@@ -186,7 +177,7 @@ class _MattersCard extends StatelessWidget {
           ),
           const SizedBox(height: 9),
           ...points.map(
-                (point) => Padding(
+            (point) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,7 +210,6 @@ class _MattersCard extends StatelessWidget {
     );
   }
 }
-
 
 class _SectionLabel extends StatelessWidget {
   const _SectionLabel(this.text);
