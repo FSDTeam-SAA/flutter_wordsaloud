@@ -1,3 +1,5 @@
+import 'package:flutter_wordsaloud/features/client_profile/screens/terms_&_condition_screen.dart';
+import 'package:get/get.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
@@ -13,17 +15,17 @@ class TermsAndPrivacyController extends GetxController {
   final supportEmail = 'support@aturservicett.com'.obs;
 
   final policyItems = <PolicyItem>[
-    const PolicyItem(
+    PolicyItem(
       icon: '📜',
       title: 'Terms & Conditions',
       subtitle:
-          'How Aturservicett works, and what\nyou agree to when using the app',
+      'How Aturservicett works, and what\nyou agree to when using the app', onPressed: (){Get.to(() => TermsAndPrivacyScreen());},
     ),
-    const PolicyItem(
+    PolicyItem(
       icon: '🔒',
       title: 'Privacy Policy',
       subtitle:
-      'What data we collect, why we\ncollect it, and how we protect it',
+      'What data we collect, why we\ncollect it, and how we protect it', onPressed: (){Get.to(() => const TermsAndConditionScreen());},
     ),
   ].obs;
 

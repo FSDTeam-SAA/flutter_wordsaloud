@@ -72,193 +72,152 @@ class TermsAndPrivacyScreen extends StatelessWidget {
 
 
 class PolicyItem {
-const PolicyItem({
-required this.icon,
-required this.title,
-required this.subtitle,
-});
-final String icon;
-final String title;
-final String subtitle;
+  const PolicyItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onPressed
+  });
+  final String icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onPressed;
 }
 
-class _HeaderPillButton extends StatelessWidget {
-const _HeaderPillButton({
-required this.label,
-required this.onTap,
-this.icon,
-});
-
-final String label;
-final IconData? icon;
-final VoidCallback onTap;
-@override
-Widget build(BuildContext context) {
-return Material(
-color: Colors.white.withValues(alpha: .18),
-borderRadius: BorderRadius.circular(16),
-child: InkWell(
-onTap: onTap,
-borderRadius: BorderRadius.circular(16),
-child: Padding(
-padding: EdgeInsets.fromLTRB(icon == null ? 12 : 8, 6, 12, 6),
-child: Row(
-mainAxisSize: MainAxisSize.min,
-children: [
-if (icon != null) ...[
-Icon(icon, size: 13, color: Colors.white),
-const SizedBox(width: 3),
-],
-Text(
-label,
-style: GoogleFonts.outfit(
-color: Colors.white,
-fontSize: 11,
-fontWeight: FontWeight.w800,
-height: 1,
-),
-),
-],
-),
-),
-),
-);
-}
-}
 
 class _PolicyMenuItem extends StatelessWidget {
-const _PolicyMenuItem({required this.item});
+  const _PolicyMenuItem({required this.item});
 
-final PolicyItem item;
+  final PolicyItem item;
 
-@override
-Widget build(BuildContext context) {
-return Material(
-color: Colors.white,
-borderRadius: BorderRadius.circular(8),
-child: InkWell(
-onTap: () {},
-borderRadius: BorderRadius.circular(8),
-child: Container(
-width: double.infinity,
-padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
-decoration: BoxDecoration(
-borderRadius: BorderRadius.circular(8),
-border: Border.all(color: TermsAndPrivacyScreen._borderColor),
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: item.onPressed,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: TermsAndPrivacyScreen._borderColor),
 
-),
-child: Row(
-children: [
-Container(
-width: 40,
-height: 40,
-alignment: Alignment.center,
-decoration: BoxDecoration(
-color: const Color(0xFFF4E8E3),
-borderRadius: BorderRadius.circular(8),
-),
-child: Text(item.icon, style: const TextStyle(fontSize: 22)),
-),
-const SizedBox(width: 12),
-Expanded(
-child: Column(
-crossAxisAlignment: CrossAxisAlignment.start,
-children: [
-Text(
-item.title,
-style: GoogleFonts.outfit(
-color: TermsAndPrivacyScreen._darkText,
-fontSize: 15,
-fontWeight: FontWeight.w600,
-height: 1,
-),
-),
-const SizedBox(height: 6),
-Text(
-item.subtitle,
-style: TextStyle(
-color: TermsAndPrivacyScreen._mutedText,
-fontSize: 11,
-fontWeight: FontWeight.w500,
-),
-),
-],
-),
-),
-const SizedBox(width: 10),
-const Icon(
-Icons.chevron_right,
-size: 16,
-color: Color(0xFFB9A693),
-),
-],
-),
-),
-),);
-}
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4E8E3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(item.icon, style: const TextStyle(fontSize: 22)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: GoogleFonts.outfit(
+                        color: TermsAndPrivacyScreen._darkText,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.subtitle,
+                      style: TextStyle(
+                        color: TermsAndPrivacyScreen._mutedText,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Icon(
+                Icons.chevron_right,
+                size: 16,
+                color: Color(0xFFB9A693),
+              ),
+            ],
+          ),
+        ),
+      ),);
+  }
 }
 
 class _MattersCard extends StatelessWidget {
-const _MattersCard({required this.title, required this.points});
+  const _MattersCard({required this.title, required this.points});
 
-final String title;
-final List<String> points;
+  final String title;
+  final List<String> points;
 
-@override
-Widget build(BuildContext context) {
-return Container(
-width: double.infinity,
-padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
-decoration: BoxDecoration(
-color: Colors.white,
-borderRadius: BorderRadius.circular(8),
-border: Border.all(color: TermsAndPrivacyScreen._borderColor),
-),
-child: Column(
-crossAxisAlignment: CrossAxisAlignment.start,
-children: [
-Text(
-title,
-style: GoogleFonts.outfit(
-color: TermsAndPrivacyScreen._headerColor,
-fontSize: 13,
-fontWeight: FontWeight.w900,
-),
-),
-const SizedBox(height: 9),
-...points.map(
-(point) => Padding(
-padding: const EdgeInsets.only(bottom: 10),
-  child: Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        '✓',
-        style: TextStyle(
-          color: TermsAndPrivacyScreen._headerColor,
-          fontSize: 12,
-          fontWeight: FontWeight.w900,
-        ),
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: TermsAndPrivacyScreen._borderColor),
       ),
-      const SizedBox(width: 8),
-      Expanded(
-        child: Text(
-          point,
-          style: TextStyle(
-            color: TermsAndPrivacyScreen._darkText,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.outfit(
+              color: TermsAndPrivacyScreen._headerColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+            ),
           ),
-        ),
+          const SizedBox(height: 9),
+          ...points.map(
+                (point) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '✓',
+                    style: TextStyle(
+                      color: TermsAndPrivacyScreen._headerColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      point,
+                      style: TextStyle(
+                        color: TermsAndPrivacyScreen._darkText,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
-    ],
-  ),
-),
-),
-],
-),
-);
-}
+    );
+  }
 }
 
 
