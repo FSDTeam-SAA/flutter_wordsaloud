@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PostReviewScreen extends StatelessWidget {
   const PostReviewScreen({
     super.key,
+    this.tradesmanId = '',
     this.tradesmanName = 'Devon Ramcharan',
     this.trade = 'Plumber',
     this.lastContacted = 'Tue',
     this.avatarLetters = 'DR',
   });
 
+  final String tradesmanId;
   final String tradesmanName;
   final String trade;
   final String lastContacted;
@@ -26,7 +29,10 @@ class PostReviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(PostReviewController());
+    final controller = Get.put(
+      PostReviewController(tradesmanId: tradesmanId),
+      tag: tradesmanId,
+    );
     final firstName = tradesmanName.split(' ').first;
 
     return Scaffold(
@@ -196,22 +202,35 @@ class PostReviewScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   height: 40,
-                  child: ElevatedButton(
-                    onPressed: controller.postReview,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _accentColor,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(9),
+                  child: Obx(
+                    () => ElevatedButton(
+                      onPressed: controller.isPosting.value
+                          ? null
+                          : controller.postReview,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _accentColor,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(9),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      'Post review',
-                      style: GoogleFonts.outfit(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      child: controller.isPosting.value
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              'Post review',
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -232,9 +251,15 @@ class PostReviewScreen extends StatelessWidget {
 }
 
 class PostReviewController extends GetxController {
+  PostReviewController({required this.tradesmanId});
+
+  final String tradesmanId;
   final formKey = GlobalKey<FormState>();
   final rating = 5.obs;
+  final isPosting = false.obs;
   final commentController = TextEditingController();
+  late final TradesmanController _tradesmanController =
+      Get.find<TradesmanController>();
 
   String get ratingLabel {
     switch (rating.value) {
@@ -251,15 +276,33 @@ class PostReviewController extends GetxController {
     }
   }
 
-  void postReview() {
+  Future<void> postReview() async {
     if (!formKey.currentState!.validate()) return;
+    if (tradesmanId.trim().isEmpty) {
+      Get.snackbar('Review not posted', 'Tradesman profile not found.');
+      return;
+    }
 
-    Get.back(
-      result: {
-        'rating': rating.value,
-        'comment': commentController.text.trim(),
-      },
+    isPosting.value = true;
+    final success = await _tradesmanController.addReview(
+      tradesmanId: tradesmanId,
+      rating: rating.value,
+      ratingLabel: ratingLabel,
+      reviewText: commentController.text.trim(),
     );
+    isPosting.value = false;
+
+    if (!success) {
+      final message = _tradesmanController.errorMessage.value.trim();
+      Get.snackbar(
+        'Review not posted',
+        message.isNotEmpty ? message : 'Please try again.',
+      );
+      return;
+    }
+
+    await _tradesmanController.getSingleTradesman(tradesmanId);
+    Get.back(result: {'posted': true});
   }
 
   void skipReview() {

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/client_profile/controller/client_profile_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,7 +10,7 @@ class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({
     super.key,
     this.initialName = 'Keisha P.',
-    this.initialPhone = '+1 868 754-2288',
+    this.initialPhone = '+1 (868) 754-2288',
     this.initialArea = 'Chaguanas',
     this.initialImagePath,
   });
@@ -61,9 +62,13 @@ class EditProfileScreen extends StatelessWidget {
                       icon: Icons.arrow_back,
                       onTap: () => Get.back(),
                     ),
-                    _HeaderPillButton(
-                      label: 'Save',
-                      onTap: controller.saveProfile,
+                    Obx(
+                      () => _HeaderPillButton(
+                        label: controller.isSaving.value ? 'Saving' : 'Save',
+                        onTap: controller.isSaving.value
+                            ? () {}
+                            : controller.saveProfile,
+                      ),
                     ),
                   ],
                 ),
@@ -175,22 +180,35 @@ class EditProfileScreen extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       height: 54,
-                      child: ElevatedButton(
-                        onPressed: controller.saveProfile,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _headerColor,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                      child: Obx(
+                        () => ElevatedButton(
+                          onPressed: controller.isSaving.value
+                              ? null
+                              : controller.saveProfile,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _headerColor,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'Save changes',
-                          style: GoogleFonts.outfit(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          child: controller.isSaving.value
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  'Save changes',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
@@ -220,6 +238,9 @@ class ClientEditProfileController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final _imagePicker = ImagePicker();
   final RxnString profileImagePath;
+  final isSaving = false.obs;
+  late final ClientProfileController _profileController =
+      Get.find<ClientProfileController>();
 
   late final TextEditingController nameController;
   late final TextEditingController phoneController;
@@ -237,8 +258,26 @@ class ClientEditProfileController extends GetxController {
     profileImagePath.value = image.path;
   }
 
-  void saveProfile() {
+  Future<void> saveProfile() async {
     if (!formKey.currentState!.validate()) return;
+
+    isSaving.value = true;
+    final success = await _profileController.updateClientProfile(
+      name: nameController.text.trim(),
+      phone: phoneController.text.trim(),
+      area: areaController.text.trim(),
+      profileImagePath: profileImagePath.value,
+    );
+    isSaving.value = false;
+
+    if (!success) {
+      final message = _profileController.errorMessage.value.trim();
+      Get.snackbar(
+        'Profile not updated',
+        message.isNotEmpty ? message : 'Please try again.',
+      );
+      return;
+    }
 
     Get.back<Map<String, String?>>(
       result: {
@@ -409,7 +448,7 @@ class _EditProfileField extends StatelessWidget {
           letterSpacing: 1,
         ),
         hintStyle: GoogleFonts.outfit(
-          color: EditProfileScreen._mutedText.withValues(alpha: .65),
+          color: Colors.grey,
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),

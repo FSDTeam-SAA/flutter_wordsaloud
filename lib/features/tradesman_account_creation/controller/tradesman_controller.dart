@@ -7,10 +7,12 @@ import 'package:flutter_wordsaloud/core/base/base_controller.dart';
 import 'package:flutter_wordsaloud/core/services/auth_storage_service.dart';
 import 'package:flutter_wordsaloud/core/services/session_service.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/add_review_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/tradesman_area_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/tradesman_skill_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/dashboard_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_client_profile_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_specific_tradesman_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/repositories/tradesman_repo.dart';
@@ -27,6 +29,8 @@ class TradesmanController extends BaseController {
   final MultiFormDataManager _multiFormDataManager = MultiFormDataManager();
   final Rxn<TradesmanDashboardResponse> dashboardData =
       Rxn<TradesmanDashboardResponse>();
+  final Rxn<GetClientProfileResponseModel> getProfile =
+      Rxn<GetClientProfileResponseModel>();
   final Rxn<GetSpecificTradesmanResponseModel> getSpecificTradesman =
       Rxn<GetSpecificTradesmanResponseModel>();
   final RxList<SkillModel> skillList = <SkillModel>[].obs;
@@ -88,6 +92,43 @@ class TradesmanController extends BaseController {
     );
   }
 
+  Future<bool> addReview({
+    required String tradesmanId,
+    required int rating,
+    required String ratingLabel,
+    required String reviewText,
+  }) async {
+    clearError();
+    if (tradesmanId.trim().isEmpty) {
+      setError('Tradesman profile not found. Please try again.');
+      return false;
+    }
+
+    setLoading(true);
+
+    final request = AddReviewRequestModel(
+      rating: rating,
+      ratingLabel: ratingLabel,
+      reviewText: reviewText,
+    );
+
+    final result = await _tradesmanRepo.addReview(request, tradesmanId);
+
+    return result.fold(
+      (fail) {
+        setError(fail.message);
+        d_print.log("Add review failed: ${fail.message}");
+        setLoading(false);
+        return false;
+      },
+      (success) {
+        d_print.log("Add review success: ${success.data}");
+        setLoading(false);
+        return true;
+      },
+    );
+  }
+
   Future<bool> createTradesmanStep3(
     String pitch,
     String amount,
@@ -127,6 +168,49 @@ class TradesmanController extends BaseController {
     } catch (e) {
       setError('Something went wrong. Please try again.');
       d_print.log('Create tradesman step 3 error: $e');
+      return false;
+    } finally {
+      _multiFormDataManager.clear();
+      setLoading(false);
+    }
+  }
+
+  Future<bool> updateClientProfile(
+    String name,
+    String phoneNumber,
+    String area,
+    File? image,
+  ) async {
+    clearError();
+    setLoading(true);
+    _multiFormDataManager.clear();
+
+    try {
+      _multiFormDataManager.addTextData("name", name);
+      _multiFormDataManager.addTextData("phoneNumber", phoneNumber);
+      _multiFormDataManager.addTextData("area", area);
+
+      if (image != null) {
+        _multiFormDataManager.addFile(image, key: "profileImage");
+      }
+
+      final formRequest = await _multiFormDataManager.toFormDataAsync();
+      final result = await _tradesmanRepo.updateClientProfile(formRequest);
+
+      return result.fold(
+        (fail) {
+          setError(fail.message);
+          d_print.log('Update client profile failed: ${fail.message}');
+          return false;
+        },
+        (success) {
+          d_print.log('Update client profile success: ${success.message}');
+          return true;
+        },
+      );
+    } catch (e) {
+      setError('Something went wrong. Please try again.');
+      d_print.log('Update client profile error: $e');
       return false;
     } finally {
       _multiFormDataManager.clear();
@@ -182,6 +266,27 @@ class TradesmanController extends BaseController {
       (success) {
         dashboardData.value = success.data;
         d_print.log("Fetch dashboard success: ${success.data}");
+        setLoading(false);
+        return success.data;
+      },
+    );
+  }
+
+  Future<GetClientProfileResponseModel?> fetchClientProfile() async {
+    clearError();
+    setLoading(true);
+    final result = await _tradesmanRepo.getClientProfile();
+
+    return result.fold(
+      (fail) {
+        setError(fail.message);
+        d_print.log("Fetch client profile failed: ${fail.message}");
+        setLoading(false);
+        return null;
+      },
+      (success) {
+        getProfile.value = success.data;
+        d_print.log("Fetch client profile success: ${success.data}");
         setLoading(false);
         return success.data;
       },

@@ -5,7 +5,7 @@ import 'package:flutter_wordsaloud/features/client_profile/controller/client_pro
 import 'package:flutter_wordsaloud/features/client_profile/screens/about_aturservice_screen.dart';
 import 'package:flutter_wordsaloud/features/client_profile/screens/edit_profile_screen.dart';
 import 'package:flutter_wordsaloud/features/client_profile/screens/help_and_faq_screen.dart';
-import 'package:flutter_wordsaloud/features/client_profile/screens/terms_and_privacy_screen.dart';
+import 'package:flutter_wordsaloud/features/client_profile/screens/privacy_policy_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -92,8 +92,8 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.article,
                     iconColor: Color(0xFFA87A4C),
                     backgroundColor: Colors.white,
-                    value: 'Terms & Privacy',
-                    onTap: () => Get.to(() => const TermsAndPrivacyScreen()),
+                    value: 'Privacy Policy',
+                    onTap: () => Get.to(() => const PrivacyPolicyScreen()),
                   ),
                   const SizedBox(height: 20),
                   const _SectionLabel('ACCOUNT'),
@@ -176,6 +176,7 @@ class _ProfileHeader extends StatelessWidget {
               child: ClipOval(
                 child: _ProfileAvatar(
                   imagePath: controller.profileImagePath.value,
+                  imageUrl: controller.profileImageUrl.value,
                   initial: controller.initial,
                 ),
               ),
@@ -205,12 +206,16 @@ class _ProfileHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 5),
-          Text(
-            'MEMBER SINCE NOV 2026',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+          Obx(
+            () => Text(
+              controller.memberSince.value.isNotEmpty
+                  ? controller.memberSince.value
+                  : 'MEMBER SINCE',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -220,9 +225,14 @@ class _ProfileHeader extends StatelessWidget {
 }
 
 class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar({required this.imagePath, required this.initial});
+  const _ProfileAvatar({
+    required this.imagePath,
+    required this.imageUrl,
+    required this.initial,
+  });
 
   final String? imagePath;
+  final String? imageUrl;
   final String initial;
 
   @override
@@ -236,6 +246,29 @@ class _ProfileAvatar extends StatelessWidget {
       );
     }
 
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return Image.network(
+        imageUrl!,
+        width: 60,
+        height: 60,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _InitialAvatar(initial: initial);
+        },
+      );
+    }
+
+    return _InitialAvatar(initial: initial);
+  }
+}
+
+class _InitialAvatar extends StatelessWidget {
+  const _InitialAvatar({required this.initial});
+
+  final String initial;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: 60,
       height: 60,

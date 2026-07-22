@@ -272,13 +272,50 @@ class ProfileImage {
 }
 
 class Review {
-  Review();
+  final String id;
+  final String reviewerName;
+  final int rating;
+  final String comment;
+  final String createdAt;
+
+  Review({
+    required this.id,
+    required this.reviewerName,
+    required this.rating,
+    required this.comment,
+    required this.createdAt,
+  });
 
   factory Review.fromJson(Map<String, dynamic> json) {
-    return Review();
+    final reviewer = json['reviewer'] ?? json['user'] ?? json['client'];
+    final reviewerMap = reviewer is Map
+        ? Map<String, dynamic>.from(reviewer)
+        : null;
+    final firstName = reviewerMap?['firstName']?.toString().trim() ?? '';
+    final lastName = reviewerMap?['lastName']?.toString().trim() ?? '';
+    final name = reviewerMap?['name']?.toString().trim();
+    final reviewerName = name != null && name.isNotEmpty
+        ? name
+        : [firstName, lastName].where((part) => part.isNotEmpty).join(' ');
+
+    return Review(
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      reviewerName: reviewerName.isNotEmpty
+          ? reviewerName
+          : json['reviewerName']?.toString() ?? 'Anonymous',
+      rating: (json['rating'] as num?)?.toInt() ?? 0,
+      comment: json['comment']?.toString() ?? json['review']?.toString() ?? '',
+      createdAt: json['createdAt']?.toString() ?? '',
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return {};
+    return {
+      '_id': id,
+      'reviewerName': reviewerName,
+      'rating': rating,
+      'comment': comment,
+      'createdAt': createdAt,
+    };
   }
 }

@@ -5,15 +5,19 @@ import 'package:flutter_wordsaloud/features/tradesman_account_creation/repositor
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_result.dart';
 import '../../../core/network/constants/api_constants.dart';
+import '../model/request/add_review_request_model.dart';
 import '../model/request/tradesman_area_request_model.dart';
 import '../model/request/tradesman_skill_request_model.dart';
+import '../model/response/add_review_response_model.dart';
 import '../model/response/dashboard_response_model.dart';
 import '../model/response/get_all_tradesman_response_model.dart';
+import '../model/response/get_client_profile_response_model.dart';
 import '../model/response/get_skill_listed_count_response_model.dart';
 import '../model/response/get_specific_tradesman_response_model.dart';
 import '../model/response/go_live_response_model.dart';
 import '../model/response/tradesman_area_response_model.dart';
 import '../model/response/tradesman_skill_response_model.dart';
+import '../model/response/update_profile_response_model.dart';
 
 class TradesmanRepositoryImpl implements TradesmanRepo {
   final ApiClient _apiClient;
@@ -53,6 +57,18 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
   }
 
   @override
+  NetworkResult<AddReviewResponseModel> addReview(
+    AddReviewRequestModel request,
+    String tradesmanId,
+  ) {
+    return _apiClient.post(
+      endpoint: ApiConstants.user.review(tradesmanId),
+      data: request.toJson(),
+      fromJsonT: (json) => AddReviewResponseModel.fromJson(json),
+    );
+  }
+
+  @override
   NetworkResult<GoLiveResponseModel> goLive() {
     return _apiClient.post(
       endpoint: ApiConstants.tradesman.goLive,
@@ -80,12 +96,33 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
   }
 
   @override
+  NetworkResult<GetClientProfileResponseModel> getClientProfile() {
+    return _apiClient.get(
+      endpoint: ApiConstants.user.getProfile,
+      fromJsonT: (json) =>
+          GetClientProfileResponseModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
   NetworkResult<GetSpecificTradesmanResponseModel> getSpecifiedTradesman(
     String tradesmanId,
   ) {
     return _apiClient.get(
       endpoint: ApiConstants.user.tradesmanDetails(tradesmanId),
       fromJsonT: GetSpecificTradesmanResponseModel.fromData,
+    );
+  }
+
+  @override
+  NetworkResult<UpdateProfileResponseModel> updateClientProfile(
+    FormData formData,
+  ) {
+    return _apiClient.put(
+      endpoint: ApiConstants.user.updateProfile,
+      formData: formData,
+      fromJsonT: (json) =>
+          UpdateProfileResponseModel.fromJson(json as Map<String, dynamic>),
     );
   }
 

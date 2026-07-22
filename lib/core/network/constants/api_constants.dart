@@ -57,7 +57,7 @@ class AuthEndpoints {
   final String register = '$_base/register';
   final String updatePassword = '$_base/change-password';
 
-  final String refreshToken = '$_base/refresh';
+  final String refreshToken = '$_base/refresh-token';
 }
 
 class ProfileEndpoints {
@@ -101,12 +101,15 @@ class TradesmanEndpoints {
   final String goLive = '${ApiConstants.baseUrl}/tradesman/onboarding/go-live';
   final String dashboard = '${ApiConstants.baseUrl}/tradesman/me/dashboard';
   final String updateProfile = '${ApiConstants.baseUrl}/tradesman/me/profile';
-  // String fetchCategory(String userId) =>;
 }
 
 class UserEndpoints {
   final String home = '${ApiConstants.baseUrl}/tradesman/categories';
+  final String getProfile = '${ApiConstants.baseUrl}/user/me';
+  final String updateProfile = '${ApiConstants.baseUrl}/user/me';
   String tradesmanDetails(String id) => '${ApiConstants.baseUrl}/tradesman/$id';
+  String review(String tradesmanId) =>
+      '${ApiConstants.baseUrl}/review/$tradesmanId';
 
   String categoryDetails({
     String skill = '',

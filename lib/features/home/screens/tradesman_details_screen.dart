@@ -143,8 +143,8 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final fetchedProfile =
-          _tradesmanController.getSpecificTradesman.value?.profile;
+      final fetchedTradesman = _tradesmanController.getSpecificTradesman.value;
+      final fetchedProfile = fetchedTradesman?.profile;
       final profile =
           widget.tradesmanId != null && fetchedProfile?.id == widget.tradesmanId
           ? fetchedProfile
@@ -175,6 +175,16 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
           profile != null && profile.typicalRate.unit.trim().isNotEmpty
           ? _rateUnitLabel(profile.typicalRate.unit)
           : widget.rateUnit;
+      final effectiveTradesmanId = profile?.id ?? widget.tradesmanId ?? '';
+      final recentWorkPhotoUrls =
+          profile?.workPhotos
+              .map(_workPhotoUrl)
+              .where((url) => url.isNotEmpty)
+              .toList() ??
+          const <String>[];
+      final reviews = profile != null
+          ? fetchedTradesman?.reviews ?? const <specific_model.Review>[]
+          : const <specific_model.Review>[];
 
       // Use pitch if provided, otherwise fall back to a generated description
       final String formattedCategory = displayCategory.endsWith('s')
@@ -551,20 +561,24 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                     ),
                     const SizedBox(height: 8),
                     // Horizontal Recent Work Boxes
-                    SizedBox(
-                      height: 106.08,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        children: [
-                          _buildRecentWorkPhoto(),
-                          const SizedBox(width: 12),
-                          _buildRecentWorkPhoto(),
-                          const SizedBox(width: 12),
-                          _buildRecentWorkPhoto(),
-                        ],
+                    if (recentWorkPhotoUrls.isEmpty)
+                      _buildEmptyInfoCard('No recent work photos available.')
+                    else
+                      SizedBox(
+                        height: 106.08,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: recentWorkPhotoUrls.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            return _buildRecentWorkPhoto(
+                              recentWorkPhotoUrls[index],
+                            );
+                          },
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 16),
 
                     // Reviews Title
@@ -581,65 +595,29 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                         Spacer(),
                         TextButton(
                           onPressed: () {
-                            Get.to(() => PostReviewScreen());
+                            Get.to(
+                              () => PostReviewScreen(
+                                tradesmanId: effectiveTradesmanId,
+                                tradesmanName: displayName,
+                                trade: displayCategory,
+                                avatarLetters: displayAvatarLetter,
+                              ),
+                            );
                           },
                           child: Text('Add Review'),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    // Card representing review
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFFF3E5CF),
-                          width: 2,
+                    if (reviews.isEmpty)
+                      _buildEmptyInfoCard('No review available')
+                    else
+                      ...reviews.map(
+                        (review) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _buildReviewCard(review),
                         ),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Rishi L.',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF1E1E1E),
-                                ),
-                              ),
-                              Row(
-                                children: List.generate(
-                                  5,
-                                  (index) => const Icon(
-                                    Icons.star,
-                                    color: Color(0xFFEAAE4B),
-                                    size: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Came same day, fix the leak in 20mins.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF6C6C6C),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -650,13 +628,133 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
     });
   }
 
-  Widget _buildRecentWorkPhoto() {
+  String _workPhotoUrl(dynamic photo) {
+    if (photo == null) return '';
+    if (photo is String) return photo.trim();
+    if (photo is Map) {
+      final json = Map<String, dynamic>.from(photo);
+      return (json['url'] ??
+              json['secure_url'] ??
+              json['imageUrl'] ??
+              json['path'] ??
+              '')
+          .toString()
+          .trim();
+    }
+    return '';
+  }
+
+  int _clampedStars(int stars) => stars.clamp(0, 5).toInt();
+
+  Widget _buildRecentWorkPhoto(String imageUrl) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.network(
+        imageUrl,
+        width: 110,
+        height: 110,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: 110,
+            height: 110,
+            color: const Color(0xFFDDD5C8),
+            child: const Icon(Icons.broken_image, color: Color(0xFF8D7766)),
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            width: 110,
+            height: 110,
+            color: const Color(0xFFDDD5C8),
+            child: const Center(
+              child: SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmptyInfoCard(String text) {
     return Container(
-      width: 110,
-      height: 110,
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFDDD5C8),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF3E5CF), width: 2),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF6C6C6C),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReviewCard(specific_model.Review review) {
+    final comment = review.comment.trim().isNotEmpty
+        ? review.comment.trim()
+        : 'No comment provided.';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF3E5CF), width: 2),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  review.reviewerName,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E1E1E),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Row(
+                children: List.generate(
+                  5,
+                  (index) => Icon(
+                    index < _clampedStars(review.rating)
+                        ? Icons.star
+                        : Icons.star_border,
+                    color: const Color(0xFFEAAE4B),
+                    size: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            comment,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF6C6C6C),
+            ),
+          ),
+        ],
       ),
     );
   }
