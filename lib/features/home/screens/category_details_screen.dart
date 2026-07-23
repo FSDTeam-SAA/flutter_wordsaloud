@@ -151,20 +151,26 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 18,
-                        top: 20,
-                        right: 18,
-                      ),
-                      child: Text(
-                        '${tradesmen.length} ${widget.category.name.toLowerCase()} Near You',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1F1F1F),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 18,
+                            top: 20,
+                            right: 18,
+                          ),
+                          child: Text(
+                            '${tradesmen.length} ${widget.category.name.toLowerCase()} Near You',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1F1F1F),
+                            ),
+                          ),
                         ),
-                      ),
+
+                        DropdownMenuItem(child: )
+                      ],
                     ),
                     const SizedBox(height: 16),
                     const Divider(
@@ -423,7 +429,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
         ? tradesman.ratingAverage.toInt().toString()
         : tradesman.ratingAverage.toStringAsFixed(1);
     final reviewLabel = tradesman.ratingCount == 1 ? 'review' : 'reviews';
-    return '$rating-${tradesman.ratingCount} $reviewLabel';
+    return '$rating  ${tradesman.ratingCount} $reviewLabel';
   }
 
   String _rateUnitLabel(String unit) {

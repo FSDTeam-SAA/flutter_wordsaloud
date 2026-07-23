@@ -525,6 +525,9 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                     ),
                     const SizedBox(height: 12),
 
+                    Text('WhatsApp not installed? Tap \'Call directly\' instead, or install WhatsApp from your app store.'),
+
+                    const SizedBox(height: 12),
                     // Call directly Button
                     GestureDetector(
                       onTap: () {
