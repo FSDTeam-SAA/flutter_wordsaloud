@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -158,7 +159,18 @@ class AdvertiseInquiryScreen extends StatelessWidget {
                   onFieldSubmitted: (_) => controller.sendInquiry(),
                 ),
                 const SizedBox(height: 30),
-                CustomButton(text: 'Send inquiry', height: 50, borderRadius: 16,)
+                Obx(
+                  () => CustomButton(
+                    text: controller.isLoading.value
+                        ? 'Sending...'
+                        : 'Send inquiry',
+                    height: 50,
+                    borderRadius: 16,
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : controller.sendInquiry,
+                  ),
+                ),
               ],
             ),
           ),
@@ -169,14 +181,60 @@ class AdvertiseInquiryScreen extends StatelessWidget {
 }
 
 class AdvertiseInquiryController extends GetxController {
+  final TradesmanController _tradesmanController =
+      Get.find<TradesmanController>();
+
   final formKey = GlobalKey<FormState>();
   final businessNameController = TextEditingController();
   final phoneController = TextEditingController();
   final tradesController = TextEditingController();
 
-  void sendInquiry() {
+  RxBool get isLoading => _tradesmanController.isLoading;
+
+  Future<void> sendInquiry() async {
     if (!formKey.currentState!.validate()) return;
 
+    final trades = tradesController.text
+        .split(RegExp(r'[,\n]'))
+        .map((trade) => trade.trim())
+        .where((trade) => trade.isNotEmpty)
+        .toList();
+
+    if (trades.isEmpty) {
+      Get.snackbar(
+        'Trades required',
+        'Add at least one trade you want to advertise to.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AdvertiseInquiryScreen._accentColor,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
+    final success = await _tradesmanController.addInquiry(
+      businessNameController.text.trim(),
+      phoneController.text.trim(),
+      trades,
+    );
+
+    if (!success) {
+      final message = _tradesmanController.errorMessage.value.trim();
+      Get.snackbar(
+        'Inquiry not sent',
+        message.isNotEmpty ? message : 'Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AdvertiseInquiryScreen._accentColor,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
+    businessNameController.clear();
+    phoneController.clear();
+    tradesController.clear();
+    Get.back();
     Get.snackbar(
       'Inquiry sent',
       'We will be in touch when ad slots open.',

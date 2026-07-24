@@ -44,6 +44,39 @@ class _HomeScreenState extends State<HomeScreen> {
     return 'U';
   }
 
+  Future<void> _openCategory(TradeCategory category) async {
+    final hasProfileInfo = await _clientProfileController
+        .ensureRequiredProfileInfoLoaded();
+
+    if (!hasProfileInfo) {
+      Get.snackbar(
+        'Complete your profile',
+        'Add your phone number, area, and profile picture first.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFF221C18),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        icon: const Icon(Icons.person, color: Color(0xFFE8B04B)),
+        mainButton: TextButton(
+          onPressed: () {
+            Get.closeCurrentSnackbar();
+            Get.to(() => ProfileScreen());
+          },
+          child: Text(
+            'Complete',
+            style: GoogleFonts.outfit(
+              color: const Color(0xFFE8B04B),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
+    Get.to(() => CategoryDetailsScreen(category: category));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,26 +119,45 @@ class _HomeScreenState extends State<HomeScreen> {
                     // User initial avatar
                     GestureDetector(
                       onTap: () => Get.to(() => ProfileScreen()),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFE8B04B),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Obx(
-                            () => Text(
-                              _userInitial(),
-                              style: GoogleFonts.outfit(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                              ),
+                      child: Obx(() {
+                        final shouldHighlight =
+                            !_clientProfileController.hasRequiredProfileInfo;
+
+                        return Container(
+                          width: 50,
+                          height: 50,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: shouldHighlight
+                                ? const Color(0xFFFFD75E)
+                                : const Color(0xFFE8B04B),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: shouldHighlight
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              width: 3,
+                            ),
+                            boxShadow: shouldHighlight
+                                ? const [
+                                    BoxShadow(
+                                      color: Color(0x99FFE8A3),
+                                      blurRadius: 18,
+                                      spreadRadius: 4,
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Text(
+                            _userInitial(),
+                            style: GoogleFonts.outfit(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
                             ),
                           ),
-                        ),
-                      ),
+                        );
+                      }),
                     ),
                   ],
                 ),
@@ -276,9 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           clipBehavior: Clip.none,
                           children: [
                             GestureDetector(
-                              onTap: () => Get.to(
-                                () => CategoryDetailsScreen(category: cat),
-                              ),
+                              onTap: () => _openCategory(cat),
                               child: SizedBox.expand(
                                 child: Container(
                                   decoration: BoxDecoration(

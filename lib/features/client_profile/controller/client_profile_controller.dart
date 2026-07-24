@@ -19,8 +19,8 @@ class ClientProfileController extends BaseController {
   final Rxn<GetClientProfileResponseModel> clientProfile =
       Rxn<GetClientProfileResponseModel>();
   final name = ''.obs;
-  final phone = '+1 (868) 754-2288'.obs;
-  final area = 'Chaguanas'.obs;
+  final phone = ''.obs;
+  final area = ''.obs;
   final RxnString profileImagePath = RxnString();
   final RxnString profileImageUrl = RxnString();
   final memberSince = ''.obs;
@@ -53,6 +53,30 @@ class ClientProfileController extends BaseController {
         return profile;
       },
     );
+  }
+
+  Future<bool> ensureRequiredProfileInfoLoaded() async {
+    if (clientProfile.value == null) {
+      await fetchClientProfile();
+    }
+
+    return hasRequiredProfileInfo;
+  }
+
+  bool get hasRequiredProfileInfo {
+    final profile = clientProfile.value;
+    final hasPhone =
+        (profile?.phoneNumber?.trim().isNotEmpty ?? false) ||
+        phone.value.trim().isNotEmpty;
+    final hasArea =
+        (profile?.area?.trim().isNotEmpty ?? false) ||
+        area.value.trim().isNotEmpty;
+    final hasProfilePicture =
+        (profile?.profileImage?.url?.trim().isNotEmpty ?? false) ||
+        (profileImageUrl.value?.trim().isNotEmpty ?? false) ||
+        (profileImagePath.value?.trim().isNotEmpty ?? false);
+
+    return hasPhone && hasArea && hasProfilePicture;
   }
 
   void updateProfile({

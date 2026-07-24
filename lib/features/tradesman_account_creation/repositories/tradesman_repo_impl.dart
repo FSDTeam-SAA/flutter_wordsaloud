@@ -1,15 +1,18 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/add_inquiry_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/tell_clients_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/repositories/tradesman_repo.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_result.dart';
 import '../../../core/network/constants/api_constants.dart';
+import '../model/request/add_inquiry_request_model.dart';
 import '../model/request/add_review_request_model.dart';
 import '../model/request/tradesman_area_request_model.dart';
 import '../model/request/tradesman_skill_request_model.dart';
 import '../model/response/add_review_response_model.dart';
 import '../model/response/dashboard_response_model.dart';
+import '../model/response/get_advertise_response_model.dart';
 import '../model/response/get_all_tradesman_response_model.dart';
 import '../model/response/get_client_profile_response_model.dart';
 import '../model/response/get_skill_listed_count_response_model.dart';
@@ -33,6 +36,17 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
       endpoint: ApiConstants.tradesman.whatCan,
       data: request.toJson(),
       fromJsonT: (json) => TradesmanSkillResponseModel.fromJson(json),
+    );
+  }
+
+  @override
+  NetworkResult<AddInquiryResponseModel> addInquiry(
+    AddInquiryRequestModel request,
+  ) {
+    return _apiClient.post(
+      endpoint: ApiConstants.user.addInquiry,
+      data: request.toJson(),
+      fromJsonT: (json) => AddInquiryResponseModel.fromJson(json),
     );
   }
 
@@ -135,6 +149,14 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
   }
 
   @override
+  NetworkResult<GetAdvertiseResponseModel> getAdvertise() {
+    return _apiClient.get(
+      endpoint: ApiConstants.user.getInquiry,
+      fromJsonT: GetAdvertiseResponseModel.fromData,
+    );
+  }
+
+  @override
   NetworkResult<GetAllTradesmanResponseModel> getTradesman({
     required String skill,
     String search = '',
@@ -155,76 +177,4 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
       fromJsonT: GetAllTradesmanResponseModel.fromData,
     );
   }
-  // @override
-  // NetworkResult<VerifyEmailResponseModel> emailVerify(
-  //     VerifyMailRequestModel request,
-  //     ) {
-  //   return _apiClient.post(
-  //     endpoint: ApiConstants.auth.verifyEmail,
-  //     data: request.toJson(),
-  //     fromJsonT: (json) => VerifyEmailResponseModel.fromJson(json),
-  //   );
-  // }
-  //
-  // @override
-  // NetworkResult<RegisterResponseModel> register(RegisterRequestModel request) {
-  //   return _apiClient.post(
-  //     endpoint: ApiConstants.auth.register,
-  //     data: request.toJson(),
-  //     fromJsonT: (json) => RegisterResponseModel.fromJson(json),
-  //   );
-  // }
-  //
-  // @override
-  // NetworkResult<LoginResponseModel> login(SignInRequestModel request) {
-  //   return _apiClient.post(
-  //     endpoint: ApiConstants.auth.login,
-  //     data: request.toJson(),
-  //     fromJsonT: (json) => LoginResponseModel.fromJson(json),
-  //   );
-  // }
-
-  //
-  // @override
-  // NetworkResult<ForgotPasswordResponseModel> forgotPassword(
-  //     ForgotPasswordRequestModel request) {
-  //   return _apiClient.post(endpoint: ApiConstants.auth.forgotPassword,
-  //       data: request.toJson(),
-  //       fromJsonT: (json) => ForgotPasswordResponseModel.fromJson(json));
-  // }
-  //
-  // @override
-  // NetworkResult<void> verifyOtp(VerifyOtpRequestModel request) {
-  //   return _apiClient.post(endpoint: ApiConstants.auth.verifyOtp,
-  //       data: request.toJson(),
-  //       fromJsonT: (json) {});
-  // }
-  //
-  // @override
-  // NetworkResult<void> createNewPassword(CreateNewPasswordRequestModel request) {
-  //   return _apiClient.post(
-  //       endpoint: ApiConstants.auth.resetPassword,
-  //       data: request.toJson(),
-  //       fromJsonT: (json) {});
-  // }
-  //
-  // @override
-  // NetworkResult<LoginResponseModel> refreshToken(
-  //     RefreshTokenRequestModel request,) {
-  //   return _apiClient.post(
-  //     endpoint: ApiConstants.auth.refreshToken,
-  //     data: request.toJson(),
-  //     fromJsonT: (json) => LoginResponseModel.fromJson(json),
-  //   );
-  // }
-  //
-  // @override
-  // NetworkResult<RefreshTokenResponseModel> refreshTOken(
-  //     RefreshTokenRequestModel request,) {
-  //   return _apiClient.post(
-  //     endpoint: ApiConstants.auth.refreshToken,
-  //     data: request.toJson(),
-  //     fromJsonT: (json) => RefreshTokenResponseModel.fromJson(json),
-  //   );
-  // }
 }

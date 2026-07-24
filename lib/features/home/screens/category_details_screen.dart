@@ -38,6 +38,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
       skill: widget.category.name,
       sort: _selectedSort,
     );
+    _tradesmanController.getAdvertise();
   }
 
   Future<void> _changeSort(String? sort) async {
@@ -837,104 +838,182 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
   }
 
   Widget _buildSponsoredSlotCard() {
-    return DashedBorderContainer(
-      color: const Color(0xFFC7B9A4),
-      borderRadius: 12,
-      strokeWidth: 1.5,
-      gap: 5,
-      dashLength: 6,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: CustomPaint(
-          painter: _SponsoredStripePainter(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'SPONSORED SLOT - AVAILABLE',
-                    style: TextStyle(
-                      fontSize: 7,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF8C7F72),
-                      letterSpacing: 3,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1E7DC),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Center(
-                      child: Text('📦', style: TextStyle(fontSize: 18)),
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: const TextSpan(
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F0F0F),
+    return Obx(() {
+      final isLoading = _tradesmanController.isAdvertiseLoading.value;
+      final advertisement = _tradesmanController.advertisements.isNotEmpty
+          ? _tradesmanController.advertisements.first
+          : null;
+
+      return DashedBorderContainer(
+        color: const Color(0xFFC7B9A4),
+        borderRadius: 12,
+        strokeWidth: 1.5,
+        gap: 5,
+        dashLength: 6,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: CustomPaint(
+            painter: _SponsoredStripePainter(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+              child: Center(
+                child: isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFFAE3F30),
+                        ),
+                      )
+                    : advertisement == null
+                    ? _buildAvailableSponsoredSlotContent()
+                    : _buildAdvertisementContent(
+                        title: advertisement.title,
+                        description: advertisement.description,
                       ),
-                      children: [
-                        TextSpan(text: 'Your store could be '),
-                        TextSpan(
-                          text: 'here.',
-                          style: TextStyle(
-                            color: Color(0xFFAE3F30),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Reach Trinis searching plumbers right now.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF1F1F1F),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Material(
-                    color: const Color(0xFF0F0F0F),
-                    borderRadius: BorderRadius.circular(18),
-                    child: InkWell(
-                      onTap: () => Get.to(() => const AdvertiseInquiryScreen()),
-                      borderRadius: BorderRadius.circular(18),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        child: Text(
-                          'Inquire about advertising →',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            height: 1,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ),
           ),
         ),
-      ),
+      );
+    });
+  }
+
+  Widget _buildAdvertisementContent({
+    required String title,
+    required String description,
+  }) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'SPONSORED',
+          style: TextStyle(
+            fontSize: 8,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF8C7F72),
+            letterSpacing: 3,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFE6B5),
+            borderRadius: BorderRadius.circular(17),
+          ),
+          child: const Icon(Icons.campaign, color: Color(0xFFAE3F30), size: 20),
+        ),
+        const SizedBox(height: 7),
+        Text(
+          title.trim().isNotEmpty ? title.trim() : 'Sponsored partner',
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F0F0F),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          description.trim().isNotEmpty
+              ? description.trim()
+              : 'Serving customers looking for ${widget.category.name.toLowerCase()} help.',
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF1F1F1F),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAvailableSponsoredSlotContent() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'SPONSORED SLOT - AVAILABLE',
+          style: TextStyle(
+            fontSize: 7,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF8C7F72),
+            letterSpacing: 3,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1E7DC),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Center(
+            child: Text('📦', style: TextStyle(fontSize: 18)),
+          ),
+        ),
+        const SizedBox(height: 7),
+        RichText(
+          textAlign: TextAlign.center,
+          text: const TextSpan(
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F0F0F),
+            ),
+            children: [
+              TextSpan(text: 'Your store could be '),
+              TextSpan(
+                text: 'here.',
+                style: TextStyle(
+                  color: Color(0xFFAE3F30),
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Reach Trinis searching ${widget.category.name.toLowerCase()} right now.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF1F1F1F),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Material(
+          color: const Color(0xFF0F0F0F),
+          borderRadius: BorderRadius.circular(18),
+          child: InkWell(
+            onTap: () => Get.to(() => const AdvertiseInquiryScreen()),
+            borderRadius: BorderRadius.circular(18),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              child: Text(
+                'Inquire about advertising →',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  height: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

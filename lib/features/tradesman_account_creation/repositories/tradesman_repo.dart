@@ -1,7 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/add_inquiry_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/add_review_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/tradesman_area_request_model.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/add_inquiry_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/add_review_response_model.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_advertise_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_client_profile_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
@@ -47,4 +50,7 @@ abstract class TradesmanRepo {
     int page,
     int limit,
   });
+
+  NetworkResult<AddInquiryResponseModel> addInquiry(AddInquiryRequestModel request);
+  NetworkResult<GetAdvertiseResponseModel> getAdvertise();
 }

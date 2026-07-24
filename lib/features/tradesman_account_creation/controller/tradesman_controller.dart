@@ -7,10 +7,12 @@ import 'package:flutter_wordsaloud/core/base/base_controller.dart';
 import 'package:flutter_wordsaloud/core/services/auth_storage_service.dart';
 import 'package:flutter_wordsaloud/core/services/session_service.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/add_inquiry_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/add_review_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/tradesman_area_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/tradesman_skill_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/dashboard_response_model.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_advertise_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_client_profile_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
@@ -35,9 +37,11 @@ class TradesmanController extends BaseController {
       Rxn<GetSpecificTradesmanResponseModel>();
   final RxList<SkillModel> skillList = <SkillModel>[].obs;
   final RxList<Tradesman> allTradesman = <Tradesman>[].obs;
+  final RxList<Advertisement> advertisements = <Advertisement>[].obs;
   final RxBool isSkillListLoading = false.obs;
   final RxBool isTradesmanLoading = false.obs;
   final RxBool isSingleTradesmanLoading = false.obs;
+  final RxBool isAdvertiseLoading = false.obs;
 
   Future<void> createTradesmanStep1(
     String mainSkill,
@@ -461,6 +465,61 @@ class TradesmanController extends BaseController {
     }
     if (normalized.contains('trinidad')) return 'Trinidad wide';
     return '5km - Local only';
+  }
+
+  Future<bool> addInquiry(
+    String businessName,
+    String whatsappPhone,
+    List<String> tradesToAdvertiseTo,
+  ) async {
+    clearError();
+    setLoading(true);
+
+    final request = AddInquiryRequestModel(
+      businessName: businessName,
+      whatsappPhone: whatsappPhone,
+      tradesToAdvertiseTo: tradesToAdvertiseTo,
+    );
+
+    final result = await _tradesmanRepo.addInquiry(request);
+
+    return result.fold(
+      (fail) {
+        setError(fail.message);
+        d_print.log("Add inquiry failed: ${fail.message}");
+        setLoading(false);
+        return false;
+      },
+      (success) {
+        d_print.log("Add inquiry success: ${success.data.toJson()}");
+        setLoading(false);
+        return true;
+      },
+    );
+  }
+
+  Future<List<Advertisement>> getAdvertise() async {
+    clearError();
+    isAdvertiseLoading.value = true;
+
+    final result = await _tradesmanRepo.getAdvertise();
+
+    return result.fold(
+      (fail) {
+        setError(fail.message);
+        d_print.log("Fetch advertise failed: ${fail.message}");
+        isAdvertiseLoading.value = false;
+        return advertisements;
+      },
+      (success) {
+        advertisements.assignAll(
+          success.data.data.where((advertise) => advertise.isActive),
+        );
+        d_print.log("Fetch advertise success: ${success.data.toJson()}");
+        isAdvertiseLoading.value = false;
+        return success.data.data;
+      },
+    );
   }
 
   Future<void> signOut() async {

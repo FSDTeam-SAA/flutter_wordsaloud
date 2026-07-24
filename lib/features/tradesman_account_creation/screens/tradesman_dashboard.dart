@@ -40,12 +40,12 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
   String _rate = '';
   String _rateUnit = 'per day';
   List<String> _recentWorkPhotoUrls = const [];
-  num _overallRating = 4.9;
-  int _reviewsTotal = 87;
+  num _overallRating = 0;
+  int _reviewsTotal = 0;
   int _jobsCount = 0;
-  int _viewsThisWeek = 42;
+  int _viewsThisWeek = 0;
   int _tradesListed = 3;
-  int _daysOnPlatform = 14;
+  int _daysOnPlatform = 0;
   List<dashboard_model.RatingBreakdown> _ratingBreakdown = const [];
   List<dashboard_model.RecentReview> _recentReviews = const [];
 
@@ -110,14 +110,12 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
           _formatStatusLabel(
             dashboard.verification?.status ?? profile?.verificationStatus,
           );
-      _overallRating =
-          dashboard.overallRating ?? profile?.ratingAverage ?? _overallRating;
-      _reviewsTotal =
-          dashboard.reviewsTotal ?? profile?.ratingCount ?? _reviewsTotal;
-      _jobsCount = profile?.jobsCount ?? _jobsCount;
-      _viewsThisWeek = dashboard.viewsThisWeek ?? _viewsThisWeek;
+      _overallRating = dashboard.overallRating ?? profile?.ratingAverage ?? 0;
+      _reviewsTotal = dashboard.reviewsTotal ?? profile?.ratingCount ?? 0;
+      _jobsCount = profile?.jobsCount ?? 0;
+      _viewsThisWeek = dashboard.viewsThisWeek ?? 0;
       _tradesListed = dashboard.tradesListed ?? _tradesListed;
-      _daysOnPlatform = dashboard.daysOnPlatform ?? _daysOnPlatform;
+      _daysOnPlatform = dashboard.daysOnPlatform ?? 0;
       _ratingBreakdown = dashboard.ratingBreakdown ?? const [];
       _recentReviews = dashboard.recentReviews ?? const [];
     });
@@ -422,9 +420,11 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                             Row(
                               children: List.generate(
                                 5,
-                                (index) => const Icon(
+                                (index) => Icon(
                                   Icons.star,
-                                  color: Color(0xFFEAAE4B),
+                                  color: index < _overallRating.round()
+                                      ? const Color(0xFFEAAE4B)
+                                      : Colors.white.withValues(alpha: 0.35),
                                   size: 20,
                                 ),
                               ),

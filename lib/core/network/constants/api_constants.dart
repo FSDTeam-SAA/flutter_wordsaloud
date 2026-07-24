@@ -106,6 +106,8 @@ class TradesmanEndpoints {
 class UserEndpoints {
   final String home = '${ApiConstants.baseUrl}/tradesman/categories';
   final String getProfile = '${ApiConstants.baseUrl}/user/me';
+  final String addInquiry = '${ApiConstants.baseUrl}/inquiry';
+  final String getInquiry = '${ApiConstants.baseUrl}/admin/advertisements';
   final String updateProfile = '${ApiConstants.baseUrl}/user/me';
   String tradesmanDetails(String id) => '${ApiConstants.baseUrl}/tradesman/$id';
   String review(String tradesmanId) =>
