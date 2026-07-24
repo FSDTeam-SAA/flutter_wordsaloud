@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
 import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart';
 import 'package:flutter_wordsaloud/features/client_profile/screens/advertise_inquiry_screen.dart';
@@ -61,15 +63,22 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
   String get _selectedSortLabel =>
       _selectedSort == 'recent' ? 'Recently Active' : 'Highest Rated';
 
-  @override
-  Widget build(BuildContext context) {
-    // Get the signed-in user's first name initial for the header avatar
-    String userInitial = 'K';
-    if (Get.isRegistered<SignupController>()) {
-      final name = Get.find<SignupController>().firstName.value.trim();
-      if (name.isNotEmpty) userInitial = name[0].toUpperCase();
+  String _userInitial() {
+    var name = '';
+
+    if (Get.isRegistered<AuthController>()) {
+      name = Get.find<AuthController>().currentUserName.value.trim();
     }
 
+    if (name.isEmpty && Get.isRegistered<SignupController>()) {
+      name = Get.find<SignupController>().firstName.value.trim();
+    }
+
+    return name.isNotEmpty ? name[0].toUpperCase() : 'U';
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Format the title (e.g. Plumber -> Plumbers)
     final String displayTitle = widget.category.name.endsWith('s')
         ? widget.category.name
@@ -132,12 +141,14 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: Center(
-                          child: Text(
-                            userInitial,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
+                          child: Obx(
+                            () => Text(
+                              _userInitial(),
+                              style: GoogleFonts.outfit(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                         ),

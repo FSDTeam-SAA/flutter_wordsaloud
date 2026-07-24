@@ -166,8 +166,8 @@ class _ProfileHeader extends StatelessWidget {
           const SizedBox(height: 10),
           Obx(
             () => Container(
-              width: 60,
-              height: 60,
+              width: 80,
+              height: 80,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: ProfileScreen._goldColor,
@@ -241,8 +241,8 @@ class _ProfileAvatar extends StatelessWidget {
     if (imagePath != null && imagePath!.isNotEmpty) {
       return Image.file(
         File(imagePath!),
-        width: 60,
-        height: 60,
+        width: 80,
+        height: 80,
         fit: BoxFit.cover,
       );
     }
@@ -250,8 +250,8 @@ class _ProfileAvatar extends StatelessWidget {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       return Image.network(
         imageUrl!,
-        width: 60,
-        height: 60,
+        width: 80,
+        height: 80,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           return _InitialAvatar(initial: initial);
