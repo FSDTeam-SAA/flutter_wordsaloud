@@ -1,9 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
+import 'package:flutter_wordsaloud/features/client_profile/controller/client_profile_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
 import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart';
 import 'package:flutter_wordsaloud/features/client_profile/screens/advertise_inquiry_screen.dart';
 import 'package:flutter_wordsaloud/features/home/screens/tradesman_details_screen.dart';
@@ -24,12 +24,16 @@ class CategoryDetailsScreen extends StatefulWidget {
 
 class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
   late final TradesmanController _tradesmanController;
+  late final ClientProfileController _clientProfileController;
   String _selectedSort = 'rating';
 
   @override
   void initState() {
     super.initState();
     _tradesmanController = Get.find<TradesmanController>();
+    _clientProfileController = Get.isRegistered<ClientProfileController>()
+        ? Get.find<ClientProfileController>()
+        : Get.put(ClientProfileController());
     _tradesmanController.fetchTradesman(
       skill: widget.category.name,
       sort: _selectedSort,
@@ -64,17 +68,15 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
       _selectedSort == 'recent' ? 'Recently Active' : 'Highest Rated';
 
   String _userInitial() {
-    var name = '';
+    final profileInitial = _clientProfileController.initial;
+    if (profileInitial != 'U') return profileInitial;
 
     if (Get.isRegistered<AuthController>()) {
-      name = Get.find<AuthController>().currentUserName.value.trim();
+      final name = Get.find<AuthController>().currentUserName.value.trim();
+      if (name.isNotEmpty) return name[0].toUpperCase();
     }
 
-    if (name.isEmpty && Get.isRegistered<SignupController>()) {
-      name = Get.find<SignupController>().firstName.value.trim();
-    }
-
-    return name.isNotEmpty ? name[0].toUpperCase() : 'U';
+    return 'U';
   }
 
   @override

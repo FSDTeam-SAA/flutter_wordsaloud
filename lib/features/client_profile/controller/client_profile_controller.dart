@@ -5,6 +5,7 @@ import 'package:dio/dio.dart' as dio;
 import 'package:flutter_wordsaloud/core/base/base_controller.dart';
 import 'package:flutter_wordsaloud/core/services/auth_storage_service.dart';
 import 'package:flutter_wordsaloud/core/services/session_service.dart';
+import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_client_profile_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/update_profile_response_model.dart';
@@ -17,7 +18,7 @@ class ClientProfileController extends BaseController {
 
   final Rxn<GetClientProfileResponseModel> clientProfile =
       Rxn<GetClientProfileResponseModel>();
-  final name = 'Keisha P.'.obs;
+  final name = ''.obs;
   final phone = '+1 (868) 754-2288'.obs;
   final area = 'Chaguanas'.obs;
   final RxnString profileImagePath = RxnString();
@@ -61,6 +62,7 @@ class ClientProfileController extends BaseController {
     String? profileImagePath,
   }) {
     this.name.value = name;
+    _syncAuthUserName(name);
     this.phone.value = phone;
     this.area.value = area;
     this.profileImagePath.value = profileImagePath;
@@ -142,7 +144,10 @@ class ClientProfileController extends BaseController {
 
   void _applyProfile(GetClientProfileResponseModel profile) {
     final displayName = _displayName(profile);
-    if (displayName.isNotEmpty) name.value = displayName;
+    if (displayName.isNotEmpty) {
+      name.value = displayName;
+      _syncAuthUserName(displayName);
+    }
 
     final phoneNumber = profile.phoneNumber?.trim() ?? '';
     if (phoneNumber.isNotEmpty) phone.value = phoneNumber;
@@ -163,7 +168,10 @@ class ClientProfileController extends BaseController {
       firstName: profile.firstName,
       lastName: profile.lastName,
     );
-    if (displayName.isNotEmpty) name.value = displayName;
+    if (displayName.isNotEmpty) {
+      name.value = displayName;
+      _syncAuthUserName(displayName);
+    }
 
     final phoneNumber = profile.phoneNumber?.trim() ?? '';
     if (phoneNumber.isNotEmpty) phone.value = phoneNumber;
@@ -228,5 +236,12 @@ class ClientProfileController extends BaseController {
     final trimmedName = name.value.trim();
     if (trimmedName.isEmpty) return 'U';
     return trimmedName.substring(0, 1).toUpperCase();
+  }
+
+  void _syncAuthUserName(String value) {
+    final trimmedName = value.trim();
+    if (trimmedName.isEmpty || !Get.isRegistered<AuthController>()) return;
+
+    Get.find<AuthController>().currentUserName.value = trimmedName;
   }
 }

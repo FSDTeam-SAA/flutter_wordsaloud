@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({
     super.key,
-    this.initialName = 'Keisha P.',
+    this.initialName = '',
     this.initialPhone = '+1 (868) 754-2288',
     this.initialArea = 'Chaguanas',
     this.initialImagePath,

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
+import 'package:flutter_wordsaloud/features/client_profile/controller/client_profile_controller.dart';
 import 'package:flutter_wordsaloud/features/client_profile/screens/profile_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
 import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart';
 import 'package:flutter_wordsaloud/features/home/screens/category_details_screen.dart';
 
@@ -17,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final HomeController controller;
+  late final ClientProfileController _clientProfileController;
 
   @override
   void initState() {
@@ -24,18 +26,26 @@ class _HomeScreenState extends State<HomeScreen> {
     controller = Get.isRegistered<HomeController>()
         ? Get.find<HomeController>()
         : Get.put(HomeController());
+    _clientProfileController = Get.isRegistered<ClientProfileController>()
+        ? Get.find<ClientProfileController>()
+        : Get.put(ClientProfileController());
     controller.fetchSkillList();
+  }
+
+  String _userInitial() {
+    final profileInitial = _clientProfileController.initial;
+    if (profileInitial != 'U') return profileInitial;
+
+    if (Get.isRegistered<AuthController>()) {
+      final name = Get.find<AuthController>().currentUserName.value.trim();
+      if (name.isNotEmpty) return name[0].toUpperCase();
+    }
+
+    return 'U';
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the signed-in user's first name initial for the avatar
-    String userInitial = 'K';
-    if (Get.isRegistered<SignupController>()) {
-      final name = Get.find<SignupController>().firstName.value.trim();
-      if (name.isNotEmpty) userInitial = name[0].toUpperCase();
-    }
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5EFE6),
       body: Column(
@@ -84,12 +94,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: Center(
-                          child: Text(
-                            userInitial,
-                            style: GoogleFonts.outfit(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
+                          child: Obx(
+                            () => Text(
+                              _userInitial(),
+                              style: GoogleFonts.outfit(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                         ),
