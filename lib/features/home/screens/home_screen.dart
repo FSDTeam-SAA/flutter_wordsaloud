@@ -393,13 +393,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 overflow: TextOverflow.ellipsis,
                 text: TextSpan(
                   style: GoogleFonts.outfit(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
                     height: 1.05,
                   ),
                   children: const [
                     TextSpan(
-                      text: "You're browsing as a\n",
+                      text: "You're browsing as a ",
                       style: TextStyle(color: Color(0xFFF4C24F)),
                     ),
                     TextSpan(

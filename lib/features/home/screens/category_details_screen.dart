@@ -22,13 +22,44 @@ class CategoryDetailsScreen extends StatefulWidget {
 
 class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
   late final TradesmanController _tradesmanController;
+  String _selectedSort = 'rating';
 
   @override
   void initState() {
     super.initState();
     _tradesmanController = Get.find<TradesmanController>();
-    _tradesmanController.fetchTradesman(skill: widget.category.name);
+    _tradesmanController.fetchTradesman(
+      skill: widget.category.name,
+      sort: _selectedSort,
+    );
   }
+
+  Future<void> _changeSort(String? sort) async {
+    if (sort == null || sort == _selectedSort) return;
+
+    setState(() => _selectedSort = sort);
+    await _tradesmanController.fetchTradesman(
+      skill: widget.category.name,
+      sort: sort,
+    );
+  }
+
+  List<tradesman_model.Tradesman> _sortedTradesmen(
+    List<tradesman_model.Tradesman> tradesmen,
+  ) {
+    final sortedTradesmen = tradesmen.toList();
+    if (_selectedSort == 'recent') {
+      sortedTradesmen.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    } else {
+      sortedTradesmen.sort(
+        (a, b) => b.ratingAverage.compareTo(a.ratingAverage),
+      );
+    }
+    return sortedTradesmen;
+  }
+
+  String get _selectedSortLabel =>
+      _selectedSort == 'recent' ? 'Recently Active' : 'Highest Rated';
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +164,9 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
           // ── Scrollable Body ─────────────────────────────────────────────
           Expanded(
             child: Obx(() {
-              final tradesmen = _tradesmanController.allTradesman.toList();
+              final tradesmen = _sortedTradesmen(
+                _tradesmanController.allTradesman.toList(),
+              );
               final vipTradesmen = tradesmen
                   .where((tradesman) => tradesman.isVip)
                   .toList();
@@ -151,26 +184,65 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 18,
-                            top: 20,
-                            right: 18,
-                          ),
-                          child: Text(
-                            '${tradesmen.length} ${widget.category.name.toLowerCase()} Near You',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1F1F1F),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 18,
+                        top: 20,
+                        right: 18,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${tradesmen.length} ${widget.category.name.toLowerCase()} Near You',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF1F1F1F),
+                              ),
                             ),
                           ),
-                        ),
-
-                        DropdownMenuItem(child: )
-                      ],
+                          Container(
+                            height: 36,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFFE5D8CD),
+                              ),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedSort,
+                                icon: const Icon(
+                                  Icons.keyboard_arrow_down,
+                                  size: 20,
+                                  color: Color(0xFF1F1F1F),
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF1F1F1F),
+                                ),
+                                dropdownColor: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                onChanged: _changeSort,
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'rating',
+                                    child: Text('Highest Rated'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'recent',
+                                    child: Text('Recently Active'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 16),
                     const Divider(
@@ -213,7 +285,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 18),
                       child: Text(
-                        'All ${widget.category.name} sorted by Rating',
+                        'All ${widget.category.name} sorted by $_selectedSortLabel',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
