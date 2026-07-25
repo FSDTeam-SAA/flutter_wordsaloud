@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter_wordsaloud/features/auth/models/request/sign_up_otp_request_model.dart';
 import 'package:flutter_wordsaloud/features/auth/models/response/sign_up_otp_response_model.dart';
 
@@ -29,10 +27,22 @@ class AuthRepositoryImpl implements AuthRepository {
       fromJsonT: (json) => SignUpOtpResponseModel.fromJson(json),
     );
   }
+
+  @override
+  NetworkResult<SignUpOtpResponseModel> resendOtp(
+    SignUpOtpRequestModel request,
+  ) {
+    return _apiClient.post(
+      endpoint: ApiConstants.auth.resendOtp,
+      data: request.toJson(),
+      fromJsonT: (json) => SignUpOtpResponseModel.fromJson(json),
+    );
+  }
+
   @override
   NetworkResult<VerifyEmailResponseModel> emailVerify(
-      VerifyMailRequestModel request,
-      ) {
+    VerifyMailRequestModel request,
+  ) {
     return _apiClient.post(
       endpoint: ApiConstants.auth.verifyEmail,
       data: request.toJson(),

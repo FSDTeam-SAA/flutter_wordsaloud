@@ -3,11 +3,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
-import 'package:flutter_wordsaloud/core/network/api_client.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
-import 'package:flutter_wordsaloud/features/auth/repositories/auth_repo.dart';
-import 'package:flutter_wordsaloud/features/auth/repositories/auth_repo_impl.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
 
 class SignUpScreen extends StatelessWidget {
@@ -15,7 +12,7 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      Get.put(AuthController());
+    Get.put(AuthController());
     final controller = Get.put(SignupController());
 
     return Scaffold(
@@ -199,32 +196,41 @@ class SignUpScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Center(
-                            child: RichText(
-                              text: TextSpan(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Don't get it? ",
                                 style: GoogleFonts.outfit(
                                   fontSize: 16,
-                                  color: Colors.black54,
+                                  color: const Color(0xFF6D6D6D),
                                 ),
-                                children: const [
-                                  TextSpan(
-                                    text: "Don't get it? ",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Color(0xFF6D6D6D),
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: 'Resend',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Color(0xFFC34D3C),
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ],
                               ),
-                            ),
+                              TextButton(
+                                onPressed: controller.isResendingCode.value
+                                    ? null
+                                    : controller.resendVerificationCode,
+                                style: TextButton.styleFrom(
+                                  foregroundColor: const Color(0xFFC34D3C),
+                                  disabledForegroundColor: const Color(
+                                    0xFFC34D3C,
+                                  ).withValues(alpha: 0.45),
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: const Size(0, 32),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  textStyle: GoogleFonts.outfit(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                child: Text(
+                                  controller.isResendingCode.value
+                                      ? 'Sending...'
+                                      : 'Resend',
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

@@ -14,6 +14,9 @@ abstract class AuthRepository {
   NetworkResult<SignUpOtpResponseModel> otpVerify(
     SignUpOtpRequestModel request,
   );
+  NetworkResult<SignUpOtpResponseModel> resendOtp(
+    SignUpOtpRequestModel request,
+  );
   NetworkResult<VerifyEmailResponseModel> emailVerify(
     VerifyMailRequestModel request,
   );

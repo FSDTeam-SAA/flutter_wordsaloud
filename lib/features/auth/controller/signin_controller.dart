@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 class SigninController extends GetxController {
   final RxBool isCodeVisible = false.obs;
   final RxBool isSendingCode = false.obs;
+  final RxBool isResendingCode = false.obs;
   final RxBool isLoggingIn = false.obs;
   final RxString email = ''.obs;
   final RxString code = ''.obs;
@@ -48,6 +49,42 @@ class SigninController extends GetxController {
       d_print.log('sendCode error: $e');
     } finally {
       isSendingCode.value = false;
+    }
+  }
+
+  Future<void> resendCode() async {
+    if (email.value.trim().isEmpty) {
+      emailError.value = 'Email address is required.';
+      return;
+    }
+
+    if (!GetUtils.isEmail(email.value.trim())) {
+      emailError.value = 'Please enter a correct email address.';
+      return;
+    }
+
+    emailError.value = '';
+    codeError.value = '';
+    apiError.value = '';
+    isResendingCode.value = true;
+
+    try {
+      final authCtrl = Get.find<AuthController>();
+      authCtrl.clearError();
+
+      await authCtrl.resendOTP(email.value.trim());
+
+      if (authCtrl.errorMessage.value.isNotEmpty) {
+        apiError.value = authCtrl.errorMessage.value;
+        authCtrl.clearError();
+      } else {
+        d_print.log('OTP resent successfully to ${email.value}');
+      }
+    } catch (e) {
+      apiError.value = 'Something went wrong. Please try again.';
+      d_print.log('resendCode error: $e');
+    } finally {
+      isResendingCode.value = false;
     }
   }
 

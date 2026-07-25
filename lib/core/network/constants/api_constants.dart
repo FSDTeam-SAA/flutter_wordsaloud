@@ -53,6 +53,7 @@ class AuthEndpoints {
   final String verifyEmail = '$_base/verify-email';
   final String forgotPassword = '$_base/forgot-password';
   final String verifyOtp = '$_base/send-otp';
+  final String resendOtp = '$_base/resend-otp';
   final String resetPassword = '$_base/reset-password';
   final String register = '$_base/register';
   final String updatePassword = '$_base/change-password';

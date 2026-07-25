@@ -205,23 +205,40 @@ class SignInScreen extends StatelessWidget {
                             ),
                           ],
                           const SizedBox(height: 2),
-                          Text.rich(
-                            TextSpan(
-                              style: GoogleFonts.outfit(
-                                fontSize: 14,
-                                color: _mutedTextColor,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Didn't get it? ",
+                                style: GoogleFonts.outfit(
+                                  fontSize: 14,
+                                  color: _mutedTextColor,
+                                ),
                               ),
-                              children: const [
-                                TextSpan(text: "Didn't get it? "),
-                                TextSpan(
-                                  text: 'Resend',
-                                  style: TextStyle(
-                                    color: _accentColor,
+                              TextButton(
+                                onPressed: controller.isResendingCode.value
+                                    ? null
+                                    : controller.resendCode,
+                                style: TextButton.styleFrom(
+                                  foregroundColor: _accentColor,
+                                  disabledForegroundColor: _accentColor
+                                      .withValues(alpha: 0.45),
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: const Size(0, 32),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  textStyle: GoogleFonts.outfit(
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                              ],
-                            ),
+                                child: Text(
+                                  controller.isResendingCode.value
+                                      ? 'Sending...'
+                                      : 'Resend',
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

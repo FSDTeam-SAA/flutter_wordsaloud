@@ -39,6 +39,23 @@ class AuthController extends BaseController {
     );
   }
 
+  Future resendOTP(String email) async {
+    final request = SignUpOtpRequestModel(email: email);
+    final result = await _authRepo.resendOtp(request);
+
+    result.fold(
+      (fail) {
+        setError(fail.message);
+        d_print.log("resend otp result : ${fail.message}");
+        setLoading(false);
+      },
+      (success) {
+        d_print.log("resend otp result : ${success.data}");
+        setLoading(false);
+      },
+    );
+  }
+
   Future verifyEmailRegister(String email) async {
     final request = VerifyMailRequestModel(email: email);
     final result = await _authRepo.emailVerify(request);
