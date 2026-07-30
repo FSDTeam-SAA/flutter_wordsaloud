@@ -56,8 +56,15 @@ class AuthController extends BaseController {
     );
   }
 
-  Future verifyEmailRegister(String email) async {
-    final request = VerifyMailRequestModel(email: email);
+  Future verifyEmailRegister(String email, {required String role}) async {
+    final loginRole = role.trim();
+    if (loginRole.isEmpty) {
+      setError('Please select whether you are a client or tradesman first.');
+      setLoading(false);
+      return;
+    }
+
+    final request = VerifyMailRequestModel(email: email, role: loginRole);
     final result = await _authRepo.emailVerify(request);
 
     result.fold(
@@ -67,7 +74,23 @@ class AuthController extends BaseController {
         setLoading(false);
       },
       (success) {
-        d_print.log("verify otp success result : ${success.data}");
+        final accountRole = _normalizeRole(success.data.data?.role);
+        final selectedLoginRole = _normalizeRole(loginRole);
+        if (accountRole.isEmpty) {
+          setError('Unable to verify this account role. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        if (accountRole.isNotEmpty && accountRole != selectedLoginRole) {
+          setError(_roleMismatchMessage(selectedLoginRole));
+          setLoading(false);
+          return;
+        }
+
+        d_print.log(
+          "verify otp success result : ${success.data} selectedRole=$selectedLoginRole accountRole=${accountRole.isEmpty ? 'not returned' : accountRole}",
+        );
         setLoading(false);
       },
     );
@@ -81,6 +104,12 @@ class AuthController extends BaseController {
     String role,
     String area,
   ) async {
+    if (role.trim().isEmpty) {
+      setError('Please select whether you are a client or tradesman first.');
+      setLoading(false);
+      return;
+    }
+
     final request = RegisterRequestModel(
       firstName: firstName,
       lastName: lastName,
@@ -116,7 +145,18 @@ class AuthController extends BaseController {
     required String verificationCode,
     String? selectedRole,
   }) async {
-    final request = SignInRequestModel(email: email, otp: verificationCode);
+    final loginRole = selectedRole?.trim() ?? '';
+    if (loginRole.isEmpty) {
+      setError('Please select whether you are a client or tradesman first.');
+      setLoading(false);
+      return;
+    }
+
+    final request = SignInRequestModel(
+      email: email,
+      otp: verificationCode,
+      role: loginRole,
+    );
 
     final result = await _authRepo.login(request);
 
@@ -130,7 +170,22 @@ class AuthController extends BaseController {
       (success) async {
         // Extract user data
         final user = success.data;
-        final role = user.role ?? selectedRole ?? 'client';
+        final accountRole = _normalizeRole(user.role);
+        final selectedLoginRole = _normalizeRole(loginRole);
+        if (accountRole.isNotEmpty && accountRole != selectedLoginRole) {
+          setError(_roleMismatchMessage(selectedLoginRole));
+          setLoading(false);
+          return;
+        }
+
+        final role = accountRole.isNotEmpty ? accountRole : selectedLoginRole;
+        if (role.isEmpty) {
+          setError(
+            'Please select whether you are a client or tradesman first.',
+          );
+          setLoading(false);
+          return;
+        }
         currentUserName.value = user.name?.trim() ?? '';
 
         // Store access token and refresh token for ANY user
@@ -156,5 +211,21 @@ class AuthController extends BaseController {
         setLoading(false);
       },
     );
+  }
+
+  String _normalizeRole(String? role) {
+    final value = role?.trim().toLowerCase() ?? '';
+    if (value == 'user') return 'client';
+    return value;
+  }
+
+  String _roleMismatchMessage(String selectedRole) {
+    if (selectedRole == 'client') {
+      return 'This is not a client account.';
+    }
+    if (selectedRole == 'tradesman') {
+      return 'This is not a tradesman account.';
+    }
+    return 'This account does not match the selected role.';
   }
 }

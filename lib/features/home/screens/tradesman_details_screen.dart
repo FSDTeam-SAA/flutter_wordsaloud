@@ -64,14 +64,20 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
         return 'assets/images/fi_12479483.png';
       case 'joinery':
         return 'assets/images/fi_14106303.png';
+      case 'mechanic':
       case 'mobile mech':
         return 'assets/images/fi_186239.png';
       case 'painter':
         return 'assets/images/fi_1995467.png';
+      case 'appliance fix':
       case 'appliance':
         return 'assets/images/fi_2012957.png';
       case 'ac tech':
         return 'assets/images/fi_7969720.png';
+      case 'maid service':
+        return 'assets/images/fi_15551378.png';
+      case 'caterer':
+        return 'assets/images/fi_4490380.png';
       case 'tile man':
         return 'assets/images/fi_11932525.png';
       case 'mason':
@@ -80,6 +86,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
         return 'assets/images/fi_896123.png';
       case 'roofer':
         return 'assets/images/fi_14620736.png';
+      case 'fabricator/welder':
       case 'welder/gate':
         return 'assets/images/fi_9439147.png';
       case 'pool cleaner':
@@ -159,6 +166,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
       final displayAvatarLetter = _getInitials(displayName).isNotEmpty
           ? _getInitials(displayName)
           : widget.avatarLetter;
+      final displayProfileImageUrl = profile?.user.profileImage.url ?? '';
       final displayRating = profile != null
           ? _formatRating(profile.ratingAverage)
           : widget.rating;
@@ -261,14 +269,11 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                             colors: [Color(0xFFD85C27), Color(0xFFF5B54C)],
                           ),
                         ),
-                        child: Center(
-                          child: Text(
-                            displayAvatarLetter,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: _TradesmanProfileAvatar(
+                            imageUrl: displayProfileImageUrl,
+                            avatarLetter: displayAvatarLetter,
                           ),
                         ),
                       ),
@@ -525,7 +530,9 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    Text('WhatsApp not installed? Tap \'Call directly\' instead, or install WhatsApp from your app store.'),
+                    Text(
+                      'WhatsApp not installed? Tap \'Call directly\' instead, or install WhatsApp from your app store.',
+                    ),
 
                     const SizedBox(height: 12),
                     // Call directly Button
@@ -763,6 +770,53 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TradesmanProfileAvatar extends StatelessWidget {
+  const _TradesmanProfileAvatar({
+    required this.imageUrl,
+    required this.avatarLetter,
+  });
+
+  final String imageUrl;
+  final String avatarLetter;
+
+  @override
+  Widget build(BuildContext context) {
+    final uploadedImageUrl = imageUrl.trim();
+    if (uploadedImageUrl.isNotEmpty) {
+      return Image.network(
+        uploadedImageUrl,
+        width: 54,
+        height: 54,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) =>
+            _TradesmanProfileInitial(avatarLetter: avatarLetter),
+      );
+    }
+
+    return _TradesmanProfileInitial(avatarLetter: avatarLetter);
+  }
+}
+
+class _TradesmanProfileInitial extends StatelessWidget {
+  const _TradesmanProfileInitial({required this.avatarLetter});
+
+  final String avatarLetter;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        avatarLetter,
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
       ),
     );
   }

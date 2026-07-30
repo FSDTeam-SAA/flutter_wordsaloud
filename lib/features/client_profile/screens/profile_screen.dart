@@ -148,6 +148,7 @@ class _ProfileHeader extends StatelessWidget {
                       initialPhone: controller.phone.value,
                       initialArea: controller.area.value,
                       initialImagePath: controller.profileImagePath.value,
+                      initialImageUrl: controller.profileImageUrl.value,
                     ),
                   );
 

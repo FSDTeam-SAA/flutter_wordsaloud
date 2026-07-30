@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/sign_up_screen.dart';
 import 'package:get/get.dart';
-
 
 class RoleSelectionController extends GetxController {
   // 0 for User, 1 for Tradesman, null for none
@@ -13,6 +13,16 @@ class RoleSelectionController extends GetxController {
   void onContinue() {
     if (selectedRole.value != null) {
       Get.to(() => const SignUpScreen());
+      return;
     }
+
+    Get.snackbar(
+      'Select a role',
+      'Choose client or tradesman to continue.',
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: const Color(0xFFA83F2D),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+    );
   }
 }

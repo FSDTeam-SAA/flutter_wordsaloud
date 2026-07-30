@@ -13,12 +13,14 @@ class EditProfileScreen extends StatelessWidget {
     this.initialPhone = '+1 (868) 754-2288',
     this.initialArea = 'Chaguanas',
     this.initialImagePath,
+    this.initialImageUrl,
   });
 
   final String initialName;
   final String initialPhone;
   final String initialArea;
   final String? initialImagePath;
+  final String? initialImageUrl;
 
   static const _backgroundColor = Color(0xFFF5EFE6);
   static const _headerColor = Color(0xFFBC4437);
@@ -35,6 +37,7 @@ class EditProfileScreen extends StatelessWidget {
         initialPhone: initialPhone,
         initialArea: initialArea,
         initialImagePath: initialImagePath,
+        initialImageUrl: initialImageUrl,
       ),
       tag: hashCode.toString(),
     );
@@ -90,6 +93,7 @@ class EditProfileScreen extends StatelessWidget {
                           child: Obx(
                             () => _ProfileImage(
                               imagePath: controller.profileImagePath.value,
+                              imageUrl: controller.profileImageUrl.value,
                               initial: controller.initialLetter,
                             ),
                           ),
@@ -229,7 +233,9 @@ class ClientEditProfileController extends GetxController {
     required String initialPhone,
     required String initialArea,
     String? initialImagePath,
-  }) : profileImagePath = RxnString(initialImagePath) {
+    String? initialImageUrl,
+  }) : profileImagePath = RxnString(initialImagePath),
+       profileImageUrl = RxnString(initialImageUrl) {
     nameController = TextEditingController(text: initialName);
     phoneController = TextEditingController(text: initialPhone);
     areaController = TextEditingController(text: initialArea);
@@ -238,6 +244,7 @@ class ClientEditProfileController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final _imagePicker = ImagePicker();
   final RxnString profileImagePath;
+  final RxnString profileImageUrl;
   final isSaving = false.obs;
   late final ClientProfileController _profileController =
       Get.find<ClientProfileController>();
@@ -245,6 +252,32 @@ class ClientEditProfileController extends GetxController {
   late final TextEditingController nameController;
   late final TextEditingController phoneController;
   late final TextEditingController areaController;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadUploadedProfileImage();
+  }
+
+  Future<void> _loadUploadedProfileImage() async {
+    if ((profileImageUrl.value?.trim().isNotEmpty ?? false) ||
+        (profileImagePath.value?.trim().isNotEmpty ?? false)) {
+      return;
+    }
+
+    final cachedImageUrl =
+        _profileController.profileImageUrl.value?.trim() ?? '';
+    if (cachedImageUrl.isNotEmpty) {
+      profileImageUrl.value = cachedImageUrl;
+      return;
+    }
+
+    final profile = await _profileController.fetchClientProfile();
+    final uploadedImageUrl = profile?.profileImage?.url?.trim() ?? '';
+    if (uploadedImageUrl.isNotEmpty) {
+      profileImageUrl.value = uploadedImageUrl;
+    }
+  }
 
   Future<void> pickProfileImage() async {
     final image = await _imagePicker.pickImage(
@@ -256,6 +289,7 @@ class ClientEditProfileController extends GetxController {
     if (image == null) return;
 
     profileImagePath.value = image.path;
+    profileImageUrl.value = null;
   }
 
   Future<void> saveProfile() async {
@@ -305,9 +339,14 @@ class ClientEditProfileController extends GetxController {
 }
 
 class _ProfileImage extends StatelessWidget {
-  const _ProfileImage({required this.imagePath, required this.initial});
+  const _ProfileImage({
+    required this.imagePath,
+    required this.imageUrl,
+    required this.initial,
+  });
 
   final String? imagePath;
+  final String? imageUrl;
   final String initial;
 
   @override
@@ -318,6 +357,26 @@ class _ProfileImage extends StatelessWidget {
       return Image.file(File(selectedImagePath), fit: BoxFit.cover);
     }
 
+    final uploadedImageUrl = imageUrl?.trim() ?? '';
+    if (uploadedImageUrl.isNotEmpty) {
+      return Image.network(
+        uploadedImageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _InitialProfileImage(initial: initial),
+      );
+    }
+
+    return _InitialProfileImage(initial: initial);
+  }
+}
+
+class _InitialProfileImage extends StatelessWidget {
+  const _InitialProfileImage({required this.initial});
+
+  final String initial;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
       color: EditProfileScreen._goldColor,

@@ -5,6 +5,9 @@ import 'package:flutter_wordsaloud/features/auth/controller/role_selection_contr
 import 'package:get/get.dart';
 
 class SigninController extends GetxController {
+  static const _roleRequiredMessage =
+      'Please select whether you are a client or tradesman first.';
+
   final RxBool isCodeVisible = false.obs;
   final RxBool isSendingCode = false.obs;
   final RxBool isResendingCode = false.obs;
@@ -16,6 +19,12 @@ class SigninController extends GetxController {
   final RxString apiError = ''.obs;
 
   Future<void> sendCode() async {
+    final selectedRole = _selectedRole();
+    if (selectedRole == null) {
+      apiError.value = _roleRequiredMessage;
+      return;
+    }
+
     if (email.value.trim().isEmpty) {
       emailError.value = 'Email address is required.';
       return;
@@ -35,7 +44,10 @@ class SigninController extends GetxController {
       final authCtrl = Get.find<AuthController>();
       authCtrl.clearError();
 
-      await authCtrl.verifyEmailRegister(email.value.trim());
+      await authCtrl.verifyEmailRegister(
+        email.value.trim(),
+        role: selectedRole,
+      );
 
       if (authCtrl.errorMessage.value.isNotEmpty) {
         apiError.value = authCtrl.errorMessage.value;
@@ -89,6 +101,12 @@ class SigninController extends GetxController {
   }
 
   Future<void> login() async {
+    final selectedRole = _selectedRole();
+    if (selectedRole == null) {
+      apiError.value = _roleRequiredMessage;
+      return;
+    }
+
     if (!isCodeVisible.value) {
       await sendCode();
       return;
@@ -118,14 +136,6 @@ class SigninController extends GetxController {
       final authCtrl = Get.find<AuthController>();
       authCtrl.clearError();
 
-      final roleSelectionController =
-          Get.isRegistered<RoleSelectionController>()
-          ? Get.find<RoleSelectionController>()
-          : null;
-      final selectedRole = roleSelectionController?.selectedRole.value == 1
-          ? 'tradesman'
-          : 'client';
-
       await authCtrl.login(
         email: email.value.trim(),
         verificationCode: code.value.trim(),
@@ -142,5 +152,14 @@ class SigninController extends GetxController {
     } finally {
       isLoggingIn.value = false;
     }
+  }
+
+  String? _selectedRole() {
+    final roleSelectionController = Get.isRegistered<RoleSelectionController>()
+        ? Get.find<RoleSelectionController>()
+        : null;
+    final selectedRole = roleSelectionController?.selectedRole.value;
+    if (selectedRole == null) return null;
+    return selectedRole == 1 ? 'tradesman' : 'client';
   }
 }

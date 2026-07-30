@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +8,8 @@ class TradesmanPublicviewScreen extends StatefulWidget {
   final String name;
   final String location;
   final String avatarLetter;
+  final String? profileImagePath;
+  final String? profileImageUrl;
   final String rating;
   final int reviewsCount;
   final int jobsCount;
@@ -22,6 +26,8 @@ class TradesmanPublicviewScreen extends StatefulWidget {
     required this.name,
     required this.location,
     required this.avatarLetter,
+    this.profileImagePath,
+    this.profileImageUrl,
     required this.rating,
     this.reviewsCount = 0,
     this.jobsCount = 0,
@@ -55,14 +61,20 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
         return 'assets/images/fi_12479483.png';
       case 'joinery':
         return 'assets/images/fi_14106303.png';
+      case 'mechanic':
       case 'mobile mech':
         return 'assets/images/fi_186239.png';
       case 'painter':
         return 'assets/images/fi_1995467.png';
+      case 'appliance fix':
       case 'appliance':
         return 'assets/images/fi_2012957.png';
       case 'ac tech':
         return 'assets/images/fi_7969720.png';
+      case 'maid service':
+        return 'assets/images/fi_15551378.png';
+      case 'caterer':
+        return 'assets/images/fi_4490380.png';
       case 'tile man':
         return 'assets/images/fi_11932525.png';
       case 'mason':
@@ -71,6 +83,7 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
         return 'assets/images/fi_896123.png';
       case 'roofer':
         return 'assets/images/fi_14620736.png';
+      case 'fabricator/welder':
       case 'welder/gate':
         return 'assets/images/fi_9439147.png';
       case 'pool cleaner':
@@ -164,14 +177,12 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
                           colors: [Color(0xFFD85C27), Color(0xFFF5B54C)],
                         ),
                       ),
-                      child: Center(
-                        child: Text(
-                          widget.avatarLetter,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: _TradesmanPublicAvatar(
+                          imagePath: widget.profileImagePath,
+                          imageUrl: widget.profileImageUrl,
+                          avatarLetter: widget.avatarLetter,
                         ),
                       ),
                     ),
@@ -646,6 +657,65 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
         fit: BoxFit.cover,
         errorBuilder: (_, _, _) => const Center(
           child: Icon(Icons.broken_image_outlined, color: Color(0xFF8D7766)),
+        ),
+      ),
+    );
+  }
+}
+
+class _TradesmanPublicAvatar extends StatelessWidget {
+  const _TradesmanPublicAvatar({
+    required this.imagePath,
+    required this.imageUrl,
+    required this.avatarLetter,
+  });
+
+  final String? imagePath;
+  final String? imageUrl;
+  final String avatarLetter;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedImagePath = imagePath?.trim() ?? '';
+    if (selectedImagePath.isNotEmpty) {
+      return Image.file(
+        File(selectedImagePath),
+        width: 54,
+        height: 54,
+        fit: BoxFit.cover,
+      );
+    }
+
+    final uploadedImageUrl = imageUrl?.trim() ?? '';
+    if (uploadedImageUrl.isNotEmpty) {
+      return Image.network(
+        uploadedImageUrl,
+        width: 54,
+        height: 54,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) =>
+            _TradesmanPublicInitial(avatarLetter: avatarLetter),
+      );
+    }
+
+    return _TradesmanPublicInitial(avatarLetter: avatarLetter);
+  }
+}
+
+class _TradesmanPublicInitial extends StatelessWidget {
+  const _TradesmanPublicInitial({required this.avatarLetter});
+
+  final String avatarLetter;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        avatarLetter,
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
         ),
       ),
     );

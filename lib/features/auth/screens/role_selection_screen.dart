@@ -78,7 +78,7 @@ class RoleSelectionScreen extends StatelessWidget {
                         title: 'I need a tradesman',
                         subtitle: 'Find skilled workers in T n T',
                         description:
-                            'Browse, message, hire. Real reviews from real Trinis.',
+                            'Browse, message, hire. Real reviews from real Trinis.Free to join.',
                         image: 'assets/images/material-symbols_person (1).png',
                         contentColor: Colors.white,
                       ),
@@ -154,62 +154,96 @@ class RoleCard extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16),
           border: isSelected
-              ? Border.all(color: const Color(0xFFA83F2D), width: 1)
+              ? Border.all(color: const Color(0xFFA83F2D), width: 3)
               : Border.all(color: Colors.transparent, width: 3),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFA83F2D).withValues(alpha: 0.18),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Avatar/Icon Circle
-                Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF9E3A24), // Circle color from image
-                    shape: BoxShape.circle,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: Image.asset(image, width: 34, height: 34),
-                  ),
+                Row(
+                  children: [
+                    // Avatar/Icon Circle
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF9E3A24), // Circle color from image
+                        shape: BoxShape.circle,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Image.asset(image, width: 34, height: 34),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: GoogleFonts.outfit(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: contentColor,
+                            ),
+                          ),
+                          Text(
+                            subtitle,
+                            style: GoogleFonts.outfit(
+                              fontSize: 16,
+                              color: contentColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 34),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.outfit(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: contentColor,
-                        ),
-                      ),
-                      Text(
-                        subtitle,
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          color: contentColor,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 16),
+                Text(
+                  description,
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    color: contentColor,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              description,
-              style: GoogleFonts.outfit(
-                fontSize: 16,
-                color: contentColor,
-                fontWeight: FontWeight.w400,
+            if (isSelected)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFA83F2D),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.check,
+                    size: 15,
+                    color: Colors.white,
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),

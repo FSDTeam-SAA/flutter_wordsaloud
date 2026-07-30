@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
@@ -143,15 +144,16 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                           color: Color(0xFFE8B04B),
                           shape: BoxShape.circle,
                         ),
-                        child: Center(
+                        child: ClipOval(
                           child: Obx(
-                            () => Text(
-                              _userInitial(),
-                              style: GoogleFonts.outfit(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                              ),
+                            () => _CategoryProfileAvatar(
+                              imagePath: _clientProfileController
+                                  .profileImagePath
+                                  .value,
+                              imageUrl: _clientProfileController
+                                  .profileImageUrl
+                                  .value,
+                              initial: _userInitial(),
                             ),
                           ),
                         ),
@@ -431,6 +433,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
       name: _displayName(tradesman),
       location: _displayLocation(tradesman),
       avatarLetter: _initials(_displayName(tradesman)),
+      profileImageUrl: tradesman.user.profileImage.url,
       hasVipBadge: true,
       hasGoldBorder: hasGoldBorder,
       tradesman: tradesman,
@@ -445,6 +448,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
       name: _displayName(tradesman),
       location: _displayLocation(tradesman),
       avatarLetter: _initials(_displayName(tradesman)),
+      profileImageUrl: tradesman.user.profileImage.url,
       rating: _ratingLabel(tradesman),
       price: tradesman.typicalRate.amount.toString(),
       priceUnit: _rateUnitLabel(tradesman.typicalRate.unit),
@@ -529,6 +533,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
     required String name,
     required String location,
     required String avatarLetter,
+    String? profileImageUrl,
     required bool hasVipBadge,
     required bool hasGoldBorder,
     tradesman_model.Tradesman? tradesman,
@@ -593,14 +598,12 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                       colors: [Color(0xFFD85C27), Color(0xFFF5B54C)],
                     ),
                   ),
-                  child: Center(
-                    child: Text(
-                      avatarLetter,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: _TradesmanCardAvatar(
+                      imageUrl: profileImageUrl,
+                      avatarLetter: avatarLetter,
+                      fontSize: 16,
                     ),
                   ),
                 ),
@@ -660,6 +663,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
     required String name,
     required String location,
     required String avatarLetter,
+    String? profileImageUrl,
     required String rating,
     required String price,
     required String priceUnit,
@@ -724,14 +728,12 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                             colors: [Color(0xFF30AE5A), Color(0xFF355E69)],
                           ),
                   ),
-                  child: Center(
-                    child: Text(
-                      avatarLetter,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: _TradesmanCardAvatar(
+                      imageUrl: profileImageUrl,
+                      avatarLetter: avatarLetter,
+                      fontSize: 18,
                     ),
                   ),
                 ),
@@ -1014,6 +1016,124 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _TradesmanCardAvatar extends StatelessWidget {
+  const _TradesmanCardAvatar({
+    required this.imageUrl,
+    required this.avatarLetter,
+    required this.fontSize,
+  });
+
+  final String? imageUrl;
+  final String avatarLetter;
+  final double fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final uploadedImageUrl = imageUrl?.trim() ?? '';
+    if (uploadedImageUrl.isNotEmpty) {
+      return Image.network(
+        uploadedImageUrl,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _TradesmanInitialAvatar(
+          avatarLetter: avatarLetter,
+          fontSize: fontSize,
+        ),
+      );
+    }
+
+    return _TradesmanInitialAvatar(
+      avatarLetter: avatarLetter,
+      fontSize: fontSize,
+    );
+  }
+}
+
+class _TradesmanInitialAvatar extends StatelessWidget {
+  const _TradesmanInitialAvatar({
+    required this.avatarLetter,
+    required this.fontSize,
+  });
+
+  final String avatarLetter;
+  final double fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        avatarLetter,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryProfileAvatar extends StatelessWidget {
+  const _CategoryProfileAvatar({
+    required this.imagePath,
+    required this.imageUrl,
+    required this.initial,
+  });
+
+  final String? imagePath;
+  final String? imageUrl;
+  final String initial;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedImagePath = imagePath?.trim() ?? '';
+    if (selectedImagePath.isNotEmpty) {
+      return Image.file(
+        File(selectedImagePath),
+        width: 44,
+        height: 44,
+        fit: BoxFit.cover,
+      );
+    }
+
+    final uploadedImageUrl = imageUrl?.trim() ?? '';
+    if (uploadedImageUrl.isNotEmpty) {
+      return Image.network(
+        uploadedImageUrl,
+        width: 44,
+        height: 44,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _CategoryInitialAvatar(initial: initial),
+      );
+    }
+
+    return _CategoryInitialAvatar(initial: initial);
+  }
+}
+
+class _CategoryInitialAvatar extends StatelessWidget {
+  const _CategoryInitialAvatar({required this.initial});
+
+  final String initial;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      color: Colors.transparent,
+      child: Text(
+        initial,
+        style: GoogleFonts.outfit(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: Colors.black,
+        ),
+      ),
     );
   }
 }

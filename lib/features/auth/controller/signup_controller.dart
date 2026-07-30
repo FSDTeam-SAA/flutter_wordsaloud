@@ -5,6 +5,9 @@ import 'package:flutter_wordsaloud/features/auth/controller/role_selection_contr
 import 'package:get/get.dart';
 
 class SignupController extends GetxController {
+  static const _roleRequiredMessage =
+      "Please select whether you are a client or tradesman first.";
+
   final RxBool isSmsCodeVisible = false.obs;
   final RxBool isLoading = false.obs;
   final RxBool isResendingCode = false.obs;
@@ -20,6 +23,11 @@ class SignupController extends GetxController {
   final RxString apiError = "".obs;
 
   void onMainButtonPressed() {
+    if (_selectedRole() == null) {
+      apiError.value = _roleRequiredMessage;
+      return;
+    }
+
     if (!isSmsCodeVisible.value) {
       // Validation Check: Empty email fields
       if (email.value.trim().isEmpty) {
@@ -134,13 +142,11 @@ class SignupController extends GetxController {
       final authCtrl = Get.find<AuthController>();
       authCtrl.clearError();
 
-      final roleSelectionController =
-          Get.isRegistered<RoleSelectionController>()
-          ? Get.find<RoleSelectionController>()
-          : null;
-      final role = roleSelectionController?.selectedRole.value == 1
-          ? 'tradesman'
-          : 'client';
+      final role = _selectedRole();
+      if (role == null) {
+        apiError.value = _roleRequiredMessage;
+        return;
+      }
 
       await authCtrl.register(
         firstName.value.trim(),
@@ -161,5 +167,14 @@ class SignupController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  String? _selectedRole() {
+    final roleSelectionController = Get.isRegistered<RoleSelectionController>()
+        ? Get.find<RoleSelectionController>()
+        : null;
+    final selectedRole = roleSelectionController?.selectedRole.value;
+    if (selectedRole == null) return null;
+    return selectedRole == 1 ? 'tradesman' : 'client';
   }
 }

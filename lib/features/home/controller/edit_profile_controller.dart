@@ -24,20 +24,22 @@ class EditProfileController extends GetxController {
     'Computer Tech',
     'Plumber',
     'Electrician',
-    'Carpenter',
+    'Appliance Fix',
     'Joinery',
-    'Mobile Mech',
-    'Painter',
-    'Appliance',
     'AC Tech',
+    'Painter',
+    'Maid Service',
+    'Caterer',
     'Tile Man',
-    'Mason',
     'Glass Man',
-    'Roofer',
-    'Welder/Gate',
+    'Mason',
+    'Carpenter',
+    'Fabricator/Welder',
     'Pool Cleaner',
     'Tree Cutter',
     'Landscaper',
+    'Roofer',
+    'Mechanic',
     'Auto Body',
     'Contractor',
   ];
@@ -135,6 +137,23 @@ class EditProfileController extends GetxController {
   }
 
   bool _sameTrade(String first, String second) {
-    return first.trim().toLowerCase() == second.trim().toLowerCase();
+    return _tradeKey(first) == _tradeKey(second);
+  }
+
+  String _tradeKey(String tradeName) {
+    final value = tradeName.trim().toLowerCase();
+    switch (value) {
+      case 'appliance':
+      case 'appliance fix':
+        return 'appliance';
+      case 'fabricator/welder':
+      case 'welder/gate':
+        return 'welder';
+      case 'mechanic':
+      case 'mobile mech':
+        return 'mechanic';
+      default:
+        return value;
+    }
   }
 }

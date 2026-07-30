@@ -282,14 +282,20 @@ class _TradesmanEditProfileScreenState
         return 'assets/images/fi_12479483.png';
       case 'joinery':
         return 'assets/images/fi_14106303.png';
+      case 'mechanic':
       case 'mobile mech':
         return 'assets/images/fi_186239.png';
       case 'painter':
         return 'assets/images/fi_1995467.png';
+      case 'appliance fix':
       case 'appliance':
         return 'assets/images/fi_2012957.png';
       case 'ac tech':
         return 'assets/images/fi_7969720.png';
+      case 'maid service':
+        return 'assets/images/fi_15551378.png';
+      case 'caterer':
+        return 'assets/images/fi_4490380.png';
       case 'tile man':
         return 'assets/images/fi_11932525.png';
       case 'mason':
@@ -298,6 +304,7 @@ class _TradesmanEditProfileScreenState
         return 'assets/images/fi_896123.png';
       case 'roofer':
         return 'assets/images/fi_14620736.png';
+      case 'fabricator/welder':
       case 'welder/gate':
         return 'assets/images/fi_9439147.png';
       case 'pool cleaner':

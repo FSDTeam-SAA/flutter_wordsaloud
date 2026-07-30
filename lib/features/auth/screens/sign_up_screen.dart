@@ -348,7 +348,7 @@ class SignUpScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 CustomTextField(
-                  hintText: 'e.g. Berlin',
+                  hintText: 'e.g. Chaguanas',
                   onChanged: (v) => controller.area.value = v,
                 ),
                 const SizedBox(height: 40),

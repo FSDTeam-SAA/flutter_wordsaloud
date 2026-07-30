@@ -59,7 +59,7 @@ class HomeController extends GetxController {
     TradeCategory(name: 'Tree Cutter', image: 'assets/images/fi_6327310.png'),
     TradeCategory(name: 'Landscaper', image: 'assets/images/fi_10033506.png'),
     TradeCategory(name: 'Roofer', image: 'assets/images/fi_14620736.png'),
-    TradeCategory(name: 'Mechanic', image: 'assets/images/fi_186239.png'),
+    TradeCategory(name: 'Mechanic', image: 'assets/images/mechanic.png'),
     TradeCategory(name: 'Auto Body', image: 'assets/images/fi_6332022.png'),
     TradeCategory(name: 'Contractor', image: 'assets/images/fi_4490380.png'),
   ];
