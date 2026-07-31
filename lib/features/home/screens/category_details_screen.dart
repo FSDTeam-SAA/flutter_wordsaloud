@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_wordsaloud/core/common/widgets/app_network_image.dart';
+import 'package:flutter_wordsaloud/core/common/widgets/app_network_video.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
 import 'package:flutter_wordsaloud/features/client_profile/controller/client_profile_controller.dart';
 import 'package:get/get.dart';
@@ -210,7 +212,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              '${tradesmen.length} ${widget.category.name.toLowerCase()} Near You',
+                              '${tradesmen.length} ${widget.category.name.toLowerCase()}s Near You',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -854,10 +856,10 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
         dashLength: 6,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: CustomPaint(
-            painter: _SponsoredStripePainter(),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: CustomPaint(
+              painter: _SponsoredStripePainter(),
               child: Center(
                 child: isLoading
                     ? const SizedBox(
@@ -873,6 +875,8 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                     : _buildAdvertisementContent(
                         title: advertisement.title,
                         description: advertisement.description,
+                        mediaUrl: advertisement.mediaUrl,
+                        mediaType: advertisement.mediaType,
                       ),
               ),
             ),
@@ -885,7 +889,29 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
   Widget _buildAdvertisementContent({
     required String title,
     required String description,
+    required String mediaUrl,
+    required String mediaType,
   }) {
+    final hasMedia = mediaUrl.trim().isNotEmpty;
+
+    if (hasMedia) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildAdvertisementMedia(mediaUrl: mediaUrl, mediaType: mediaType),
+          Positioned(
+            top: 8,
+            left: 8,
+            child: _SponsoredBadge(
+              label: 'SPONSORED',
+              backgroundColor: Colors.black.withValues(alpha: 0.62),
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -935,6 +961,47 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildAdvertisementMedia({
+    required String mediaUrl,
+    required String mediaType,
+  }) {
+    if (mediaType == 'video') {
+      return AppNetworkVideo(
+        videoUrl: mediaUrl,
+        autoPlay: true,
+        muted: true,
+        looping: true,
+        fit: BoxFit.contain,
+      );
+    }
+
+    return AppNetworkImage(
+      imageUrl: mediaUrl,
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.contain,
+      placeholder: const ColoredBox(
+        color: Color(0xFFE9DFD3),
+        child: Center(
+          child: SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Color(0xFFAE3F30),
+            ),
+          ),
+        ),
+      ),
+      errorWidget: const ColoredBox(
+        color: Color(0xFFE9DFD3),
+        child: Center(
+          child: Icon(Icons.broken_image_outlined, color: Color(0xFF8C7F72)),
+        ),
+      ),
     );
   }
 
@@ -1016,6 +1083,41 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SponsoredBadge extends StatelessWidget {
+  const _SponsoredBadge({
+    required this.label,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final String label;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 8,
+            fontWeight: FontWeight.w800,
+            color: foregroundColor,
+            letterSpacing: 1.2,
+            height: 1,
+          ),
+        ),
+      ),
     );
   }
 }

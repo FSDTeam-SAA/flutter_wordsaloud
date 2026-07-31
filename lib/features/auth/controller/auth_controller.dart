@@ -76,11 +76,6 @@ class AuthController extends BaseController {
       (success) {
         final accountRole = _normalizeRole(success.data.data?.role);
         final selectedLoginRole = _normalizeRole(loginRole);
-        if (accountRole.isEmpty) {
-          setError('Unable to verify this account role. Please try again.');
-          setLoading(false);
-          return;
-        }
 
         if (accountRole.isNotEmpty && accountRole != selectedLoginRole) {
           setError(_roleMismatchMessage(selectedLoginRole));
