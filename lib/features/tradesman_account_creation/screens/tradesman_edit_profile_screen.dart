@@ -283,6 +283,7 @@ class _TradesmanEditProfileScreenState
       case 'joinery':
         return 'assets/images/fi_14106303.png';
       case 'mechanic':
+        return 'assets/images/mechanic.png';
       case 'mobile mech':
         return 'assets/images/fi_186239.png';
       case 'painter':
