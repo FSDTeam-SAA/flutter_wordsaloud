@@ -26,61 +26,68 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5EFE6), // Creamy background
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Logo & Text
-              Image.asset(
-                'assets/images/Frame 2147234823.png',
-                height: 36,
-                width: 203,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 20,
               ),
-              const SizedBox(height: 43),
-
-              // Welcome Text
-              Text(
-                'Welcome.',
-                style: GoogleFonts.outfit(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.black,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 40,
                 ),
-              ),
-              const SizedBox(height: 4),
-              RichText(
-                text: TextSpan(
-                  style: GoogleFonts.outfit(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black,
-                  ),
-                  children: const [
-                    TextSpan(text: "Let's get you "),
-                    TextSpan(
-                      text: 'sorted',
-                      style: TextStyle(color: Color(0xFFA83F2D)),
-                    ),
-                    TextSpan(text: '.'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Tell us what brings you here.',
-                style: GoogleFonts.outfit(
-                  fontSize: 16,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              const SizedBox(height: 36),
-
-              // Roles
-              Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Header Logo & Text
+                    Image.asset(
+                      'assets/images/Frame 2147234823.png',
+                      height: 36,
+                      width: 203,
+                    ),
+                    const SizedBox(height: 43),
+
+                    // Welcome Text
+                    Text(
+                      'Welcome.',
+                      style: GoogleFonts.outfit(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.outfit(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.black,
+                        ),
+                        children: const [
+                          TextSpan(text: "Let's get you "),
+                          TextSpan(
+                            text: 'sorted',
+                            style: TextStyle(color: Color(0xFFA83F2D)),
+                          ),
+                          TextSpan(text: '.'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Tell us what brings you here.',
+                      style: GoogleFonts.outfit(
+                        fontSize: 16,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    const SizedBox(height: 36),
+
+                    // Roles
                     Obx(
                       () => controller.showOfferNote.value
                           ? const Column(
@@ -121,25 +128,26 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                         contentColor: Colors.black,
                       ),
                     ),
+                    const SizedBox(height: 38),
+
+                    // Continue Button
+                    Center(
+                      child: Obx(
+                        () => CustomButton(
+                          text: 'Continue',
+                          icon: Icons.arrow_forward,
+                          onPressed: controller.selectedRole.value != null
+                              ? controller.onContinue
+                              : null,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
-
-              // Continue Button
-              Center(
-                child: Obx(
-                  () => CustomButton(
-                    text: 'Continue',
-                    icon: Icons.arrow_forward,
-                    onPressed: controller.selectedRole.value != null
-                        ? controller.onContinue
-                        : null,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

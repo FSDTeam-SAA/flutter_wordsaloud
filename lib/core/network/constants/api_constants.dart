@@ -19,6 +19,7 @@ class ApiConstants {
   //   return 'ws://$baseDomain';
   // }
 
+
   /// [Headers]
   static Map<String, String> get defaultHeaders => {
     'Content-Type': 'application/json',
