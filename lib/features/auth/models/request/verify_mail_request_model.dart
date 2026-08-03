@@ -1,10 +1,15 @@
 class VerifyMailRequestModel {
   final String email;
-  final String role;
+  final String? role;
 
-  VerifyMailRequestModel({required this.email, required this.role});
+  VerifyMailRequestModel({required this.email, this.role});
 
   Map<String, dynamic> toJson() {
-    return {'email': email, 'role': role};
+    final json = {'email': email};
+    final trimmedRole = role?.trim();
+    if (trimmedRole != null && trimmedRole.isNotEmpty) {
+      json['role'] = trimmedRole;
+    }
+    return json;
   }
 }

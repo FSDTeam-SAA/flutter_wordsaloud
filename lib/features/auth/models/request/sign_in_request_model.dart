@@ -1,15 +1,16 @@
 class SignInRequestModel {
   final String email;
   final String otp;
-  final String role;
+  final String? role;
 
-  SignInRequestModel({
-    required this.email,
-    required this.otp,
-    required this.role,
-  });
+  SignInRequestModel({required this.email, required this.otp, this.role});
 
   Map<String, dynamic> toJson() {
-    return {'email': email, 'otp': otp, 'role': role};
+    final json = {'email': email, 'otp': otp};
+    final trimmedRole = role?.trim();
+    if (trimmedRole != null && trimmedRole.isNotEmpty) {
+      json['role'] = trimmedRole;
+    }
+    return json;
   }
 }

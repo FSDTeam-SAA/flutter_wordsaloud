@@ -18,6 +18,8 @@ class AuthController extends BaseController {
   late final _authRepo = Get.find<AuthRepository>();
   final AuthStorageService _authStorageService = AuthStorageService();
   final currentUserName = ''.obs;
+  static const accountNotFoundMessage =
+      'No account found with this email. Please sign up first.';
 
   //
   // AuthController(this._authRepo, this._authStorageService);
@@ -56,20 +58,14 @@ class AuthController extends BaseController {
     );
   }
 
-  Future verifyEmailRegister(String email, {required String role}) async {
-    final loginRole = role.trim();
-    if (loginRole.isEmpty) {
-      setError('Please select whether you are a client or tradesman first.');
-      setLoading(false);
-      return;
-    }
-
+  Future verifyEmailRegister(String email, {String? role}) async {
+    final loginRole = role?.trim();
     final request = VerifyMailRequestModel(email: email, role: loginRole);
     final result = await _authRepo.emailVerify(request);
 
     result.fold(
       (fail) {
-        setError(fail.message);
+        setError(_loginErrorMessage(fail.message, fail.statusCode));
         d_print.log("verify otp success result : ${fail.message}");
         setLoading(false);
       },
@@ -77,7 +73,9 @@ class AuthController extends BaseController {
         final accountRole = _normalizeRole(success.data.data?.role);
         final selectedLoginRole = _normalizeRole(loginRole);
 
-        if (accountRole.isNotEmpty && accountRole != selectedLoginRole) {
+        if (selectedLoginRole.isNotEmpty &&
+            accountRole.isNotEmpty &&
+            accountRole != selectedLoginRole) {
           setError(_roleMismatchMessage(selectedLoginRole));
           setLoading(false);
           return;
@@ -98,6 +96,7 @@ class AuthController extends BaseController {
     String otp,
     String role,
     String area,
+    String phoneNumber,
   ) async {
     if (role.trim().isEmpty) {
       setError('Please select whether you are a client or tradesman first.');
@@ -112,6 +111,7 @@ class AuthController extends BaseController {
       otp: otp,
       role: role,
       area: area,
+      phoneNumber: phoneNumber,
     );
 
     final result = await _authRepo.register(request);
@@ -138,20 +138,8 @@ class AuthController extends BaseController {
   Future<void> login({
     required String email,
     required String verificationCode,
-    String? selectedRole,
   }) async {
-    final loginRole = selectedRole?.trim() ?? '';
-    if (loginRole.isEmpty) {
-      setError('Please select whether you are a client or tradesman first.');
-      setLoading(false);
-      return;
-    }
-
-    final request = SignInRequestModel(
-      email: email,
-      otp: verificationCode,
-      role: loginRole,
-    );
+    final request = SignInRequestModel(email: email, otp: verificationCode);
 
     final result = await _authRepo.login(request);
 
@@ -159,24 +147,17 @@ class AuthController extends BaseController {
 
     await result.fold<Future<void>>(
       (fail) async {
-        setError(fail.message);
+        setError(_loginErrorMessage(fail.message, fail.statusCode));
         setLoading(false);
       },
       (success) async {
         // Extract user data
         final user = success.data;
         final accountRole = _normalizeRole(user.role);
-        final selectedLoginRole = _normalizeRole(loginRole);
-        if (accountRole.isNotEmpty && accountRole != selectedLoginRole) {
-          setError(_roleMismatchMessage(selectedLoginRole));
-          setLoading(false);
-          return;
-        }
-
-        final role = accountRole.isNotEmpty ? accountRole : selectedLoginRole;
+        final role = accountRole;
         if (role.isEmpty) {
           setError(
-            'Please select whether you are a client or tradesman first.',
+            'We could not find this account role. Please contact support.',
           );
           setLoading(false);
           return;
@@ -212,6 +193,25 @@ class AuthController extends BaseController {
     final value = role?.trim().toLowerCase() ?? '';
     if (value == 'user') return 'client';
     return value;
+  }
+
+  String _loginErrorMessage(String message, int statusCode) {
+    final normalizedMessage = message.toLowerCase();
+    final isMissingAccount =
+        statusCode == 404 ||
+        normalizedMessage.contains('no account') ||
+        normalizedMessage.contains('account not found') ||
+        normalizedMessage.contains('user not found') ||
+        normalizedMessage.contains('email not found') ||
+        normalizedMessage.contains('not exist') ||
+        normalizedMessage.contains('not registered') ||
+        normalizedMessage == 'resource not found';
+
+    if (isMissingAccount) return accountNotFoundMessage;
+    if (normalizedMessage.contains('password')) {
+      return 'Please enter the verification code sent to your email.';
+    }
+    return message;
   }
 
   String _roleMismatchMessage(String selectedRole) {

@@ -7,6 +7,7 @@ import 'package:flutter_wordsaloud/core/base/base_controller.dart';
 import 'package:flutter_wordsaloud/core/services/auth_storage_service.dart';
 import 'package:flutter_wordsaloud/core/services/session_service.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
+import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/add_inquiry_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/add_review_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/tradesman_area_request_model.dart';
@@ -533,7 +534,7 @@ class TradesmanController extends BaseController {
         Get.find<SessionService>().clearToken();
       }
 
-      Get.offAll(() => const RoleSelectionScreen());
+      Get.offAll(() => const SignInScreen());
     } catch (e) {
       setError('Something went wrong. Please try again.');
       d_print.log('Sign out failed: $e');

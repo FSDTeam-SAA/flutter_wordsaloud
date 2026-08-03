@@ -5,6 +5,7 @@ import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/res
     as specific_model;
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TradesmanDetailsScreen extends StatefulWidget {
   final String? tradesmanId;
@@ -147,6 +148,81 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
     return 'day';
   }
 
+  String _digitsOnly(String phoneNumber) {
+    return phoneNumber.replaceAll(RegExp(r'\D'), '');
+  }
+
+  String _whatsAppPhoneNumber(String phoneNumber) {
+    final digits = _digitsOnly(phoneNumber);
+    if (digits.length == 7) return '1868$digits';
+    if (digits.length == 10 && digits.startsWith('868')) return '1$digits';
+    return digits;
+  }
+
+  String _dialPhoneNumber(String phoneNumber) {
+    final trimmed = phoneNumber.trim();
+    if (trimmed.startsWith('+')) {
+      return '+${_digitsOnly(trimmed)}';
+    }
+    return _digitsOnly(trimmed);
+  }
+
+  void _showContactError(String message) {
+    Get.snackbar(
+      'Contact unavailable',
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFF1F1716),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+    );
+  }
+
+  Future<void> _openWhatsApp({
+    required String phoneNumber,
+    required String tradesmanName,
+  }) async {
+    final whatsappPhone = _whatsAppPhoneNumber(phoneNumber);
+    if (whatsappPhone.isEmpty) {
+      _showContactError('This tradesman has not added a phone number yet.');
+      return;
+    }
+
+    final message =
+        'Hi $tradesmanName, I found your profile via Aturservicett and would like to discuss a job.';
+    final appUri = Uri.parse(
+      'whatsapp://send?phone=$whatsappPhone&text=${Uri.encodeComponent(message)}',
+    );
+    final webUri = Uri.parse(
+      'https://wa.me/$whatsappPhone?text=${Uri.encodeComponent(message)}',
+    );
+
+    if (await launchUrl(appUri, mode: LaunchMode.externalApplication)) {
+      return;
+    }
+
+    if (await launchUrl(webUri, mode: LaunchMode.externalApplication)) {
+      return;
+    }
+
+    _showContactError(
+      'Could not open WhatsApp. Try calling directly instead.',
+    );
+  }
+
+  Future<void> _openDialer(String phoneNumber) async {
+    final dialPhone = _dialPhoneNumber(phoneNumber);
+    if (dialPhone.isEmpty) {
+      _showContactError('This tradesman has not added a phone number yet.');
+      return;
+    }
+
+    final uri = Uri(scheme: 'tel', path: dialPhone);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      _showContactError('Could not open the phone dialer.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -190,6 +266,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
           profile != null && profile.typicalRate.unit.trim().isNotEmpty
           ? _rateUnitLabel(profile.typicalRate.unit)
           : widget.rateUnit;
+      final tradesmanPhoneNumber = profile?.user.phoneNumber.trim() ?? '';
       final effectiveTradesmanId = profile?.id ?? widget.tradesmanId ?? '';
       final recentWorkPhotoUrls =
           profile?.workPhotos
@@ -498,9 +575,10 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
 
                     // WhatsApp Button
                     GestureDetector(
-                      onTap: () {
-                        // WhatsApp redirection placeholder
-                      },
+                      onTap: () => _openWhatsApp(
+                        phoneNumber: tradesmanPhoneNumber,
+                        tradesmanName: displayName,
+                      ),
                       child: Container(
                         height: 51,
                         decoration: BoxDecoration(
@@ -537,9 +615,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                     const SizedBox(height: 12),
                     // Call directly Button
                     GestureDetector(
-                      onTap: () {
-                        // Call directly placeholder
-                      },
+                      onTap: () => _openDialer(tradesmanPhoneNumber),
                       child: Container(
                         height: 51,
                         decoration: BoxDecoration(

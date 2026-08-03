@@ -15,10 +15,12 @@ class SignupController extends GetxController {
   final RxString smsCode = "".obs;
   final RxString firstName = "".obs;
   final RxString lastName = "".obs;
+  final RxString phoneNumber = "".obs;
   final RxString area = "".obs;
   final RxString emailError = "".obs;
   final RxString firstNameError = "".obs;
   final RxString lastNameError = "".obs;
+  final RxString phoneNumberError = "".obs;
   final RxString smsCodeError = "".obs;
   final RxString apiError = "".obs;
 
@@ -67,6 +69,18 @@ class SignupController extends GetxController {
         return;
       }
       lastNameError.value = "";
+
+      if (phoneNumber.value.trim().isEmpty) {
+        phoneNumberError.value = "Phone number is required.";
+        return;
+      }
+
+      final phoneDigits = phoneNumber.value.replaceAll(RegExp(r'\D'), "");
+      if (phoneDigits.length < 7) {
+        phoneNumberError.value = "Please enter a valid phone number.";
+        return;
+      }
+      phoneNumberError.value = "";
 
       // Area is optional, no validation needed
       completeSignup();
@@ -155,6 +169,7 @@ class SignupController extends GetxController {
         smsCode.value.trim(),
         role,
         area.value.trim(),
+        phoneNumber.value.trim(),
       );
 
       if (authCtrl.errorMessage.value.isNotEmpty) {

@@ -9,7 +9,6 @@ class KeyConst {
   static const String tradesmanProfileCompleted = 'tradesman_profile_completed';
 
   static const String email = 'email';
-  static const String password = 'password';
 
   static const String isDark = 'is_dark';
 

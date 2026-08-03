@@ -98,6 +98,7 @@ class SignInScreen extends StatelessWidget {
                           }
                           if (controller.apiError.value.isNotEmpty) {
                             controller.apiError.value = '';
+                            controller.isAccountMissing.value = false;
                           }
                         },
                       ),
@@ -120,6 +121,34 @@ class SignInScreen extends StatelessWidget {
                             fontSize: 12,
                             color: _accentColor,
                             fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                      if (controller.isAccountMissing.value) ...[
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () => Get.off(
+                              () =>
+                                  const SignUpScreen(backToRoleSelection: true),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: _accentColor,
+                              side: const BorderSide(color: _accentColor),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              textStyle: GoogleFonts.outfit(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            child: const Text('Sign up first'),
                           ),
                         ),
                       ],

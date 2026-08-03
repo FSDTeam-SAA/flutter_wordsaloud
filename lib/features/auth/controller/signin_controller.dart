@@ -1,17 +1,14 @@
 import 'dart:developer' as d_print;
 
 import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/role_selection_controller.dart';
 import 'package:get/get.dart';
 
 class SigninController extends GetxController {
-  static const _roleRequiredMessage =
-      'Please select whether you are a client or tradesman first.';
-
   final RxBool isCodeVisible = false.obs;
   final RxBool isSendingCode = false.obs;
   final RxBool isResendingCode = false.obs;
   final RxBool isLoggingIn = false.obs;
+  final RxBool isAccountMissing = false.obs;
   final RxString email = ''.obs;
   final RxString code = ''.obs;
   final RxString emailError = ''.obs;
@@ -19,12 +16,6 @@ class SigninController extends GetxController {
   final RxString apiError = ''.obs;
 
   Future<void> sendCode() async {
-    final selectedRole = _selectedRole();
-    if (selectedRole == null) {
-      apiError.value = _roleRequiredMessage;
-      return;
-    }
-
     if (email.value.trim().isEmpty) {
       emailError.value = 'Email address is required.';
       return;
@@ -38,19 +29,19 @@ class SigninController extends GetxController {
     emailError.value = '';
     codeError.value = '';
     apiError.value = '';
+    isAccountMissing.value = false;
     isSendingCode.value = true;
 
     try {
       final authCtrl = Get.find<AuthController>();
       authCtrl.clearError();
 
-      await authCtrl.verifyEmailRegister(
-        email.value.trim(),
-        role: selectedRole,
-      );
+      await authCtrl.verifyEmailRegister(email.value.trim());
 
       if (authCtrl.errorMessage.value.isNotEmpty) {
         apiError.value = authCtrl.errorMessage.value;
+        isAccountMissing.value =
+            apiError.value == AuthController.accountNotFoundMessage;
         authCtrl.clearError();
       } else {
         isCodeVisible.value = true;
@@ -78,6 +69,7 @@ class SigninController extends GetxController {
     emailError.value = '';
     codeError.value = '';
     apiError.value = '';
+    isAccountMissing.value = false;
     isResendingCode.value = true;
 
     try {
@@ -88,6 +80,8 @@ class SigninController extends GetxController {
 
       if (authCtrl.errorMessage.value.isNotEmpty) {
         apiError.value = authCtrl.errorMessage.value;
+        isAccountMissing.value =
+            apiError.value == AuthController.accountNotFoundMessage;
         authCtrl.clearError();
       } else {
         d_print.log('OTP resent successfully to ${email.value}');
@@ -101,12 +95,6 @@ class SigninController extends GetxController {
   }
 
   Future<void> login() async {
-    final selectedRole = _selectedRole();
-    if (selectedRole == null) {
-      apiError.value = _roleRequiredMessage;
-      return;
-    }
-
     if (!isCodeVisible.value) {
       await sendCode();
       return;
@@ -130,6 +118,7 @@ class SigninController extends GetxController {
     emailError.value = '';
     codeError.value = '';
     apiError.value = '';
+    isAccountMissing.value = false;
     isLoggingIn.value = true;
 
     try {
@@ -139,11 +128,12 @@ class SigninController extends GetxController {
       await authCtrl.login(
         email: email.value.trim(),
         verificationCode: code.value.trim(),
-        selectedRole: selectedRole,
       );
 
       if (authCtrl.errorMessage.value.isNotEmpty) {
         apiError.value = authCtrl.errorMessage.value;
+        isAccountMissing.value =
+            apiError.value == AuthController.accountNotFoundMessage;
         authCtrl.clearError();
       }
     } catch (e) {
@@ -152,14 +142,5 @@ class SigninController extends GetxController {
     } finally {
       isLoggingIn.value = false;
     }
-  }
-
-  String? _selectedRole() {
-    final roleSelectionController = Get.isRegistered<RoleSelectionController>()
-        ? Get.find<RoleSelectionController>()
-        : null;
-    final selectedRole = roleSelectionController?.selectedRole.value;
-    if (selectedRole == null) return null;
-    return selectedRole == 1 ? 'tradesman' : 'client';
   }
 }
