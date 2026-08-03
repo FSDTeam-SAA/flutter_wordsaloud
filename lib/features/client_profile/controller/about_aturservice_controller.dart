@@ -12,7 +12,7 @@ class AboutAturserviceController extends GetxController {
   final foundersNote =
       'Aturservicett was built to solve a real problem -- finding good, honest, verified tradesmen in Trinidad & Tobago shouldn\'t be difficult. We built this app so every skilled worker on our two islands has a place to be found, and every Trini has a way to find them.'
           .obs;
-  final foundersSignature = '-- Rhian & Rae-Jeanne, Co-Founders'.obs;
+  final foundersSignature = 'Co-Founders'.obs;
   final contactTitle = 'We\'d love to hear from you'.obs;
   final contactSubtitle = 'Feedback, questions, or partnerships'.obs;
   final supportEmail = 'support@aturservicett.com'.obs;

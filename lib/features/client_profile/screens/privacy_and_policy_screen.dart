@@ -292,7 +292,7 @@ class _ServiceTable extends StatelessWidget {
 
   static const _rows = [
     ('Resend', 'Sends email verification codes and essential account emails.'),
-    ('Supabase', 'Stores account, profile, and review data securely.'),
+    ('Custom Backend', 'Stores account, profile, and review data securely.'),
     (
       'WhatsApp (Meta)',
       'Handles all client-to-tradesman conversations after the hand-off. WhatsApp\'s own policy applies to those messages.',

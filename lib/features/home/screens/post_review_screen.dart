@@ -255,7 +255,7 @@ class PostReviewController extends GetxController {
 
   final String tradesmanId;
   final formKey = GlobalKey<FormState>();
-  final rating = 5.obs;
+  final rating = 0.obs;
   final isPosting = false.obs;
   final commentController = TextEditingController();
   late final TradesmanController _tradesmanController =
@@ -271,12 +271,19 @@ class PostReviewController extends GetxController {
         return 'Good';
       case 4:
         return 'Great — would recommend';
-      default:
+      case 5:
         return 'Excellent — would recommend';
+      default:
+        return 'Tap a star to rate';
     }
   }
 
   Future<void> postReview() async {
+    if (rating.value < 1 || rating.value > 5) {
+      Get.snackbar('Rating required', 'Please tap a star to choose a rating.');
+      return;
+    }
+
     if (!formKey.currentState!.validate()) return;
     if (tradesmanId.trim().isEmpty) {
       Get.snackbar('Review not posted', 'Tradesman profile not found.');
