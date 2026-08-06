@@ -13,6 +13,7 @@ import 'package:flutter_wordsaloud/features/home/screens/home_screen.dart';
 class TradesmanDashboard extends StatefulWidget {
   final String tradesmanName;
   final String tradesmanSkill;
+  final List<String> extraTrades;
   final String homeArea;
   final String? profileImagePath;
 
@@ -20,6 +21,7 @@ class TradesmanDashboard extends StatefulWidget {
     super.key,
     this.tradesmanName = 'Devon Ramsaran',
     this.tradesmanSkill = 'Plumber',
+    this.extraTrades = const [],
     this.homeArea = 'San Fernando',
     this.profileImagePath,
   });
@@ -56,6 +58,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
     _controller = Get.find<TradesmanController>();
     _tradesmanName = widget.tradesmanName;
     _tradesmanSkill = widget.tradesmanSkill;
+    _extraTrades = widget.extraTrades;
     _homeArea = widget.homeArea;
     _profileImagePath = widget.profileImagePath;
     _loadDashboard();

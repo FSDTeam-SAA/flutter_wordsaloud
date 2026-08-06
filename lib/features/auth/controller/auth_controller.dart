@@ -162,7 +162,11 @@ class AuthController extends BaseController {
           setLoading(false);
           return;
         }
-        currentUserName.value = user.name?.trim() ?? '';
+        currentUserName.value = _displayName(
+          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        );
 
         // Store access token and refresh token for ANY user
         await _authStorageService.storeAuthData(
@@ -178,7 +182,11 @@ class AuthController extends BaseController {
 
           Get.offAll(
             () => isProfileCompleted
-                ? const TradesmanDashboard(tradesmanName: 'Tradesman')
+                ? TradesmanDashboard(
+                    tradesmanName: currentUserName.value.trim().isNotEmpty
+                        ? currentUserName.value.trim()
+                        : 'Tradesman',
+                  )
                 : const WhatDoScreen(),
           );
         } else {
@@ -193,6 +201,16 @@ class AuthController extends BaseController {
     final value = role?.trim().toLowerCase() ?? '';
     if (value == 'user') return 'client';
     return value;
+  }
+
+  String _displayName({String? name, String? firstName, String? lastName}) {
+    final explicitName = name?.trim() ?? '';
+    if (explicitName.isNotEmpty) return explicitName;
+
+    return [
+      firstName?.trim() ?? '',
+      lastName?.trim() ?? '',
+    ].where((part) => part.isNotEmpty).join(' ');
   }
 
   String _loginErrorMessage(String message, int statusCode) {

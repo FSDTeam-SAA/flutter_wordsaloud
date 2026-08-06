@@ -1,6 +1,8 @@
 class LoginResponseModel {
   final String? id;
   final String? name;
+  final String? firstName;
+  final String? lastName;
   final String? email;
   final String? phoneNumber;
   final String? role;
@@ -12,6 +14,8 @@ class LoginResponseModel {
   LoginResponseModel({
     this.id,
     this.name,
+    this.firstName,
+    this.lastName,
     this.email,
     this.phoneNumber,
     this.role,
@@ -25,6 +29,8 @@ class LoginResponseModel {
     return LoginResponseModel(
       id: json['_id'],
       name: json['name'],
+      firstName: json['firstName'],
+      lastName: json['lastName'],
       email: json['email'],
       phoneNumber: json['phoneNumber'],
       role: json['role'],
@@ -39,6 +45,8 @@ class LoginResponseModel {
     return {
       '_id': id,
       'name': name,
+      'firstName': firstName,
+      'lastName': lastName,
       'email': email,
       'phoneNumber': phoneNumber,
       'role': role,

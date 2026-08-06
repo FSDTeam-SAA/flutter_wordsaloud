@@ -8,6 +8,7 @@ import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
 class YouAreLiveScreen extends StatelessWidget {
   final String tradesmanName;
   final String tradesmanSkill;
+  final List<String> extraTrades;
   final String homeArea;
   final String? profileImagePath;
 
@@ -15,6 +16,7 @@ class YouAreLiveScreen extends StatelessWidget {
     super.key,
     this.tradesmanName = 'Tradesman',
     this.tradesmanSkill = '',
+    this.extraTrades = const [],
     this.homeArea = '',
     this.profileImagePath,
   });
@@ -205,7 +207,7 @@ class YouAreLiveScreen extends StatelessWidget {
                             ),
                           )
                         : CustomButton(
-                      backgroundColor: Color(0xFFE5A742),
+                            backgroundColor: Color(0xFFE5A742),
                             textColor: Colors.black,
                             height: 50,
                             borderRadius: 16,
@@ -214,6 +216,7 @@ class YouAreLiveScreen extends StatelessWidget {
                               await controller.goLive(
                                 tradesmanName: tradesmanName,
                                 tradesmanSkill: tradesmanSkill,
+                                extraTrades: extraTrades,
                                 homeArea: homeArea,
                                 profileImagePath: profileImagePath,
                               );

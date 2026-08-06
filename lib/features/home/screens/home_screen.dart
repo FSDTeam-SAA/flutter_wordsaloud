@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!hasProfileInfo) {
       Get.snackbar(
         'Complete your profile',
-        'Add your phone number, area, and profile picture first.',
+        'Add your name, phone number, and area first.',
         snackPosition: SnackPosition.TOP,
         backgroundColor: const Color(0xFF221C18),
         colorText: Colors.white,

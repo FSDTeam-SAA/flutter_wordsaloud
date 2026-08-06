@@ -6,7 +6,6 @@ import 'package:dio/dio.dart' as dio;
 import 'package:flutter_wordsaloud/core/base/base_controller.dart';
 import 'package:flutter_wordsaloud/core/services/auth_storage_service.dart';
 import 'package:flutter_wordsaloud/core/services/session_service.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/add_inquiry_request_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/request/add_review_request_model.dart';
@@ -52,8 +51,8 @@ class TradesmanController extends BaseController {
     setLoading(true);
 
     final request = TradesmanSkillRequestModel(
-      mainSkill: mainSkill,
-      extraSkills: extraSkills,
+      mainSkill: _normalizeSkillForApi(mainSkill),
+      extraSkills: extraSkills.map(_normalizeSkillForApi).toList(),
     );
 
     final result = await _tradesmanRepo.whatCanDo(request);
@@ -145,11 +144,14 @@ class TradesmanController extends BaseController {
     _multiFormDataManager.clear();
 
     try {
+      final normalizedAmount = amount.trim();
+      final normalizedRateUnit = _normalizeRateUnitForApi(unit);
+
       _multiFormDataManager.addTextData("pitch", pitch);
-      _multiFormDataManager.addTextData("typicalRate[amount]", amount);
-      _multiFormDataManager.addTextData("typicalRate[unit]", unit);
+      _multiFormDataManager.addTextData("rateAmount", normalizedAmount);
+      _multiFormDataManager.addTextData("rateUnit", normalizedRateUnit);
       d_print.log(
-        'Create tradesman step 3 payload: pitch=$pitch, amount=$amount, unit=$unit',
+        'Create tradesman step 3 payload: pitch=$pitch, amount=$normalizedAmount, unit=$normalizedRateUnit',
       );
 
       if (images.isNotEmpty) {
@@ -226,6 +228,7 @@ class TradesmanController extends BaseController {
   Future<void> goLive({
     required String tradesmanName,
     required String tradesmanSkill,
+    List<String> extraTrades = const [],
     required String homeArea,
     String? profileImagePath,
   }) async {
@@ -248,6 +251,7 @@ class TradesmanController extends BaseController {
           () => TradesmanDashboard(
             tradesmanName: tradesmanName,
             tradesmanSkill: tradesmanSkill,
+            extraTrades: extraTrades,
             homeArea: homeArea,
             profileImagePath: profileImagePath,
           ),
@@ -357,7 +361,7 @@ class TradesmanController extends BaseController {
     isTradesmanLoading.value = true;
     allTradesman.clear();
     final result = await _tradesmanRepo.getTradesman(
-      skill: skill,
+      skill: _normalizeSkillForApi(skill),
       search: search,
       area: area,
       sort: sort,
@@ -398,15 +402,17 @@ class TradesmanController extends BaseController {
       final normalizedAmount = amount.trim();
       final normalizedRateUnit = _normalizeRateUnitForApi(unit);
       final normalizedTravelRange = _normalizeTravelRangeForApi(travelRange);
+      final normalizedMainSkill = _normalizeSkillForApi(mainSkill);
       final normalizedExtraSkills = extraSkills
-          .where((skill) => skill.trim().isNotEmpty)
+          .map(_normalizeSkillForApi)
+          .where((skill) => skill.isNotEmpty)
           .toList();
       final formData = dio.FormData();
       formData.fields.addAll([
         MapEntry('pitch', pitch),
         MapEntry('rateAmount', normalizedAmount),
         MapEntry('rateUnit', normalizedRateUnit),
-        MapEntry('mainSkill', mainSkill),
+        MapEntry('mainSkill', normalizedMainSkill),
         MapEntry('extraSkills', jsonEncode(normalizedExtraSkills)),
         MapEntry('homeArea', homeArea),
         MapEntry('travelRange', normalizedTravelRange),
@@ -466,6 +472,19 @@ class TradesmanController extends BaseController {
     }
     if (normalized.contains('trinidad')) return 'Trinidad wide';
     return '5km - Local only';
+  }
+
+  String _normalizeSkillForApi(String skill) {
+    switch (skill.trim().toLowerCase()) {
+      case 'appliance fix':
+        return 'Appliance';
+      case 'fabricator/welder':
+        return 'Welder/Gate';
+      case 'mechanic':
+        return 'Mobile Mech';
+      default:
+        return skill.trim();
+    }
   }
 
   Future<bool> addInquiry(

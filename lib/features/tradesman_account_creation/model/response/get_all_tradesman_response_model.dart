@@ -117,7 +117,7 @@ class Tradesman {
             ? Map<String, dynamic>.from(json['user'])
             : {},
       ),
-      extraSkills: List<String>.from(profileJson['extraSkills'] ?? const []),
+      extraSkills: _extraSkillsFromJson(profileJson),
       pitch: profileJson['pitch']?.toString() ?? '',
       verificationStatus: profileJson['verificationStatus']?.toString() ?? '',
       isLive: profileJson['isLive'] == true,
@@ -309,6 +309,18 @@ class ContactChangeRequest {
       'requestedAt': requestedAt,
     };
   }
+}
+
+List<String> _extraSkillsFromJson(Map<String, dynamic> json) {
+  final extraSkills = List<String>.from(json['extraSkills'] ?? const []);
+  if (extraSkills.isNotEmpty) return extraSkills;
+
+  final skills = List<String>.from(json['skills'] ?? const []);
+  final mainSkill = json['mainSkill']?.toString().trim().toLowerCase() ?? '';
+  return skills
+      .where((skill) => skill.trim().isNotEmpty)
+      .where((skill) => skill.trim().toLowerCase() != mainSkill)
+      .toList();
 }
 
 class User {

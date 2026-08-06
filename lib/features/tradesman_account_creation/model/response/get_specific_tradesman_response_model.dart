@@ -104,7 +104,7 @@ class Profile {
       user: User.fromJson(
         json['user'] is Map ? Map<String, dynamic>.from(json['user']) : {},
       ),
-      extraSkills: List<String>.from(json['extraSkills'] ?? const []),
+      extraSkills: _extraSkillsFromJson(json),
       pitch: json['pitch']?.toString() ?? '',
       verificationStatus: json['verificationStatus']?.toString() ?? '',
       isLive: json['isLive'] == true,
@@ -229,6 +229,18 @@ class ContactChangeRequest {
       'requestedAt': requestedAt,
     };
   }
+}
+
+List<String> _extraSkillsFromJson(Map<String, dynamic> json) {
+  final extraSkills = List<String>.from(json['extraSkills'] ?? const []);
+  if (extraSkills.isNotEmpty) return extraSkills;
+
+  final skills = List<String>.from(json['skills'] ?? const []);
+  final mainSkill = json['mainSkill']?.toString().trim().toLowerCase() ?? '';
+  return skills
+      .where((skill) => skill.trim().isNotEmpty)
+      .where((skill) => skill.trim().toLowerCase() != mainSkill)
+      .toList();
 }
 
 class User {

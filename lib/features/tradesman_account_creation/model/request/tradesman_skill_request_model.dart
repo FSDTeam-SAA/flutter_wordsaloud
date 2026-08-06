@@ -8,9 +8,15 @@ class TradesmanSkillRequestModel {
   });
 
   Map<String, dynamic> toJson() {
+    final skills = [
+      mainSkill,
+      ...extraSkills,
+    ].where((skill) => skill.trim().isNotEmpty).toList();
+
     return {
       'mainSkill': mainSkill,
       'extraSkills': extraSkills,
+      'skills': skills,
     };
   }
 }

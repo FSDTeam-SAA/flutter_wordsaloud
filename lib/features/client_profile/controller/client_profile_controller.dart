@@ -6,7 +6,6 @@ import 'package:flutter_wordsaloud/core/base/base_controller.dart';
 import 'package:flutter_wordsaloud/core/services/auth_storage_service.dart';
 import 'package:flutter_wordsaloud/core/services/session_service.dart';
 import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_client_profile_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/update_profile_response_model.dart';
@@ -66,18 +65,21 @@ class ClientProfileController extends BaseController {
 
   bool get hasRequiredProfileInfo {
     final profile = clientProfile.value;
+    final hasName =
+        _displayNameFromParts(
+          name: profile?.name,
+          firstName: profile?.firstName,
+          lastName: profile?.lastName,
+        ).isNotEmpty ||
+        name.value.trim().isNotEmpty;
     final hasPhone =
         (profile?.phoneNumber?.trim().isNotEmpty ?? false) ||
         phone.value.trim().isNotEmpty;
     final hasArea =
         (profile?.area?.trim().isNotEmpty ?? false) ||
         area.value.trim().isNotEmpty;
-    final hasProfilePicture =
-        (profile?.profileImage?.url?.trim().isNotEmpty ?? false) ||
-        (profileImageUrl.value?.trim().isNotEmpty ?? false) ||
-        (profileImagePath.value?.trim().isNotEmpty ?? false);
 
-    return hasPhone && hasArea && hasProfilePicture;
+    return hasName && hasPhone && hasArea;
   }
 
   void updateProfile({

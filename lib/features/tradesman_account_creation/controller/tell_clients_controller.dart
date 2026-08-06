@@ -111,9 +111,23 @@ class TellClientsController extends GetxController {
       fullName = Get.find<AuthController>().currentUserName.value.trim();
     }
 
+    if (fullName.isEmpty) {
+      final profile = await _tradesmanController.fetchClientProfile();
+      fullName = _displayProfileName(
+        name: profile?.name,
+        firstName: profile?.firstName,
+        lastName: profile?.lastName,
+      );
+    }
+
     String tradesmanSkill = '';
+    List<String> extraTrades = const [];
     if (Get.isRegistered<WhatDoController>()) {
-      tradesmanSkill = Get.find<WhatDoController>().mainSkillName.trim();
+      final whatDoController = Get.find<WhatDoController>();
+      tradesmanSkill = whatDoController.mainSkillName.trim();
+      extraTrades = whatDoController.selectExtraIndices
+          .map((index) => whatDoController.skills[index].name)
+          .toList();
     }
 
     String homeArea = '';
@@ -129,9 +143,24 @@ class TellClientsController extends GetxController {
       () => YouAreLiveScreen(
         tradesmanName: fullName.isNotEmpty ? fullName : 'Tradesman',
         tradesmanSkill: tradesmanSkill,
+        extraTrades: extraTrades,
         homeArea: homeArea,
         profileImagePath: firstPhotoPath,
       ),
     );
+  }
+
+  String _displayProfileName({
+    String? name,
+    String? firstName,
+    String? lastName,
+  }) {
+    final explicitName = name?.trim() ?? '';
+    if (explicitName.isNotEmpty) return explicitName;
+
+    return [
+      firstName?.trim() ?? '',
+      lastName?.trim() ?? '',
+    ].where((part) => part.isNotEmpty).join(' ');
   }
 }
