@@ -273,7 +273,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                       _buildVipHeader(),
                       const SizedBox(height: 10),
                       SizedBox(
-                        height: 160,
+                        height: 230,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           physics: const BouncingScrollPhysics(),
@@ -436,6 +436,10 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
       location: _displayLocation(tradesman),
       avatarLetter: _initials(_displayName(tradesman)),
       profileImageUrl: tradesman.user.profileImage.url,
+      distance: _distanceLabel(tradesman),
+      rating: _vipRatingLabel(tradesman),
+      price: tradesman.typicalRate.amount.toString(),
+      priceUnit: _rateUnitLabel(tradesman.typicalRate.unit),
       hasVipBadge: true,
       hasGoldBorder: hasGoldBorder,
       tradesman: tradesman,
@@ -524,6 +528,30 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
     return '$rating  ${tradesman.ratingCount} $reviewLabel';
   }
 
+  String _vipRatingLabel(tradesman_model.Tradesman tradesman) {
+    if (tradesman.ratingAverage <= 0) return 'New';
+
+    final rating = tradesman.ratingAverage % 1 == 0
+        ? tradesman.ratingAverage.toInt().toString()
+        : tradesman.ratingAverage.toStringAsFixed(1);
+    return tradesman.ratingCount > 0
+        ? '$rating (${tradesman.ratingCount})'
+        : rating;
+  }
+
+  String _distanceLabel(tradesman_model.Tradesman tradesman) {
+    final travelRange = tradesman.travelRange.trim();
+    if (travelRange.isEmpty) return '4.2km';
+
+    final match = RegExp(
+      r'(\d+(?:\.\d+)?)\s*km',
+      caseSensitive: false,
+    ).firstMatch(travelRange);
+    if (match != null) return '${match.group(1)}km';
+
+    return travelRange;
+  }
+
   String _rateUnitLabel(String unit) {
     final normalized = unit.trim().toLowerCase();
     if (normalized.contains('hour')) return 'hour';
@@ -536,6 +564,10 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
     required String location,
     required String avatarLetter,
     String? profileImageUrl,
+    required String distance,
+    required String rating,
+    required String price,
+    required String priceUnit,
     required bool hasVipBadge,
     required bool hasGoldBorder,
     tradesman_model.Tradesman? tradesman,
@@ -567,7 +599,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
         clipBehavior: Clip.none,
         children: [
           Container(
-            width: 110,
+            width: 200,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -579,14 +611,14 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
               ),
             ),
             padding: const EdgeInsets.only(
-              top: 18,
+              top: 20,
               left: 12,
               right: 12,
               bottom: 12,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // Avatar with gradient
                 Container(
@@ -609,10 +641,12 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 // Name
                 Text(
                   name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -623,11 +657,75 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                 // Location
                 Text(
                   location,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFF6C6C6C),
                   ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  distance,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF6C6C6C),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: Color(0xFFEAAE4B), size: 13),
+                    const SizedBox(width: 2),
+                    Expanded(
+                      child: Text(
+                        rating,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFFD19119),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Color(0xFFF0E2D1),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        price,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFFAE3F30),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '/ $priceUnit',
+                      style: const TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF6C6C6C),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -651,7 +749,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFFEAAE4B),
+                    color: Color(0xFFA83F2D),
                   ),
                 ),
               ),

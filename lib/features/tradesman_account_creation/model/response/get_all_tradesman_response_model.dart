@@ -120,8 +120,23 @@ class Tradesman {
       extraSkills: _extraSkillsFromJson(profileJson),
       pitch: profileJson['pitch']?.toString() ?? '',
       verificationStatus: profileJson['verificationStatus']?.toString() ?? '',
-      isLive: profileJson['isLive'] == true,
-      isVip: profileJson['isVip'] == true,
+      isLive: _boolFromAny(
+        Tradesman._firstNonNull([profileJson['isLive'], json['isLive']]),
+      ),
+      isVip: _boolFromAny(
+        Tradesman._firstNonNull([
+          profileJson['isVip'],
+          profileJson['isVIP'],
+          profileJson['vip'],
+          profileJson['isFeatured'],
+          profileJson['featured'],
+          json['isVip'],
+          json['isVIP'],
+          json['vip'],
+          json['isFeatured'],
+          json['featured'],
+        ]),
+      ),
       ratingAverage: _ratingAverageFromJson(json, profileJson),
       ratingCount: _ratingCountFromJson(json, profileJson),
       jobsCount: (profileJson['jobsCount'] as num?)?.toInt() ?? 0,
@@ -255,6 +270,14 @@ num _numFromAny(dynamic value) {
 int _intFromAny(dynamic value) {
   if (value is num) return value.toInt();
   return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+bool _boolFromAny(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+
+  final normalized = value?.toString().trim().toLowerCase();
+  return normalized == 'true' || normalized == '1' || normalized == 'yes';
 }
 
 class TypicalRate {

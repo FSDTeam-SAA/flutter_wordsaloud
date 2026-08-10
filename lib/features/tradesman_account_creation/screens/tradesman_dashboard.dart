@@ -183,16 +183,6 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
     return const Color(0xFF6C5D4A);
   }
 
-  IconData _verificationIcon(String status) {
-    final value = status.toLowerCase();
-    if (value.contains('verified') || value.contains('approved')) {
-      return Icons.check;
-    }
-    if (value.contains('reject') || value.contains('declined')) {
-      return Icons.close;
-    }
-    return Icons.hourglass_bottom;
-  }
 
   String _reviewerDisplayName(String? name) {
     final value = name?.trim();
@@ -366,11 +356,6 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    _verificationIcon(_verificationStatus),
-                                    color: Colors.white,
-                                    size: 11,
-                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     _verificationStatus,
