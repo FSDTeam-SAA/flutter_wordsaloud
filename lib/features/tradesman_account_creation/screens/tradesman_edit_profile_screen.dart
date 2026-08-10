@@ -227,17 +227,20 @@ class _TradesmanEditProfileScreenState
       return;
     }
 
-    Get.back(
-      result: {
-        'pitch': controller.pitch.value,
-        'rate': controller.rate.value,
-        'rateUnit': controller.rateUnit.value,
-        'mainTrade': controller.mainTrade.value,
-        'extraTrades': List<String>.from(controller.extraTrades),
-        'homeArea': controller.homeArea.value,
-        'profileImagePath': controller.profileImagePath.value,
-      },
-    );
+    final result = {
+      'pitch': controller.pitch.value,
+      'rate': controller.rate.value,
+      'rateUnit': controller.rateUnit.value,
+      'mainTrade': controller.mainTrade.value,
+      'extraTrades': List<String>.from(controller.extraTrades),
+      'homeArea': controller.homeArea.value,
+    };
+    final updatedProfileImagePath = controller.profileImagePath.value?.trim();
+    if (updatedProfileImagePath != null && updatedProfileImagePath.isNotEmpty) {
+      result['profileImagePath'] = updatedProfileImagePath;
+    }
+
+    Get.back(result: result);
     Get.snackbar(
       'Success',
       'Your profile changes have been saved!',

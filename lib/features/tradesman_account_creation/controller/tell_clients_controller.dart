@@ -135,17 +135,12 @@ class TellClientsController extends GetxController {
       homeArea = Get.find<WhatWorkController>().homeArea.value.trim();
     }
 
-    final String? firstPhotoPath = workPhotos.isNotEmpty
-        ? workPhotos.first.path
-        : null;
-
     Get.to(
       () => YouAreLiveScreen(
         tradesmanName: fullName.isNotEmpty ? fullName : 'Tradesman',
         tradesmanSkill: tradesmanSkill,
         extraTrades: extraTrades,
         homeArea: homeArea,
-        profileImagePath: firstPhotoPath,
       ),
     );
   }

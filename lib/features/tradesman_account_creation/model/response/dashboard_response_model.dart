@@ -40,12 +40,43 @@ class TradesmanDashboardResponse {
       ratingBreakdown: (json['ratingBreakdown'] as List?)
           ?.map((e) => RatingBreakdown.fromJson(e))
           .toList(),
-      recentReviews: (json['recentReviews'] as List?)
-          ?.map((e) => RecentReview.fromJson(e))
-          .toList(),
+      recentReviews: _recentReviewsFromJson(
+        json,
+      ).map((e) => RecentReview.fromJson(e)).toList(),
       daysOnPlatform: json['daysOnPlatform'],
     );
   }
+}
+
+List<dynamic> _recentReviewsFromJson(Map<String, dynamic> json) {
+  final rawReviews =
+      json['recentReviews'] ??
+      json['reviews'] ??
+      json['latestReviews'] ??
+      json['recentReview'];
+
+  if (rawReviews is List) return rawReviews;
+  if (rawReviews is Map) {
+    final reviewMap = Map<String, dynamic>.from(rawReviews);
+    final data =
+        reviewMap['data'] ?? reviewMap['items'] ?? reviewMap['docs'] ?? [];
+    if (data is List) return data;
+  }
+
+  final profile = json['profile'];
+  if (profile is Map) {
+    final profileMap = Map<String, dynamic>.from(profile);
+    final profileReviews = profileMap['recentReviews'] ?? profileMap['reviews'];
+    if (profileReviews is List) return profileReviews;
+    if (profileReviews is Map) {
+      final reviewMap = Map<String, dynamic>.from(profileReviews);
+      final data =
+          reviewMap['data'] ?? reviewMap['items'] ?? reviewMap['docs'] ?? [];
+      if (data is List) return data;
+    }
+  }
+
+  return const [];
 }
 
 class Profile {
@@ -186,13 +217,20 @@ class RecentReview {
     if (value is! Map) return RecentReview();
 
     final json = Map<String, dynamic>.from(value);
-    final reviewer = json['reviewer'] ?? json['user'] ?? json['client'];
+    final reviewer =
+        json['reviewer'] ??
+        json['reviewedBy'] ??
+        json['createdBy'] ??
+        json['user'] ??
+        json['client'];
     final reviewerMap = reviewer is Map
         ? Map<String, dynamic>.from(reviewer)
         : null;
     final firstName = reviewerMap?['firstName']?.toString().trim() ?? '';
     final lastName = reviewerMap?['lastName']?.toString().trim() ?? '';
-    final name = reviewerMap?['name']?.toString().trim();
+    final name =
+        reviewerMap?['name']?.toString().trim() ??
+        reviewerMap?['fullName']?.toString().trim();
     final reviewerName = (name != null && name.isNotEmpty)
         ? name
         : [firstName, lastName].where((part) => part.isNotEmpty).join(' ');
@@ -200,12 +238,41 @@ class RecentReview {
     return RecentReview(
       reviewerName: reviewerName.isNotEmpty
           ? reviewerName
-          : json['reviewerName']?.toString(),
-      rating: (json['rating'] as num?)?.toInt(),
-      comment: json['comment']?.toString() ?? json['review']?.toString(),
-      createdAt: json['createdAt']?.toString(),
+          : json['reviewerName']?.toString() ??
+                json['clientName']?.toString() ??
+                json['userName']?.toString(),
+      rating: _intFromAny(
+        json['rating'] ??
+            json['stars'] ??
+            json['score'] ??
+            _nestedValue(json, ['rating', 'value']),
+      ),
+      comment:
+          json['comment']?.toString() ??
+          json['reviewText']?.toString() ??
+          json['review']?.toString() ??
+          json['text']?.toString() ??
+          json['message']?.toString(),
+      createdAt:
+          json['createdAt']?.toString() ??
+          json['updatedAt']?.toString() ??
+          json['date']?.toString(),
     );
   }
+}
+
+int _intFromAny(dynamic value) {
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+dynamic _nestedValue(Map<String, dynamic> json, List<String> keys) {
+  dynamic current = json;
+  for (final key in keys) {
+    if (current is! Map) return null;
+    current = current[key];
+  }
+  return current;
 }
 
 class ProfileImage {

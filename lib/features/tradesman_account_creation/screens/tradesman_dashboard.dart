@@ -183,7 +183,6 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
     return const Color(0xFF6C5D4A);
   }
 
-
   String _reviewerDisplayName(String? name) {
     final value = name?.trim();
     if (value == null || value.isEmpty) return 'Client';
@@ -909,16 +908,21 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                reviewer,
-                style: GoogleFonts.outfit(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1E1E1E),
+              Expanded(
+                child: Text(
+                  reviewer,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1E1E1E),
+                  ),
                 ),
               ),
+              const SizedBox(width: 12),
               Row(
                 children: List.generate(
                   _clampedStars(stars),
