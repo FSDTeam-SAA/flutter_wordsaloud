@@ -273,20 +273,34 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                       _buildVipHeader(),
                       const SizedBox(height: 10),
                       SizedBox(
-                        height: 230,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 8,
-                          ),
-                          itemCount: vipTradesmen.length,
-                          separatorBuilder: (_, _) => const SizedBox(width: 12),
-                          itemBuilder: (context, index) {
-                            return _buildVipCardFromTradesman(
-                              vipTradesmen[index],
-                              hasGoldBorder: index == 0,
+                        height: 180,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            const horizontalPadding = 18.0;
+                            const itemGap = 8.0;
+                            final cardWidth =
+                                (constraints.maxWidth -
+                                    (horizontalPadding * 2) -
+                                    (itemGap * 2)) /
+                                3;
+
+                            return ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              physics: const BouncingScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: horizontalPadding,
+                                vertical: 8,
+                              ),
+                              itemCount: vipTradesmen.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(width: itemGap),
+                              itemBuilder: (context, index) {
+                                return _buildVipCardFromTradesman(
+                                  vipTradesmen[index],
+                                  hasGoldBorder: index == 0,
+                                  width: cardWidth,
+                                );
+                              },
                             );
                           },
                         ),
@@ -430,6 +444,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
   Widget _buildVipCardFromTradesman(
     tradesman_model.Tradesman tradesman, {
     required bool hasGoldBorder,
+    required double width,
   }) {
     return _buildVipCard(
       name: _displayName(tradesman),
@@ -442,6 +457,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
       priceUnit: _rateUnitLabel(tradesman.typicalRate.unit),
       hasVipBadge: true,
       hasGoldBorder: hasGoldBorder,
+      width: width,
       tradesman: tradesman,
     );
   }
@@ -570,6 +586,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
     required String priceUnit,
     required bool hasVipBadge,
     required bool hasGoldBorder,
+    required double width,
     tradesman_model.Tradesman? tradesman,
   }) {
     return GestureDetector(
@@ -599,10 +616,10 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
         clipBehavior: Clip.none,
         children: [
           Container(
-            width: 200,
+            width: width,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: hasGoldBorder
                     ? const Color(0xFFEAAE4B)
@@ -611,10 +628,10 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
               ),
             ),
             padding: const EdgeInsets.only(
-              top: 20,
-              left: 12,
-              right: 12,
-              bottom: 12,
+              top: 16,
+              left: 8,
+              right: 8,
+              bottom: 8,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,10 +639,10 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
               children: [
                 // Avatar with gradient
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(9),
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -633,53 +650,53 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                     ),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(9),
                     child: _TradesmanCardAvatar(
                       imageUrl: profileImageUrl,
                       avatarLetter: avatarLetter,
-                      fontSize: 16,
+                      fontSize: 13,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 5),
                 // Name
                 Text(
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF1E1E1E),
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 1),
                 // Location
                 Text(
                   location,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFF6C6C6C),
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 1),
                 Text(
                   distance,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFF6C6C6C),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Row(
                   children: [
-                    const Icon(Icons.star, color: Color(0xFFEAAE4B), size: 13),
+                    const Icon(Icons.star, color: Color(0xFFEAAE4B), size: 11),
                     const SizedBox(width: 2),
                     Expanded(
                       child: Text(
@@ -687,7 +704,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFFD19119),
                         ),
@@ -695,13 +712,13 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 const Divider(
                   height: 1,
                   thickness: 1,
                   color: Color(0xFFF0E2D1),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -711,7 +728,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 11,
                           fontWeight: FontWeight.w900,
                           color: Color(0xFFAE3F30),
                         ),
@@ -733,21 +750,18 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
           if (hasVipBadge)
             Positioned(
               top: -9,
-              left: 12,
+              left: 8,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFFEAAE4B), width: 1),
                 ),
                 child: const Text(
                   'VIP',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFFA83F2D),
                   ),
