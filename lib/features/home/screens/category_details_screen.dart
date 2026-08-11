@@ -621,9 +621,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: hasGoldBorder
-                    ? const Color(0xFFEAAE4B)
-                    : const Color(0xFFF3E5CF),
+                color: const Color(0xFFEAAE4B),
                 width: 2,
               ),
             ),
