@@ -11,7 +11,7 @@ class TradeCategory {
     required this.name,
     required this.image,
     this.isNew = false,
-    this.listed = 73,
+    this.listed = 0,
   });
 }
 
@@ -80,15 +80,30 @@ class HomeController extends GetxController {
     final tradesmanController = Get.find<TradesmanController>();
     isLoadingSkills.value = true;
     final skills = await tradesmanController.fetchSkillList();
+    final tradesmen = await tradesmanController.fetchTradesmenForCounts();
     isLoadingSkills.value = false;
 
-    if (skills.isEmpty) return;
+    if (skills.isEmpty && tradesmen.isEmpty) return;
 
     final countsBySkill = <String, int>{};
     for (final skill in skills) {
       final name = skill.skill?.trim();
       if (name == null || name.isEmpty) continue;
       countsBySkill[_skillKey(name)] = skill.listedCount ?? 0;
+    }
+
+    if (tradesmen.isNotEmpty) {
+      countsBySkill.clear();
+      for (final tradesman in tradesmen) {
+        final offeredSkillKeys = <String>{
+          _skillKey(tradesman.mainSkill),
+          ...tradesman.extraSkills.map(_skillKey),
+        }..removeWhere((skill) => skill.isEmpty);
+
+        for (final skill in offeredSkillKeys) {
+          countsBySkill[skill] = (countsBySkill[skill] ?? 0) + 1;
+        }
+      }
     }
 
     categories.assignAll(

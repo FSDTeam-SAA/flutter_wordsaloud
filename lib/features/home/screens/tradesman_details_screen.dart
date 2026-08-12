@@ -205,9 +205,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
       return;
     }
 
-    _showContactError(
-      'Could not open WhatsApp. Try calling directly instead.',
-    );
+    _showContactError('Could not open WhatsApp. Try calling directly instead.');
   }
 
   Future<void> _openDialer(String phoneNumber) async {
@@ -685,8 +683,8 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                         ),
                         Spacer(),
                         TextButton(
-                          onPressed: () {
-                            Get.to(
+                          onPressed: () async {
+                            final result = await Get.to(
                               () => PostReviewScreen(
                                 tradesmanId: effectiveTradesmanId,
                                 tradesmanName: displayName,
@@ -694,6 +692,11 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                                 avatarLetters: displayAvatarLetter,
                               ),
                             );
+                            if (result is Map && result['posted'] == true) {
+                              await _tradesmanController.getSingleTradesman(
+                                effectiveTradesmanId,
+                              );
+                            }
                           },
                           child: Text('Add Review'),
                         ),

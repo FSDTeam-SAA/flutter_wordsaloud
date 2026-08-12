@@ -342,10 +342,34 @@ class TradesmanController extends BaseController {
       },
       (success) {
         getSpecificTradesman.value = success.data;
+        _syncCachedTradesman(success.data);
         d_print.log("Fetch single tradesman success: ${success.data}");
         isSingleTradesmanLoading.value = false;
         return success.data;
       },
+    );
+  }
+
+  void _syncCachedTradesman(GetSpecificTradesmanResponseModel tradesman) {
+    final profile = tradesman.profile;
+    final index = allTradesman.indexWhere((item) => item.id == profile.id);
+    if (index == -1) return;
+
+    allTradesman[index] = allTradesman[index].copyWith(
+      extraSkills: profile.extraSkills,
+      pitch: profile.pitch,
+      verificationStatus: profile.verificationStatus,
+      isLive: profile.isLive,
+      isVip: profile.isVip,
+      ratingAverage: profile.ratingAverage,
+      ratingCount: profile.ratingCount > 0
+          ? profile.ratingCount
+          : tradesman.reviews.length,
+      jobsCount: profile.jobsCount,
+      workPhotos: profile.workPhotos,
+      mainSkill: profile.mainSkill,
+      homeArea: profile.homeArea,
+      travelRange: profile.travelRange,
     );
   }
 
@@ -360,8 +384,9 @@ class TradesmanController extends BaseController {
     clearError();
     isTradesmanLoading.value = true;
     allTradesman.clear();
+    final normalizedSkill = _normalizeSkillForApi(skill);
     final result = await _tradesmanRepo.getTradesman(
-      skill: _normalizeSkillForApi(skill),
+      skill: normalizedSkill,
       search: search,
       area: area,
       sort: sort,
@@ -370,19 +395,114 @@ class TradesmanController extends BaseController {
     );
 
     return result.fold(
-      (fail) {
+      (fail) async {
         setError(fail.message);
         d_print.log("Fetch tradesman failed: ${fail.message}");
         isTradesmanLoading.value = false;
         return allTradesman;
       },
-      (success) {
-        allTradesman.assignAll(success.data.data);
-        d_print.log("Fetch tradesman success: ${success.data.data}");
+      (success) async {
+        final tradesmen = _mergeTradesmenForSkill(
+          success.data.data,
+          const [],
+          normalizedSkill,
+        );
+        allTradesman.assignAll(tradesmen);
+        d_print.log("Fetch tradesman success: $tradesmen");
+        final mergedTradesmen = await _fetchExtraSkillFallback(
+          skill: normalizedSkill,
+          search: search,
+          area: area,
+          sort: sort,
+          limit: limit,
+        );
         isTradesmanLoading.value = false;
-        return success.data.data;
+        return mergedTradesmen;
       },
     );
+  }
+
+  Future<List<Tradesman>> fetchTradesmenForCounts({int limit = 500}) async {
+    final result = await _tradesmanRepo.getTradesman(
+      skill: '',
+      sort: 'rating',
+      page: 1,
+      limit: limit,
+    );
+
+    return result.fold((fail) {
+      d_print.log("Fetch tradesman counts failed: ${fail.message}");
+      return const <Tradesman>[];
+    }, (success) => success.data.data);
+  }
+
+  Future<List<Tradesman>> _fetchExtraSkillFallback({
+    required String skill,
+    required String search,
+    required String area,
+    required String sort,
+    required int limit,
+  }) async {
+    if (skill.trim().isEmpty) return allTradesman;
+
+    final fallbackLimit = limit < 200 ? 200 : limit;
+    final result = await _tradesmanRepo.getTradesman(
+      skill: '',
+      search: search,
+      area: area,
+      sort: sort,
+      page: 1,
+      limit: fallbackLimit,
+    );
+
+    result.fold(
+      (fail) {
+        d_print.log("Fetch extra skill fallback failed: ${fail.message}");
+      },
+      (success) {
+        final mergedTradesmen = _mergeTradesmenForSkill(
+          allTradesman.toList(),
+          success.data.data,
+          skill,
+        );
+        allTradesman.assignAll(mergedTradesmen);
+      },
+    );
+    return allTradesman;
+  }
+
+  List<Tradesman> _mergeTradesmenForSkill(
+    List<Tradesman> primary,
+    List<Tradesman> fallback,
+    String skill,
+  ) {
+    final merged = <Tradesman>[];
+    final seen = <String>{};
+
+    void addIfMatch(Tradesman tradesman) {
+      if (!_tradesmanOffersSkill(tradesman, skill)) return;
+
+      final key = tradesman.id.trim().isNotEmpty
+          ? tradesman.id.trim()
+          : '${tradesman.user.id}-${tradesman.mainSkill}-${tradesman.user.name}';
+      if (seen.add(key)) {
+        merged.add(tradesman);
+      }
+    }
+
+    primary.forEach(addIfMatch);
+    fallback.forEach(addIfMatch);
+    return merged;
+  }
+
+  bool _tradesmanOffersSkill(Tradesman tradesman, String skill) {
+    final target = _skillLookupKey(skill);
+    if (target.isEmpty) return true;
+
+    return [
+      tradesman.mainSkill,
+      ...tradesman.extraSkills,
+    ].any((offeredSkill) => _skillLookupKey(offeredSkill) == target);
   }
 
   Future<bool> editProfile({
@@ -484,6 +604,22 @@ class TradesmanController extends BaseController {
         return 'Mobile Mech';
       default:
         return skill.trim();
+    }
+  }
+
+  String _skillLookupKey(String skill) {
+    switch (_normalizeSkillForApi(skill).trim().toLowerCase()) {
+      case 'appliance':
+      case 'appliance fix':
+        return 'appliance';
+      case 'mobile mech':
+      case 'mechanic':
+        return 'mechanic';
+      case 'welder/gate':
+      case 'fabricator/welder':
+        return 'welder';
+      default:
+        return _normalizeSkillForApi(skill).trim().toLowerCase();
     }
   }
 

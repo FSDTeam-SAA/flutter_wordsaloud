@@ -153,6 +153,48 @@ class Tradesman {
     );
   }
 
+  Tradesman copyWith({
+    TypicalRate? typicalRate,
+    ContactChangeRequest? contactChangeRequest,
+    String? id,
+    User? user,
+    List<String>? extraSkills,
+    String? pitch,
+    String? verificationStatus,
+    bool? isLive,
+    bool? isVip,
+    num? ratingAverage,
+    int? ratingCount,
+    int? jobsCount,
+    List<dynamic>? workPhotos,
+    String? mainSkill,
+    String? homeArea,
+    String? travelRange,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Tradesman(
+      typicalRate: typicalRate ?? this.typicalRate,
+      contactChangeRequest: contactChangeRequest ?? this.contactChangeRequest,
+      id: id ?? this.id,
+      user: user ?? this.user,
+      extraSkills: extraSkills ?? this.extraSkills,
+      pitch: pitch ?? this.pitch,
+      verificationStatus: verificationStatus ?? this.verificationStatus,
+      isLive: isLive ?? this.isLive,
+      isVip: isVip ?? this.isVip,
+      ratingAverage: ratingAverage ?? this.ratingAverage,
+      ratingCount: ratingCount ?? this.ratingCount,
+      jobsCount: jobsCount ?? this.jobsCount,
+      workPhotos: workPhotos ?? this.workPhotos,
+      mainSkill: mainSkill ?? this.mainSkill,
+      homeArea: homeArea ?? this.homeArea,
+      travelRange: travelRange ?? this.travelRange,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   static num _ratingAverageFromJson(
     Map<String, dynamic> json,
     Map<String, dynamic> profileJson,
@@ -335,15 +377,36 @@ class ContactChangeRequest {
 }
 
 List<String> _extraSkillsFromJson(Map<String, dynamic> json) {
-  final extraSkills = List<String>.from(json['extraSkills'] ?? const []);
+  final extraSkills = _stringListFromAny(
+    Tradesman._firstNonNull([
+      json['extraSkills'],
+      json['extraSkill'],
+      json['extraTrades'],
+      json['extraTrade'],
+      json['extra_skills'],
+      json['extra_trades'],
+    ]),
+  );
   if (extraSkills.isNotEmpty) return extraSkills;
 
-  final skills = List<String>.from(json['skills'] ?? const []);
+  final skills = _stringListFromAny(json['skills']);
   final mainSkill = json['mainSkill']?.toString().trim().toLowerCase() ?? '';
   return skills
       .where((skill) => skill.trim().isNotEmpty)
       .where((skill) => skill.trim().toLowerCase() != mainSkill)
       .toList();
+}
+
+List<String> _stringListFromAny(dynamic value) {
+  if (value is List) {
+    return value
+        .map((skill) => skill?.toString().trim() ?? '')
+        .where((skill) => skill.isNotEmpty)
+        .toList();
+  }
+
+  final skill = value?.toString().trim() ?? '';
+  return skill.isEmpty ? const [] : [skill];
 }
 
 class User {

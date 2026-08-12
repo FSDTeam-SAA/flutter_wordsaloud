@@ -232,15 +232,43 @@ class ContactChangeRequest {
 }
 
 List<String> _extraSkillsFromJson(Map<String, dynamic> json) {
-  final extraSkills = List<String>.from(json['extraSkills'] ?? const []);
+  final extraSkills = _stringListFromAny(
+    _firstNonNull([
+      json['extraSkills'],
+      json['extraSkill'],
+      json['extraTrades'],
+      json['extraTrade'],
+      json['extra_skills'],
+      json['extra_trades'],
+    ]),
+  );
   if (extraSkills.isNotEmpty) return extraSkills;
 
-  final skills = List<String>.from(json['skills'] ?? const []);
+  final skills = _stringListFromAny(json['skills']);
   final mainSkill = json['mainSkill']?.toString().trim().toLowerCase() ?? '';
   return skills
       .where((skill) => skill.trim().isNotEmpty)
       .where((skill) => skill.trim().toLowerCase() != mainSkill)
       .toList();
+}
+
+dynamic _firstNonNull(List<dynamic> values) {
+  for (final value in values) {
+    if (value != null) return value;
+  }
+  return null;
+}
+
+List<String> _stringListFromAny(dynamic value) {
+  if (value is List) {
+    return value
+        .map((skill) => skill?.toString().trim() ?? '')
+        .where((skill) => skill.isNotEmpty)
+        .toList();
+  }
+
+  final skill = value?.toString().trim() ?? '';
+  return skill.isEmpty ? const [] : [skill];
 }
 
 class User {
