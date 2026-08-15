@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 
 import '../../../core/base/base_controller.dart';
 import '../../../core/services/auth_storage_service.dart';
+import '../../../core/services/tradesman_profile_status_service.dart';
 import '../../home/screens/home_screen.dart';
 import '../../tradesman_account_creation/screens/tradesman_dashboard.dart';
 import '../../tradesman_account_creation/screens/what_do_screen.dart';
@@ -17,6 +18,8 @@ import '../repositories/auth_repo.dart';
 class AuthController extends BaseController {
   late final _authRepo = Get.find<AuthRepository>();
   final AuthStorageService _authStorageService = AuthStorageService();
+  final TradesmanProfileStatusService _tradesmanProfileStatusService =
+      TradesmanProfileStatusService();
   final currentUserName = ''.obs;
   static const accountNotFoundMessage =
       'No account found with this email. Please sign up first.';
@@ -177,8 +180,8 @@ class AuthController extends BaseController {
         );
 
         if (role.toLowerCase() == "tradesman") {
-          final isProfileCompleted = await _authStorageService
-              .isTradesmanProfileCompleted(userId: user.id);
+          final isProfileCompleted = await _tradesmanProfileStatusService
+              .hasCompletedProfile(userId: user.id);
 
           Get.offAll(
             () => isProfileCompleted

@@ -543,7 +543,7 @@ class TradesmanController extends BaseController {
         if (await imageFile.exists()) {
           formData.files.add(
             MapEntry(
-              'avatar',
+              'profileImage',
               await dio.MultipartFile.fromFile(imageFile.path),
             ),
           );
@@ -570,6 +570,81 @@ class TradesmanController extends BaseController {
     } catch (e) {
       setError('Something went wrong. Please try again.');
       d_print.log('Edit profile error: $e');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<bool> updateRecentWorkPhotos({
+    required String pitch,
+    required String amount,
+    required String unit,
+    List<String> existingWorkPhotoUrls = const [],
+    List<String> existingWorkPhotoPublicIds = const [],
+    List<String> removedWorkPhotoUrls = const [],
+    List<String> removedWorkPhotoPublicIds = const [],
+    required List<String> workPhotoPaths,
+  }) async {
+    clearError();
+    setLoading(true);
+
+    try {
+      final formData = dio.FormData();
+      formData.fields.addAll([
+        MapEntry('pitch', pitch),
+        MapEntry('rateAmount', amount.trim()),
+        MapEntry('rateUnit', _normalizeRateUnitForApi(unit)),
+        MapEntry('existingWorkPhotos', jsonEncode(existingWorkPhotoUrls)),
+        MapEntry('existingWorkPhotoUrls', jsonEncode(existingWorkPhotoUrls)),
+        MapEntry(
+          'existingWorkPhotoPublicIds',
+          jsonEncode(existingWorkPhotoPublicIds),
+        ),
+        MapEntry('removedWorkPhotos', jsonEncode(removedWorkPhotoUrls)),
+        MapEntry('removedWorkPhotoUrls', jsonEncode(removedWorkPhotoUrls)),
+        MapEntry(
+          'removedWorkPhotoPublicIds',
+          jsonEncode(removedWorkPhotoPublicIds),
+        ),
+        MapEntry(
+          'deleteWorkPhotoPublicIds',
+          jsonEncode(removedWorkPhotoPublicIds),
+        ),
+        MapEntry('removedMissingWorkPhotos', 'true'),
+      ]);
+
+      for (final path in workPhotoPaths) {
+        final imageFile = File(path);
+        if (path.trim().isEmpty || !await imageFile.exists()) continue;
+
+        formData.files.add(
+          MapEntry(
+            'workPhotos',
+            await dio.MultipartFile.fromFile(imageFile.path),
+          ),
+        );
+      }
+
+      d_print.log(
+        'Update recent work photos payload fields: ${formData.fields}, files: ${formData.files.map((file) => file.key).toList()}',
+      );
+
+      final result = await _tradesmanRepo.tellClient(formData);
+      return result.fold(
+        (fail) {
+          setError(fail.message);
+          d_print.log("Update recent work photos failed: ${fail.message}");
+          return false;
+        },
+        (success) {
+          d_print.log("Update recent work photos success: ${success.data}");
+          return true;
+        },
+      );
+    } catch (e) {
+      setError('Something went wrong. Please try again.');
+      d_print.log('Update recent work photos error: $e');
       return false;
     } finally {
       setLoading(false);

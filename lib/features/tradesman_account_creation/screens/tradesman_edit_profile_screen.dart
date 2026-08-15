@@ -6,6 +6,7 @@ import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/res
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_wordsaloud/features/home/controller/edit_profile_controller.dart';
+import 'package:image_picker/image_picker.dart';
 
 class TradesmanEditProfileScreen extends StatefulWidget {
   final String tradesmanName;
@@ -41,6 +42,10 @@ class _TradesmanEditProfileScreenState
   String _tradesmanName = '';
   String _tradesmanPhone = '';
   String? _profileImageUrl;
+  List<dashboard_model.WorkPhoto> _originalWorkPhotos = const [];
+  List<dashboard_model.WorkPhoto> _workPhotos = const [];
+  final List<String> _newWorkPhotoPaths = [];
+  final List<dashboard_model.WorkPhoto> _removedWorkPhotos = [];
   bool _isLoadingProfile = true;
 
   @override
@@ -120,6 +125,8 @@ class _TradesmanEditProfileScreenState
         _tradesmanPhone = user!.phoneNumber!.trim();
       }
       _profileImageUrl = user?.profileImage?.url;
+      _workPhotos = _workPhotosFromDashboard(dashboard);
+      _originalWorkPhotos = List<dashboard_model.WorkPhoto>.from(_workPhotos);
     });
 
     controller.pitch.value = profile?.pitch ?? '';
@@ -227,6 +234,60 @@ class _TradesmanEditProfileScreenState
       return;
     }
 
+    final workPhotosChanged =
+        _newWorkPhotoPaths.isNotEmpty ||
+        !_sameWorkPhotoList(_originalWorkPhotos, _workPhotos);
+
+    if (workPhotosChanged) {
+      final photosUpdated = await _tradesmanController.updateRecentWorkPhotos(
+        pitch: controller.pitch.value.trim(),
+        amount: controller.rate.value.trim(),
+        unit: controller.rateUnit.value,
+        existingWorkPhotoUrls: _workPhotoUrls(_workPhotos),
+        existingWorkPhotoPublicIds: _workPhotoPublicIds(_workPhotos),
+        removedWorkPhotoUrls: _workPhotoUrls(_removedWorkPhotos),
+        removedWorkPhotoPublicIds: _workPhotoPublicIds(_removedWorkPhotos),
+        workPhotoPaths: List<String>.from(_newWorkPhotoPaths),
+      );
+
+      if (!mounted) return;
+
+      if (!photosUpdated) {
+        Get.snackbar(
+          'Error',
+          _tradesmanController.errorMessage.value.isNotEmpty
+              ? _tradesmanController.errorMessage.value
+              : 'Failed to update recent work images.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFA83F2D),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(15),
+        );
+        return;
+      }
+
+      final refreshedDashboard = await _tradesmanController.fetchDashboard();
+      if (!mounted) return;
+      if (refreshedDashboard != null) {
+        setState(() {
+          _workPhotos = _workPhotosFromDashboard(refreshedDashboard);
+          _originalWorkPhotos = List<dashboard_model.WorkPhoto>.from(
+            _workPhotos,
+          );
+          _newWorkPhotoPaths.clear();
+          _removedWorkPhotos.clear();
+        });
+      } else {
+        setState(() {
+          _originalWorkPhotos = List<dashboard_model.WorkPhoto>.from(
+            _workPhotos,
+          );
+          _newWorkPhotoPaths.clear();
+          _removedWorkPhotos.clear();
+        });
+      }
+    }
+
     final result = {
       'pitch': controller.pitch.value,
       'rate': controller.rate.value,
@@ -234,6 +295,7 @@ class _TradesmanEditProfileScreenState
       'mainTrade': controller.mainTrade.value,
       'extraTrades': List<String>.from(controller.extraTrades),
       'homeArea': controller.homeArea.value,
+      'recentWorkPhotoUrls': _workPhotoUrls(_workPhotos),
     };
     final updatedProfileImagePath = controller.profileImagePath.value?.trim();
     if (updatedProfileImagePath != null && updatedProfileImagePath.isNotEmpty) {
@@ -256,6 +318,53 @@ class _TradesmanEditProfileScreenState
     if (parts.isEmpty || parts.first.isEmpty) return 'TR';
     if (parts.length == 1) return parts.first[0].toUpperCase();
     return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+  }
+
+  List<dashboard_model.WorkPhoto> _workPhotosFromDashboard(
+    dashboard_model.TradesmanDashboardResponse dashboard,
+  ) {
+    return dashboard.profile?.workPhotos
+            ?.where((photo) => (photo.url ?? '').trim().isNotEmpty)
+            .toList() ??
+        const [];
+  }
+
+  List<String> _workPhotoUrls(List<dashboard_model.WorkPhoto> photos) {
+    return photos
+        .map((photo) => photo.url?.trim() ?? '')
+        .where((url) => url.isNotEmpty)
+        .toList();
+  }
+
+  List<String> _workPhotoPublicIds(List<dashboard_model.WorkPhoto> photos) {
+    return photos
+        .map((photo) => photo.publicId?.trim() ?? '')
+        .where((publicId) => publicId.isNotEmpty)
+        .toList();
+  }
+
+  bool _sameWorkPhotoList(
+    List<dashboard_model.WorkPhoto> first,
+    List<dashboard_model.WorkPhoto> second,
+  ) {
+    if (first.length != second.length) return false;
+
+    for (var index = 0; index < first.length; index++) {
+      if (_workPhotoKey(first[index]) != _workPhotoKey(second[index])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  String _workPhotoKey(dashboard_model.WorkPhoto photo) {
+    final publicId = photo.publicId?.trim() ?? '';
+    if (publicId.isNotEmpty) return publicId;
+
+    final id = photo.id?.trim() ?? '';
+    if (id.isNotEmpty) return id;
+
+    return photo.url?.trim() ?? '';
   }
 
   Widget _buildAvatarInitials() {
@@ -652,7 +761,14 @@ class _TradesmanEditProfileScreenState
 
                     const SizedBox(height: 20),
 
-                    // 4. Your Trades Section
+                    // 4. Recent Work Images Section
+                    _buildSectionHeader('RECENT WORK IMAGES'),
+                    const SizedBox(height: 8),
+                    _buildRecentWorkImages(),
+
+                    const SizedBox(height: 20),
+
+                    // 5. Your Trades Section
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -735,7 +851,7 @@ class _TradesmanEditProfileScreenState
 
                     const SizedBox(height: 20),
 
-                    // 5. Home Area Section
+                    // 6. Home Area Section
                     _buildSectionHeader('HOME AREA'),
                     const SizedBox(height: 8),
                     TextField(
@@ -767,7 +883,7 @@ class _TradesmanEditProfileScreenState
 
                     const SizedBox(height: 20),
 
-                    // 6. Travel Range Section
+                    // 7. Travel Range Section
                     _buildSectionHeader('TRAVEL RANGE'),
                     const SizedBox(height: 8),
                     Obx(
@@ -806,7 +922,7 @@ class _TradesmanEditProfileScreenState
 
                     const SizedBox(height: 24),
 
-                    // 7. Contact details are locked Card
+                    // 8. Contact details are locked Card
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -997,6 +1113,147 @@ class _TradesmanEditProfileScreenState
         letterSpacing: 0.5,
       ),
     );
+  }
+
+  Widget _buildRecentWorkImages() {
+    final itemCount = _workPhotos.length + _newWorkPhotoPaths.length + 1;
+
+    return SizedBox(
+      height: 104,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: itemCount,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          if (index == itemCount - 1) {
+            return _buildAddWorkImageTile();
+          }
+
+          if (index < _workPhotos.length) {
+            return _buildWorkImageTile(
+              child: Image.network(
+                _workPhotos[index].url ?? '',
+                width: 96,
+                height: 96,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => _buildBrokenImageTile(),
+              ),
+              onRemove: () {
+                setState(() {
+                  _removedWorkPhotos.add(_workPhotos[index]);
+                  _workPhotos = List<dashboard_model.WorkPhoto>.from(
+                    _workPhotos,
+                  )..removeAt(index);
+                });
+              },
+            );
+          }
+
+          final localIndex = index - _workPhotos.length;
+          return _buildWorkImageTile(
+            child: Image.file(
+              File(_newWorkPhotoPaths[localIndex]),
+              width: 96,
+              height: 96,
+              fit: BoxFit.cover,
+            ),
+            onRemove: () {
+              setState(() {
+                _newWorkPhotoPaths.removeAt(localIndex);
+              });
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAddWorkImageTile() {
+    return InkWell(
+      onTap: _pickWorkPhotos,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 96,
+        height: 96,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFA83F2D), width: 1.2),
+        ),
+        child: const Icon(
+          Icons.add_photo_alternate_outlined,
+          color: Color(0xFFA83F2D),
+          size: 30,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorkImageTile({
+    required Widget child,
+    required VoidCallback onRemove,
+  }) {
+    return SizedBox(
+      width: 104,
+      height: 104,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 0,
+            bottom: 0,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(width: 96, height: 96, child: child),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: InkWell(
+              onTap: onRemove,
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFA83F2D),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: const Icon(Icons.close, size: 16, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBrokenImageTile() {
+    return Container(
+      color: const Color(0xFFEBD7C7),
+      child: const Icon(Icons.broken_image_outlined, color: Color(0xFF8D7766)),
+    );
+  }
+
+  Future<void> _pickWorkPhotos() async {
+    try {
+      final picker = ImagePicker();
+      final images = await picker.pickMultiImage(imageQuality: 85);
+      if (images.isEmpty || !mounted) return;
+
+      setState(() {
+        _newWorkPhotoPaths.addAll(
+          images
+              .map((image) => image.path)
+              .where((path) => path.trim().isNotEmpty),
+        );
+      });
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to pick images: $e');
+    }
   }
 
   // Helper widget for specific Trade Chip / Bagde

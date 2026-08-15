@@ -649,6 +649,11 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                                 result['extraTrades'],
                               );
                             }
+                            if (result['recentWorkPhotoUrls'] != null) {
+                              _recentWorkPhotoUrls = List<String>.from(
+                                result['recentWorkPhotoUrls'],
+                              );
+                            }
                           });
                         }
                       },

@@ -1,5 +1,6 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter_wordsaloud/core/services/auth_storage_service.dart';
+import 'package:flutter_wordsaloud/core/services/tradesman_profile_status_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
 import 'package:flutter_wordsaloud/features/home/screens/home_screen.dart';
@@ -8,6 +9,8 @@ import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/w
 
 class SplashController extends GetxController with GetTickerProviderStateMixin {
   final AuthStorageService _authStorageService = AuthStorageService();
+  final TradesmanProfileStatusService _tradesmanProfileStatusService =
+      TradesmanProfileStatusService();
 
   late AnimationController logoController;
   late AnimationController textRevealController;
@@ -70,8 +73,8 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
 
     final role = (await _authStorageService.getRole())?.toLowerCase().trim();
     if (role == 'tradesman') {
-      final isProfileCompleted = await _authStorageService
-          .isTradesmanProfileCompleted();
+      final isProfileCompleted = await _tradesmanProfileStatusService
+          .hasCompletedProfile();
 
       Get.offAll(
         () => isProfileCompleted
