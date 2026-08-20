@@ -575,6 +575,36 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
     return 'day';
   }
 
+  bool _isVerified(tradesman_model.Tradesman? tradesman) {
+    final status = tradesman?.verificationStatus.trim().toLowerCase() ?? '';
+    return status.contains('verified') || status.contains('approved');
+  }
+
+  Widget _buildNameRow({
+    required String name,
+    required TextStyle style,
+    required bool isVerified,
+    double badgeSize = 14,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: style,
+          ),
+        ),
+        if (isVerified) ...[
+          const SizedBox(width: 4),
+          Icon(Icons.verified, size: badgeSize, color: const Color(0xFF22707F)),
+        ],
+      ],
+    );
+  }
+
   Widget _buildVipCard({
     required String name,
     required String location,
@@ -589,6 +619,8 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
     required double width,
     tradesman_model.Tradesman? tradesman,
   }) {
+    final isVerified = _isVerified(tradesman);
+
     return GestureDetector(
       onTap: () {
         if (tradesman != null) {
@@ -620,10 +652,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFFEAAE4B),
-                width: 2,
-              ),
+              border: Border.all(color: const Color(0xFFEAAE4B), width: 2),
             ),
             padding: const EdgeInsets.only(
               top: 16,
@@ -658,10 +687,10 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                 ),
                 const SizedBox(height: 5),
                 // Name
-                Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                _buildNameRow(
+                  name: name,
+                  isVerified: isVerified,
+                  badgeSize: 12,
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -782,6 +811,8 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
     required bool isTopRated,
     tradesman_model.Tradesman? tradesman,
   }) {
+    final isVerified = _isVerified(tradesman);
+
     return GestureDetector(
       onTap: () {
         if (tradesman != null) {
@@ -856,8 +887,9 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name,
+                      _buildNameRow(
+                        name: name,
+                        isVerified: isVerified,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

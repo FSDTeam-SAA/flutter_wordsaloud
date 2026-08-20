@@ -651,6 +651,39 @@ class TradesmanController extends BaseController {
     }
   }
 
+  Future<bool> removeWorkPhoto({
+    required String publicId,
+    required String url,
+    required String photoId,
+  }) async {
+    clearError();
+
+    if (publicId.trim().isEmpty &&
+        url.trim().isEmpty &&
+        photoId.trim().isEmpty) {
+      setError('Unable to remove this photo. Please try again.');
+      return false;
+    }
+
+    final result = await _tradesmanRepo.removeWorkPhoto(
+      publicId: publicId.trim(),
+      url: url.trim(),
+      photoId: photoId.trim(),
+    );
+
+    return result.fold(
+      (fail) {
+        setError(fail.message);
+        d_print.log("Remove work photo failed: ${fail.message}");
+        return false;
+      },
+      (success) {
+        d_print.log("Remove work photo success: ${success.message}");
+        return true;
+      },
+    );
+  }
+
   String _normalizeRateUnitForApi(String value) {
     final normalized = value.trim().toLowerCase();
     if (normalized.contains('hour')) return 'Per hour';

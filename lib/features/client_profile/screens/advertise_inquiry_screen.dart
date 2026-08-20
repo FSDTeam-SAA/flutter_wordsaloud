@@ -135,7 +135,7 @@ class AdvertiseInquiryScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 _InquiryField(
                   controller: controller.businessNameController,
-                  hintText: 'e.g. Bhagwansingh\'s Hardware',
+                  hintText: 'e.g. Pet Hardware Ltd',
                   textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: 15),

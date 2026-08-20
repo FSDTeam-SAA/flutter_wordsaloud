@@ -31,6 +31,11 @@ abstract class TradesmanRepo {
     String tradesmanId,
   );
   NetworkResult<TellClientsResponseModel> tellClient(FormData formData);
+  NetworkResult<dynamic> removeWorkPhoto({
+    required String publicId,
+    required String url,
+    required String photoId,
+  });
   NetworkResult<GoLiveResponseModel> goLive();
   NetworkResult<TradesmanDashboardResponse> dashboard();
   NetworkResult<TradesmanDashboardResponse> updateProfile(FormData formData);
@@ -51,6 +56,8 @@ abstract class TradesmanRepo {
     int limit,
   });
 
-  NetworkResult<AddInquiryResponseModel> addInquiry(AddInquiryRequestModel request);
+  NetworkResult<AddInquiryResponseModel> addInquiry(
+    AddInquiryRequestModel request,
+  );
   NetworkResult<GetAdvertiseResponseModel> getAdvertise();
 }

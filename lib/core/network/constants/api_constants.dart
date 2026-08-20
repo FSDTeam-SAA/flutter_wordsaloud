@@ -19,7 +19,6 @@ class ApiConstants {
   //   return 'ws://$baseDomain';
   // }
 
-
   /// [Headers]
   static Map<String, String> get defaultHeaders => {
     'Content-Type': 'application/json',
@@ -100,6 +99,8 @@ class TradesmanEndpoints {
       '${ApiConstants.baseUrl}/tradesman/onboarding/work-area';
   final String tellClient =
       '${ApiConstants.baseUrl}/tradesman/onboarding/pitch';
+  final String deletePhoto =
+      '${ApiConstants.baseUrl}/tradesman/onboarding/delete-photo';
   final String goLive = '${ApiConstants.baseUrl}/tradesman/onboarding/go-live';
   final String dashboard = '${ApiConstants.baseUrl}/tradesman/me/dashboard';
   final String updateProfile = '${ApiConstants.baseUrl}/tradesman/me/profile';

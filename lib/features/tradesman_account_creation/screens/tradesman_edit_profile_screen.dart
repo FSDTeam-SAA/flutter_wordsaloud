@@ -367,6 +367,54 @@ class _TradesmanEditProfileScreenState
     return photo.url?.trim() ?? '';
   }
 
+  Future<void> _removeExistingWorkPhoto(int index) async {
+    if (index < 0 || index >= _workPhotos.length) return;
+
+    final removedPhoto = _workPhotos[index];
+    setState(() {
+      _workPhotos = List<dashboard_model.WorkPhoto>.from(_workPhotos)
+        ..removeAt(index);
+    });
+
+    final isRemoved = await _tradesmanController.removeWorkPhoto(
+      publicId: removedPhoto.publicId ?? '',
+      url: removedPhoto.url ?? '',
+      photoId: removedPhoto.id ?? '',
+    );
+
+    if (!mounted) return;
+
+    if (!isRemoved) {
+      setState(() {
+        final restoredPhotos = List<dashboard_model.WorkPhoto>.from(
+          _workPhotos,
+        );
+        final restoreIndex = index.clamp(0, restoredPhotos.length);
+        restoredPhotos.insert(restoreIndex, removedPhoto);
+        _workPhotos = restoredPhotos;
+      });
+
+      Get.snackbar(
+        'Error',
+        _tradesmanController.errorMessage.value.isNotEmpty
+            ? _tradesmanController.errorMessage.value
+            : 'Failed to remove recent work image.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFA83F2D),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(15),
+      );
+      return;
+    }
+
+    _removedWorkPhotos.removeWhere(
+      (photo) => _workPhotoKey(photo) == _workPhotoKey(removedPhoto),
+    );
+    _originalWorkPhotos.removeWhere(
+      (photo) => _workPhotoKey(photo) == _workPhotoKey(removedPhoto),
+    );
+  }
+
   Widget _buildAvatarInitials() {
     return Center(
       child: Text(
@@ -1139,14 +1187,7 @@ class _TradesmanEditProfileScreenState
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => _buildBrokenImageTile(),
               ),
-              onRemove: () {
-                setState(() {
-                  _removedWorkPhotos.add(_workPhotos[index]);
-                  _workPhotos = List<dashboard_model.WorkPhoto>.from(
-                    _workPhotos,
-                  )..removeAt(index);
-                });
-              },
+              onRemove: () => _removeExistingWorkPhoto(index),
             );
           }
 

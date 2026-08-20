@@ -71,6 +71,29 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
   }
 
   @override
+  NetworkResult<dynamic> removeWorkPhoto({
+    required String publicId,
+    required String url,
+    required String photoId,
+  }) {
+    return _apiClient.post(
+      endpoint: ApiConstants.tradesman.deletePhoto,
+      data: {
+        'removeWorkPhoto': publicId.isNotEmpty
+            ? publicId
+            : photoId.isNotEmpty
+            ? photoId
+            : url,
+        'publicId': publicId,
+        'public_id': publicId,
+        'url': url,
+        'photoId': photoId,
+      },
+      fromJsonT: (json) => json,
+    );
+  }
+
+  @override
   NetworkResult<AddReviewResponseModel> addReview(
     AddReviewRequestModel request,
     String tradesmanId,
