@@ -708,8 +708,8 @@ class TradesmanController extends BaseController {
         return 'Appliance';
       case 'fabricator/welder':
         return 'Welder/Gate';
-      case 'mechanic':
-        return 'Mobile Mech';
+      // case 'mechanic':
+      //   return 'Mechanic';
       default:
         return skill.trim();
     }
@@ -720,9 +720,8 @@ class TradesmanController extends BaseController {
       case 'appliance':
       case 'appliance fix':
         return 'appliance';
-      case 'mobile mech':
-      case 'mechanic':
-        return 'mechanic';
+      // case 'mechanic':
+      //   return 'Mechanic';
       case 'welder/gate':
       case 'fabricator/welder':
         return 'welder';

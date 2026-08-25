@@ -62,8 +62,7 @@ class _TradesmanPublicviewScreenState extends State<TradesmanPublicviewScreen> {
       case 'joinery':
         return 'assets/images/fi_14106303.png';
       case 'mechanic':
-      case 'mobile mech':
-        return 'assets/images/fi_186239.png';
+        return 'assets/images/mechanic.png';
       case 'painter':
         return 'assets/images/fi_1995467.png';
       case 'appliance fix':

@@ -444,8 +444,6 @@ class _TradesmanEditProfileScreenState
         return 'assets/images/fi_14106303.png';
       case 'mechanic':
         return 'assets/images/mechanic.png';
-      case 'mobile mech':
-        return 'assets/images/fi_186239.png';
       case 'painter':
         return 'assets/images/fi_1995467.png';
       case 'appliance fix':

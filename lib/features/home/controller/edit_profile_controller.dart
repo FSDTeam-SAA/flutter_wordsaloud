@@ -149,9 +149,8 @@ class EditProfileController extends GetxController {
       case 'fabricator/welder':
       case 'welder/gate':
         return 'welder';
-      case 'mechanic':
-      case 'mobile mech':
-        return 'mechanic';
+      // case 'mechanic':
+      //   return 'mechanic';
       default:
         return value;
     }
