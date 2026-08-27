@@ -453,7 +453,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(height: 8),
+                                        const SizedBox(height: 6),
                                         // Name
                                         Text(
                                           cat.name,
@@ -463,13 +463,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fontSize: 14,
                                             fontWeight: FontWeight.w700,
                                             color: Colors.black,
-                                            height: 1.15,
+                                            height: 1.1,
                                           ),
                                         ),
                                         const SizedBox(height: 2),
                                         // Listed count
                                         Text(
                                           '${cat.listed} Listed',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.outfit(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w500,

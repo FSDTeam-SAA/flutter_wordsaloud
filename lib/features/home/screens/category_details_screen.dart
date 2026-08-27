@@ -212,7 +212,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              '${tradesmen.length} ${widget.category.name.toLowerCase()}s Near You',
+                              '${tradesmen.length} ${widget.category.name.toLowerCase()}s ',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
