@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -19,11 +20,14 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  static const Duration _categoryRefreshInterval = Duration(seconds: 10);
+
   late final HomeController controller;
   late final ClientProfileController _clientProfileController;
   late final TextEditingController _searchTextController;
   late final FocusNode _searchFocusNode;
+  Timer? _categoryRefreshTimer;
 
   @override
   void initState() {
@@ -36,7 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _clientProfileController = Get.isRegistered<ClientProfileController>()
         ? Get.find<ClientProfileController>()
         : Get.put(ClientProfileController());
+    WidgetsBinding.instance.addObserver(this);
     controller.fetchSkillList();
+    _startCategoryRefreshTimer();
 
     if (widget.showCustomerModeBanner) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -48,9 +54,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _categoryRefreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _searchTextController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      controller.refreshCategoryListOnly();
+      _startCategoryRefreshTimer();
+      return;
+    }
+
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      _categoryRefreshTimer?.cancel();
+      _categoryRefreshTimer = null;
+    }
+  }
+
+  void _startCategoryRefreshTimer() {
+    _categoryRefreshTimer?.cancel();
+    _categoryRefreshTimer = Timer.periodic(
+      _categoryRefreshInterval,
+      (_) => controller.refreshCategoryListOnly(),
+    );
   }
 
   void _clearSearch() {
@@ -327,200 +359,214 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Obx(() {
                 final items = controller.filteredCategories;
                 if (items.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No matches found.',
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        color: const Color(0xFF6D6D6D),
-                      ),
-                    ),
-                  );
-                }
-                return Column(
-                  children: [
-                    Row(
+                  return RefreshIndicator(
+                    onRefresh: controller.fetchSkillList,
+                    color: const Color(0xFFA83F2D),
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'Browse Trades',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        Spacer(),
-
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: Text(
-                            '${controller.categories.length} Categories',
-                            style: TextStyle(
-                              color: Color(0xFFA83F2D),
-                              fontWeight: FontWeight.w600,
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.45,
+                          child: Center(
+                            child: Text(
+                              'No matches found.',
+                              style: GoogleFonts.outfit(
+                                fontSize: 16,
+                                color: const Color(0xFF6D6D6D),
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    Expanded(
-                      child: GridView.builder(
-                        // padding: EdgeInsets.zero,
-                        padding: const EdgeInsets.only(
-                          left: 18,
-                          top: 10,
-                          bottom: 18,
-                          right: 18,
-                        ),
-                        itemCount: items.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              childAspectRatio: 1,
-                              crossAxisSpacing: 7,
-                              mainAxisSpacing: 7,
+                  );
+                }
+                return RefreshIndicator(
+                  onRefresh: controller.fetchSkillList,
+                  color: const Color(0xFFA83F2D),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Browse Trades',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                        itemBuilder: (context, index) {
-                          final cat = items[index];
-                          final bool hasRedBorder = index == 0;
-                          final bool hasTealBorder = cat.isNew && index != 0;
+                          ),
+                          Spacer(),
 
-                          Color borderColor = const Color(0xFFF3E5CF);
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Text(
+                              '${controller.categories.length} Categories',
+                              style: TextStyle(
+                                color: Color(0xFFA83F2D),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: GridView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          // padding: EdgeInsets.zero,
+                          padding: const EdgeInsets.only(
+                            left: 18,
+                            top: 10,
+                            bottom: 18,
+                            right: 18,
+                          ),
+                          itemCount: items.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                childAspectRatio: 1,
+                                crossAxisSpacing: 7,
+                                mainAxisSpacing: 7,
+                              ),
+                          itemBuilder: (context, index) {
+                            final cat = items[index];
+                            final bool hasRedBorder = index == 0;
+                            final bool hasTealBorder = cat.isNew && index != 0;
 
-                          if (hasRedBorder) {
-                            borderColor = const Color(0xFFA83F2D);
-                          }
-                          if (hasTealBorder) {
-                            borderColor = const Color(0xFF22707F);
-                          }
+                            Color borderColor = const Color(0xFFF3E5CF);
 
-                          // Subtitle color matches the border (teal for new/teal cards, red-brown for others)
-                          final Color subLabelColor = hasTealBorder
-                              ? const Color(0xFF22707F)
-                              : const Color(0xFFA83F2D);
+                            if (hasRedBorder) {
+                              borderColor = const Color(0xFFA83F2D);
+                            }
+                            if (hasTealBorder) {
+                              borderColor = const Color(0xFF22707F);
+                            }
 
-                          // Colors for the circular background of icons (matching mockup diversity)
-                          final List<Color> circleColors = [
-                            const Color(0xFFFDE8E8), // light red/pink
-                            const Color(0xFFE3F2FD), // light blue
-                            const Color(0xFFFFF9C4), // light yellow
-                            const Color(0xFFE8F5E9), // light green
-                            const Color(0xFFFCE4EC), // light pink
-                            const Color(0xFFFFE0B2), // light orange
-                          ];
-                          final Color iconBgColor =
-                              circleColors[index % circleColors.length];
+                            // Subtitle color matches the border (teal for new/teal cards, red-brown for others)
+                            final Color subLabelColor = hasTealBorder
+                                ? const Color(0xFF22707F)
+                                : const Color(0xFFA83F2D);
 
-                          return Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              GestureDetector(
-                                onTap: () => _openCategory(cat),
-                                child: SizedBox.expand(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: borderColor,
-                                        width: 2,
+                            // Colors for the circular background of icons (matching mockup diversity)
+                            final List<Color> circleColors = [
+                              const Color(0xFFFDE8E8), // light red/pink
+                              const Color(0xFFE3F2FD), // light blue
+                              const Color(0xFFFFF9C4), // light yellow
+                              const Color(0xFFE8F5E9), // light green
+                              const Color(0xFFFCE4EC), // light pink
+                              const Color(0xFFFFE0B2), // light orange
+                            ];
+                            final Color iconBgColor =
+                                circleColors[index % circleColors.length];
+
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => _openCategory(cat),
+                                  child: SizedBox.expand(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: borderColor,
+                                          width: 2,
+                                        ),
                                       ),
-                                    ),
-                                    padding: const EdgeInsets.only(
-                                      top: 20,
-                                      left: 8,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // Icon rounded container
-                                        Container(
-                                          width: 32,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color: iconBgColor,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                            child: Image.asset(
-                                              cat.image,
-                                              width: 18,
-                                              height: 18,
-                                              fit: BoxFit.contain,
+                                      padding: const EdgeInsets.only(
+                                        top: 20,
+                                        left: 8,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Icon rounded container
+                                          Container(
+                                            width: 32,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color: iconBgColor,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Center(
+                                              child: _CategoryIcon(
+                                                image: cat.image,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        // Name
-                                        Text(
-                                          cat.name,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.black,
-                                            height: 1.1,
+                                          const SizedBox(height: 6),
+                                          // Name
+                                          Text(
+                                            cat.name,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.black,
+                                              height: 1.1,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        // Listed count
-                                        Text(
-                                          '${cat.listed} Listed',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
-                                            color: subLabelColor,
+                                          const SizedBox(height: 2),
+                                          // Listed count
+                                          Text(
+                                            '${cat.listed} Listed',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w500,
+                                              color: subLabelColor,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              // "New" badge (shifted to top-left overlapping top border)
-                              if (cat.isNew)
-                                Positioned(
-                                  top: -10,
-                                  left: 12,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 3,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: index == 0
-                                            ? const Color(0xFFA83F2D)
-                                            : const Color(0xFF22707F),
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'New',
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: index == 0
-                                            ? const Color(0xFFA83F2D)
-                                            : const Color(0xFF22707F),
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ),
-                            ],
-                          );
-                        },
+                                // "New" badge (shifted to top-left overlapping top border)
+                                if (cat.isNew)
+                                  Positioned(
+                                    top: -10,
+                                    left: 12,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: index == 0
+                                              ? const Color(0xFFA83F2D)
+                                              : const Color(0xFF22707F),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'New',
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: index == 0
+                                              ? const Color(0xFFA83F2D)
+                                              : const Color(0xFF22707F),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               }),
             ),
@@ -566,6 +612,34 @@ class _HomeProfileAvatar extends StatelessWidget {
     }
 
     return _HomeInitialAvatar(initial: initial);
+  }
+}
+
+class _CategoryIcon extends StatelessWidget {
+  const _CategoryIcon({required this.image});
+
+  final String image;
+
+  @override
+  Widget build(BuildContext context) {
+    final source = image.trim();
+    final networkUrl = RegExp(r'https?://[^\s)]+').firstMatch(source)?.group(0);
+
+    if (networkUrl != null) {
+      return Image.network(
+        networkUrl,
+        width: 18,
+        height: 18,
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+      );
+    }
+
+    if (!source.startsWith('assets/')) {
+      return Text(source, style: const TextStyle(fontSize: 18, height: 1));
+    }
+
+    return Image.asset(source, width: 18, height: 18, fit: BoxFit.contain);
   }
 }
 

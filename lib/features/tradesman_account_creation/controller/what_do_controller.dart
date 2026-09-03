@@ -34,11 +34,11 @@ class WhatDoController extends GetxController {
     Skill(name: 'Maid Service', image: 'assets/images/fi_15551378.png'),
     Skill(name: 'Caterer', image: 'assets/images/fi_4490380.png', isNew: true),
     Skill(
-      name: 'Tile Man',
+      name: 'Tile Men',
       image: 'assets/images/fi_11932525.png',
       isNew: true,
     ),
-    Skill(name: 'Glass Man', image: 'assets/images/fi_896123.png'),
+    Skill(name: 'Glass Men', image: 'assets/images/fi_896123.png'),
     Skill(name: 'Mason', image: 'assets/images/fi_18029670.png'),
     Skill(name: 'Carpenter', image: 'assets/images/fi_12479483.png'),
     Skill(name: 'Fabricator/Welder', image: 'assets/images/fi_9439147.png'),

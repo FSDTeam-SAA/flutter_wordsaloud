@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
 
 class TradeCategory {
   final String name;
@@ -17,38 +19,21 @@ class TradeCategory {
 
 class HomeController extends GetxController {
   final List<TradeCategory> _fallbackCategories = const [
-    TradeCategory(
-      name: 'Phone Tech',
-      image: 'assets/images/fi_5060325.png',
-      isNew: true,
-    ),
+    TradeCategory(name: 'Phone Tech', image: 'assets/images/fi_5060325.png'),
     TradeCategory(
       name: 'Computer Tech',
       image: 'assets/images/fi_10528057.png',
-      isNew: true,
     ),
     TradeCategory(name: 'Plumber', image: 'assets/images/fi_6342703.png'),
     TradeCategory(name: 'Electrician', image: 'assets/images/fi_9781304.png'),
     TradeCategory(name: 'Appliance Fix', image: 'assets/images/fi_2012957.png'),
-    TradeCategory(
-      name: 'Joinery',
-      image: 'assets/images/fi_14106303.png',
-      isNew: true,
-    ),
+    TradeCategory(name: 'Joinery', image: 'assets/images/fi_14106303.png'),
     TradeCategory(name: 'AC Tech', image: 'assets/images/fi_7969720.png'),
     TradeCategory(name: 'Painter', image: 'assets/images/fi_1995467.png'),
     TradeCategory(name: 'Maid Service', image: 'assets/images/fi_15551378.png'),
-    TradeCategory(
-      name: 'Caterer',
-      image: 'assets/images/fi_4490380.png',
-      isNew: true,
-    ),
-    TradeCategory(
-      name: 'Tile Man',
-      image: 'assets/images/fi_11932525.png',
-      isNew: true,
-    ),
-    TradeCategory(name: 'Glass Man', image: 'assets/images/fi_896123.png'),
+    TradeCategory(name: 'Caterer', image: 'assets/images/fi_4490380.png'),
+    TradeCategory(name: 'Tile Men', image: 'assets/images/fi_11932525.png'),
+    TradeCategory(name: 'Glass Men', image: 'assets/images/fi_896123.png'),
     TradeCategory(name: 'Mason', image: 'assets/images/fi_18029670.png'),
     TradeCategory(name: 'Carpenter', image: 'assets/images/fi_12479483.png'),
     TradeCategory(
@@ -67,6 +52,7 @@ class HomeController extends GetxController {
   final RxString searchQuery = ''.obs;
   final RxList<TradeCategory> categories = <TradeCategory>[].obs;
   final RxBool isLoadingSkills = false.obs;
+  bool _isFetchingSkills = false;
 
   @override
   void onInit() {
@@ -76,20 +62,60 @@ class HomeController extends GetxController {
 
   Future<void> fetchSkillList() async {
     if (!Get.isRegistered<TradesmanController>()) return;
+    if (_isFetchingSkills) return;
 
+    _isFetchingSkills = true;
     final tradesmanController = Get.find<TradesmanController>();
     isLoadingSkills.value = true;
-    final skills = await tradesmanController.fetchSkillList();
-    final tradesmen = await tradesmanController.fetchTradesmenForCounts();
-    isLoadingSkills.value = false;
+    try {
+      final skills = await tradesmanController.fetchSkillList();
+      _applySkillList(skills);
 
+      final tradesmen = await tradesmanController.fetchTradesmenForCounts();
+      _applySkillList(skills, tradesmen: tradesmen);
+    } finally {
+      isLoadingSkills.value = false;
+      _isFetchingSkills = false;
+    }
+  }
+
+  Future<void> refreshCategoryListOnly() async {
+    if (!Get.isRegistered<TradesmanController>()) return;
+    if (_isFetchingSkills) return;
+
+    _isFetchingSkills = true;
+    try {
+      final skills = await Get.find<TradesmanController>().fetchSkillList();
+      _applySkillList(skills);
+    } finally {
+      _isFetchingSkills = false;
+    }
+  }
+
+  void _applySkillList(
+    List<SkillModel> skills, {
+    List<Tradesman> tradesmen = const [],
+  }) {
     if (skills.isEmpty && tradesmen.isEmpty) return;
 
     final countsBySkill = <String, int>{};
+    final iconsBySkill = <String, String>{};
+    final newBySkill = <String, bool>{};
+    final apiCategoryNames = <String>[];
+    final apiCategoryKeys = <String>{};
     for (final skill in skills) {
       final name = skill.skill?.trim();
       if (name == null || name.isEmpty) continue;
-      countsBySkill[_skillKey(name)] = skill.listedCount ?? 0;
+      final key = _skillKey(name);
+      if (apiCategoryKeys.add(key)) {
+        apiCategoryNames.add(name);
+      }
+      countsBySkill[key] = skill.listedCount ?? 0;
+      final icon = skill.icon?.trim();
+      if (icon != null && icon.isNotEmpty) {
+        iconsBySkill[key] = icon;
+      }
+      newBySkill[key] = skill.isNew;
     }
 
     if (tradesmen.isNotEmpty) {
@@ -106,17 +132,38 @@ class HomeController extends GetxController {
       }
     }
 
-    categories.assignAll(
-      _fallbackCategories.map((category) {
-        final listedCount = countsBySkill[_skillKey(category.name)];
-        return TradeCategory(
-          name: category.name,
-          image: category.image,
-          isNew: category.isNew,
-          listed: listedCount ?? category.listed,
-        );
-      }),
-    );
+    final fallbackKeys = _fallbackCategories
+        .map((category) => _skillKey(category.name))
+        .toSet();
+
+    final apiOnlyCategories = <TradeCategory>[];
+    for (final name in apiCategoryNames) {
+      final key = _skillKey(name);
+      if (fallbackKeys.contains(key)) continue;
+
+      apiOnlyCategories.add(
+        TradeCategory(
+          name: name,
+          image:
+              iconsBySkill[key] ??
+              'assets/images/project-manager_8741633 1.png',
+          isNew: newBySkill[key] ?? false,
+          listed: countsBySkill[key] ?? 0,
+        ),
+      );
+    }
+
+    final mergedCategories = _fallbackCategories.map((category) {
+      final listedCount = countsBySkill[_skillKey(category.name)];
+      return TradeCategory(
+        name: category.name,
+        image: iconsBySkill[_skillKey(category.name)] ?? category.image,
+        isNew: newBySkill[_skillKey(category.name)] ?? false,
+        listed: listedCount ?? category.listed,
+      );
+    }).toList();
+
+    categories.assignAll([...apiOnlyCategories, ...mergedCategories]);
   }
 
   List<TradeCategory> get filteredCategories {

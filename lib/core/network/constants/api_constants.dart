@@ -4,8 +4,8 @@ class ApiConstants {
   // static const String baseDomain = 'https://daniela-bake-backend.onrender.com'; // Publish
   // static const String baseDomain = 'http://18.116.214.151'; /// [AWS]
   // static const String baseDomain = 'http://192.168.0.218:8000';
-  //static const String baseDomain = 'http://localhost:5002';///eshitas laptop
-  static const String baseDomain = 'http://187.77.187.56:5056'; // Live
+  static const String baseDomain = 'http://62.72.58.29:5002';///eshitas laptop
+  // static const String baseDomain = 'http://187.77.187.56:5056'; // Live
   static const String baseUrl = '$baseDomain/api/v1';
 
   /// Dynamically generated WebSocket URL based on baseDomain

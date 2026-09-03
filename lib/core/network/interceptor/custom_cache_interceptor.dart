@@ -49,7 +49,7 @@ class CustomCacheInterceptor extends Interceptor {
   ) async {
     // Skip non-GET requests and excluded paths
     if (options.method.toUpperCase() != 'GET' ||
-        _excludedPaths.contains(options.path) ||
+        _isExcludedPath(options.path) ||
         _isAuthenticationEndpoint(options.path)) {
       return handler.next(options);
     }
@@ -123,7 +123,7 @@ class CustomCacheInterceptor extends Interceptor {
     // Only cache successful GET responses
     if (options.method.toUpperCase() == 'GET' &&
         _shouldCacheResponse(response) &&
-        !_excludedPaths.contains(options.path) &&
+        !_isExcludedPath(options.path) &&
         !_isAuthenticationEndpoint(options.path)) {
       await _cacheResponse(options, response);
     }
@@ -140,7 +140,7 @@ class CustomCacheInterceptor extends Interceptor {
 
     // Try to serve stale cache on network errors
     if (options.method.toUpperCase() == 'GET' &&
-        !_excludedPaths.contains(options.path) &&
+        !_isExcludedPath(options.path) &&
         _isNetworkError(err)) {
       final key = _generateCacheKey(options);
       final cached = _cacheBox.get(key);
@@ -380,6 +380,10 @@ class CustomCacheInterceptor extends Interceptor {
       '/logout',
     ];
     return authPaths.any((authPath) => path.contains(authPath));
+  }
+
+  bool _isExcludedPath(String path) {
+    return _excludedPaths.any((excludedPath) => path.contains(excludedPath));
   }
 
   bool _isNetworkError(DioException error) {

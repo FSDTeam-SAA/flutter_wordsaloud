@@ -26,6 +26,7 @@ class ApiClient {
 
   bool _isRefreshing = false;
   final List<Completer<void>> _pendingRequests = [];
+  final Completer<void> _initCompleter = Completer<void>();
 
   // Singleton instance
   static final ApiClient _instance = ApiClient._internal();
@@ -43,9 +44,16 @@ class ApiClient {
   bool _isInitialized = false;
 
   ApiClient._internal() {
+    _init();
+  }
+
+  Future<void> _init() async {
     if (!_isInitialized) {
-      _initialize();
+      await _initialize();
       _isInitialized = true;
+    }
+    if (!_initCompleter.isCompleted) {
+      _initCompleter.complete();
     }
   }
 
@@ -73,16 +81,22 @@ class ApiClient {
       ),
     );
 
-    // Initialize cache interceptor
-    // _cacheInterceptor = CustomCacheInterceptor(
-    //   maxCacheAge: const Duration(minutes: 15),
-    //   staleWhileRevalidate: const Duration(minutes: 5),
-    //   maxCacheSize: 1000,
-    //   maxMemorySize: 5 * 1024 * 1024, // 5MB
-    //   excludedPaths: ['/auth/', '/payment/', '/user/profile'],
-    // );
+    _cacheInterceptor = CustomCacheInterceptor(
+      maxCacheAge: const Duration(minutes: 15),
+      staleWhileRevalidate: const Duration(minutes: 5),
+      maxCacheSize: 1000,
+      maxMemorySize: 5 * 1024 * 1024,
+      excludedPaths: [
+        '/auth/',
+        '/payment/',
+        '/user/profile',
+        '/user/me',
+        '/tradesman/categories',
+        '/tradesman?',
+      ],
+    );
 
-    // _dio.interceptors.add(_cacheInterceptor);
+    _dio.interceptors.add(_cacheInterceptor);
   }
 
   /// Check connectivity before making requests
@@ -172,6 +186,8 @@ class ApiClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
+    await _initCompleter.future;
+
     final connectivityCheck = await _checkConnectivity();
     if (connectivityCheck.isLeft()) {
       if (method.toUpperCase() == 'GET') {
@@ -275,7 +291,7 @@ class ApiClient {
         _isRefreshing = true;
         try {
           if (await _refreshToken()) {
-            return _request<T>(
+            return await _request<T>(
               method: method,
               endpoint: endpoint,
               fromJsonT: fromJsonT,
