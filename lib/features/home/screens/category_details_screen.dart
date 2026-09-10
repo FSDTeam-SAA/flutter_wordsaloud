@@ -86,7 +86,9 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     // Format the title (e.g. Plumber -> Plumbers)
-    final String displayTitle = widget.category.name.endsWith('s')
+    final String displayTitle =
+        widget.category.name.toLowerCase().endsWith('s') ||
+            widget.category.name.toLowerCase().endsWith('men')
         ? widget.category.name
         : (widget.category.name == 'Welder/Gate'
               ? 'Welder/Gates'
@@ -189,6 +191,13 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                   .where((tradesman) => tradesman.isVip)
                   .toList();
               final isLoading = _tradesmanController.isTradesmanLoading.value;
+              final categoryName = widget.category.name.toLowerCase();
+              final countCategoryName =
+                  tradesmen.length <= 1 ||
+                      categoryName.endsWith('s') ||
+                      categoryName.endsWith('men')
+                  ? categoryName
+                  : '${categoryName}s';
 
               if (isLoading && tradesmen.isEmpty) {
                 return const Center(
@@ -212,7 +221,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              '${tradesmen.length} ${widget.category.name.toLowerCase()}s ',
+                              '${tradesmen.length} $countCategoryName',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
