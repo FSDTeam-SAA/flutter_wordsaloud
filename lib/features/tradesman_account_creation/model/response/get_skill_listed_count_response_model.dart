@@ -3,13 +3,21 @@ class SkillModel {
   final int? listedCount;
   final String? icon;
   final bool isNew;
+  final bool isVip;
 
-  SkillModel({this.skill, this.listedCount, this.icon, this.isNew = false});
+  SkillModel({
+    this.skill,
+    this.listedCount,
+    this.icon,
+    this.isNew = false,
+    this.isVip = false,
+  });
 
   factory SkillModel.fromJson(Map<String, dynamic> json) {
     final rawListedCount =
         json['listedCount'] ?? json['count'] ?? json['listed'];
     final rawIsNew = json['isNew'];
+    final rawIsVip = json['isVerified'] ?? json['isVip'] ?? json['isVIP'];
 
     return SkillModel(
       skill: (json['skill'] ?? json['name'] ?? json['category'])?.toString(),
@@ -20,6 +28,9 @@ class SkillModel {
       isNew: rawIsNew is bool
           ? rawIsNew
           : rawIsNew?.toString().toLowerCase() == 'true',
+      isVip: rawIsVip is bool
+          ? rawIsVip
+          : rawIsVip?.toString().toLowerCase() == 'true',
     );
   }
 
@@ -29,6 +40,7 @@ class SkillModel {
       'listedCount': listedCount,
       'icon': icon,
       'isNew': isNew,
+      'isVip': isVip,
     };
   }
 }

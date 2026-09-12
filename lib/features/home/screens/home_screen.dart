@@ -560,6 +560,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       ),
                                     ),
                                   ),
+                                // VIP badge, driven by the category API's
+                                // `isVerified` flag when a VIP is assigned.
+                                if (cat.isVip)
+                                  Positioned(
+                                    top: -10,
+                                    right: 12,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: const Color(0xFFA83F2D),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'VIP',
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color(0xFFA83F2D),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                               ],
                             );
                           },

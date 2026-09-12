@@ -7,12 +7,14 @@ class TradeCategory {
   final String name;
   final String image;
   final bool isNew;
+  final bool isVip;
   final int listed;
 
   const TradeCategory({
     required this.name,
     required this.image,
     this.isNew = false,
+    this.isVip = false,
     this.listed = 0,
   });
 }
@@ -101,6 +103,7 @@ class HomeController extends GetxController {
     final countsBySkill = <String, int>{};
     final iconsBySkill = <String, String>{};
     final newBySkill = <String, bool>{};
+    final vipBySkill = <String, bool>{};
     final apiCategoryNames = <String>[];
     final apiCategoryKeys = <String>{};
     for (final skill in skills) {
@@ -116,6 +119,7 @@ class HomeController extends GetxController {
         iconsBySkill[key] = icon;
       }
       newBySkill[key] = skill.isNew;
+      vipBySkill[key] = skill.isVip;
     }
 
     if (tradesmen.isNotEmpty) {
@@ -148,6 +152,7 @@ class HomeController extends GetxController {
               iconsBySkill[key] ??
               'assets/images/project-manager_8741633 1.png',
           isNew: newBySkill[key] ?? false,
+          isVip: vipBySkill[key] ?? false,
           listed: countsBySkill[key] ?? 0,
         ),
       );
@@ -159,6 +164,7 @@ class HomeController extends GetxController {
         name: category.name,
         image: iconsBySkill[_skillKey(category.name)] ?? category.image,
         isNew: newBySkill[_skillKey(category.name)] ?? false,
+        isVip: vipBySkill[_skillKey(category.name)] ?? false,
         listed: listedCount ?? category.listed,
       );
     }).toList();
