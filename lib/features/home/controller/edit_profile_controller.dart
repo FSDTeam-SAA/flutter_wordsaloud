@@ -1,5 +1,15 @@
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
+
+class TradeOption {
+  final String name;
+  final String? icon;
+  final bool isNew;
+
+  const TradeOption({required this.name, this.icon, this.isNew = false});
+}
 
 class EditProfileController extends GetxController {
   final String initialName;
@@ -18,31 +28,38 @@ class EditProfileController extends GetxController {
       'Trinidad wide'.obs; // matches screenshot selected option
   final RxnString profileImagePath = RxnString();
 
-  // All available trades/skills in the application
-  final List<String> availableTrades = const [
-    'Phone Tech',
-    'Computer Tech',
-    'Plumber',
-    'Electrician',
-    'Appliance Fix',
-    'Joinery',
-    'AC Tech',
-    'Painter',
-    'Maid Service',
-    'Caterer',
-    'Tile Men',
-    'Glass Men',
-    'Mason',
-    'Carpenter',
-    'Fabricator/Welder',
-    'Pool Cleaner',
-    'Tree Cutter',
-    'Landscaper',
-    'Roofer',
-    'Mechanic',
-    'Auto Body',
-    'Contractor',
+  final RxBool isLoadingTradeCategories = false.obs;
+  final RxList<TradeOption> availableTradeOptions = <TradeOption>[
+    ..._fallbackTradeOptions,
+  ].obs;
+
+  static const List<TradeOption> _fallbackTradeOptions = [
+    TradeOption(name: 'Phone Tech'),
+    TradeOption(name: 'Computer Tech'),
+    TradeOption(name: 'Plumber'),
+    TradeOption(name: 'Electrician'),
+    TradeOption(name: 'Appliance Fix'),
+    TradeOption(name: 'Joinery'),
+    TradeOption(name: 'AC Tech'),
+    TradeOption(name: 'Painter'),
+    TradeOption(name: 'Maid Service'),
+    TradeOption(name: 'Caterer'),
+    TradeOption(name: 'Tile Men'),
+    TradeOption(name: 'Glass Men'),
+    TradeOption(name: 'Mason'),
+    TradeOption(name: 'Carpenter'),
+    TradeOption(name: 'Fabricator/Welder'),
+    TradeOption(name: 'Pool Cleaner'),
+    TradeOption(name: 'Tree Cutter'),
+    TradeOption(name: 'Landscaper'),
+    TradeOption(name: 'Roofer'),
+    TradeOption(name: 'Mechanic'),
+    TradeOption(name: 'Auto Body'),
+    TradeOption(name: 'Contractor'),
   ];
+
+  List<String> get availableTrades =>
+      availableTradeOptions.map((trade) => trade.name).toList();
 
   EditProfileController({
     required this.initialName,
@@ -113,11 +130,67 @@ class EditProfileController extends GetxController {
     extraTrades.add(normalizedTrade);
   }
 
+  Future<void> loadAvailableTradesFromApi() async {
+    if (!Get.isRegistered<TradesmanController>()) return;
+    if (isLoadingTradeCategories.value) return;
+
+    isLoadingTradeCategories.value = true;
+    try {
+      final skills = await Get.find<TradesmanController>().fetchSkillList();
+      setAvailableTradeCategories(skills);
+    } finally {
+      isLoadingTradeCategories.value = false;
+    }
+  }
+
+  void setAvailableTradeCategories(List<SkillModel> skills) {
+    if (skills.isEmpty) return;
+
+    final options = <TradeOption>[];
+    final seenTradeKeys = <String>{};
+
+    void addOption(TradeOption option) {
+      final name = _displayTradeName(option.name);
+      if (name.isEmpty) return;
+      if (!seenTradeKeys.add(_tradeKey(name))) return;
+
+      options.add(
+        TradeOption(name: name, icon: option.icon, isNew: option.isNew),
+      );
+    }
+
+    for (final skill in skills) {
+      final name = skill.skill?.trim();
+      if (name == null || name.isEmpty) continue;
+      addOption(
+        TradeOption(
+          name: name,
+          icon: skill.icon?.trim().isNotEmpty == true
+              ? skill.icon!.trim()
+              : null,
+          isNew: skill.isNew,
+        ),
+      );
+    }
+
+    for (final option in _fallbackTradeOptions) {
+      addOption(option);
+    }
+
+    if (options.isNotEmpty) {
+      availableTradeOptions.assignAll(options);
+    }
+  }
+
   // Filter out already selected trades for the "Add Trade" dialog
-  List<String> get remainingTrades {
-    return availableTrades.where((trade) {
-      return !_isSelectedTrade(trade);
+  List<TradeOption> get remainingTradeOptions {
+    return availableTradeOptions.where((trade) {
+      return !_isSelectedTrade(trade.name);
     }).toList();
+  }
+
+  List<String> get remainingTrades {
+    return remainingTradeOptions.map((trade) => trade.name).toList();
   }
 
   String _displayTradeName(String tradeName) {

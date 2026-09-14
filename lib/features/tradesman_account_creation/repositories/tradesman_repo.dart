@@ -59,5 +59,5 @@ abstract class TradesmanRepo {
   NetworkResult<AddInquiryResponseModel> addInquiry(
     AddInquiryRequestModel request,
   );
-  NetworkResult<GetAdvertiseResponseModel> getAdvertise();
+  NetworkResult<GetAdvertiseResponseModel> getAdvertise({String category = ''});
 }

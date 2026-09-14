@@ -80,6 +80,7 @@ class _TradesmanEditProfileScreenState
       controller.homeArea.value = homeAreaTextController.text;
     });
 
+    controller.loadAvailableTradesFromApi();
     _loadProfileFromDashboard();
   }
 
@@ -481,6 +482,41 @@ class _TradesmanEditProfileScreenState
     }
   }
 
+  Widget _buildTradeIcon(TradeOption trade) {
+    final icon = trade.icon?.trim() ?? '';
+    if (icon.startsWith('http://') || icon.startsWith('https://')) {
+      return Image.network(
+        icon,
+        width: 26,
+        height: 26,
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) =>
+            Image.asset(_getTradeImage(trade.name), width: 26, height: 26),
+      );
+    }
+
+    return Image.asset(_getTradeImage(trade.name), width: 26, height: 26);
+  }
+
+  Widget _buildNewTradeBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5B544),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        'NEW',
+        style: GoogleFonts.outfit(
+          fontSize: 9,
+          height: 1,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -852,10 +888,13 @@ class _TradesmanEditProfileScreenState
                               onDelete: () => controller.removeTrade(trade),
                             ),
                           ),
-                          if (controller.remainingTrades.isNotEmpty)
+                          if (controller.remainingTrades.isNotEmpty ||
+                              controller.isLoadingTradeCategories.value)
                             InkWell(
-                              onTap: () =>
-                                  _showAddTradeDialog(context, controller),
+                              onTap: () {
+                                _showAddTradeDialog(context, controller);
+                                controller.loadAvailableTradesFromApi();
+                              },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 14,
@@ -1476,7 +1515,6 @@ class _TradesmanEditProfileScreenState
     showDialog(
       context: context,
       builder: (context) {
-        final remaining = controller.remainingTrades;
         final dialogHeight = (MediaQuery.of(context).size.height * 0.55).clamp(
           220.0,
           460.0,
@@ -1489,41 +1527,80 @@ class _TradesmanEditProfileScreenState
             'Select Trade to Add',
             style: GoogleFonts.outfit(fontWeight: FontWeight.w800),
           ),
-          content: remaining.isEmpty
-              ? Text(
-                  'No remaining trades available.',
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.w500),
-                )
-              : SizedBox(
-                  width: double.maxFinite,
-                  height: dialogHeight,
-                  child: ListView.separated(
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: remaining.length,
-                    separatorBuilder: (context, index) =>
-                        const Divider(color: Color(0xFFEBD7C7)),
-                    itemBuilder: (context, index) {
-                      final trade = remaining[index];
-                      return ListTile(
-                        leading: Image.asset(
-                          _getTradeImage(trade),
-                          width: 26,
-                          height: 26,
-                        ),
-                        title: Text(
-                          trade,
-                          style: GoogleFonts.outfit(
-                            fontWeight: FontWeight.w700,
+          content: Obx(() {
+            final remaining = controller.remainingTradeOptions;
+            final isLoading = controller.isLoadingTradeCategories.value;
+
+            if (remaining.isEmpty) {
+              return SizedBox(
+                width: double.maxFinite,
+                child: isLoading
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: CircularProgressIndicator(
+                            color: Color(0xFFA83F2D),
                           ),
                         ),
-                        onTap: () {
-                          controller.addTrade(trade);
-                          Get.back();
-                        },
-                      );
-                    },
+                      )
+                    : Text(
+                        'No remaining trades available.',
+                        style: GoogleFonts.outfit(fontWeight: FontWeight.w500),
+                      ),
+              );
+            }
+
+            return SizedBox(
+              width: double.maxFinite,
+              height: dialogHeight,
+              child: Column(
+                children: [
+                  if (isLoading)
+                    const LinearProgressIndicator(
+                      minHeight: 2,
+                      color: Color(0xFFA83F2D),
+                      backgroundColor: Color(0xFFEBD7C7),
+                    ),
+                  Expanded(
+                    child: ListView.separated(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: remaining.length,
+                      separatorBuilder: (context, index) =>
+                          const Divider(color: Color(0xFFEBD7C7)),
+                      itemBuilder: (context, index) {
+                        final trade = remaining[index];
+                        return ListTile(
+                          leading: _buildTradeIcon(trade),
+                          title: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  trade.name,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              if (trade.isNew) ...[
+                                const SizedBox(width: 8),
+                                _buildNewTradeBadge(),
+                              ],
+                            ],
+                          ),
+                          onTap: () {
+                            controller.addTrade(trade.name);
+                            Get.back();
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ),
+                ],
+              ),
+            );
+          }),
           actions: [
             TextButton(
               onPressed: () => Get.back(),

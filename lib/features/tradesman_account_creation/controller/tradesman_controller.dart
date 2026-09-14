@@ -761,11 +761,11 @@ class TradesmanController extends BaseController {
     );
   }
 
-  Future<List<Advertisement>> getAdvertise() async {
+  Future<List<Advertisement>> getAdvertise({String category = ''}) async {
     clearError();
     isAdvertiseLoading.value = true;
 
-    final result = await _tradesmanRepo.getAdvertise();
+    final result = await _tradesmanRepo.getAdvertise(category: category);
 
     return result.fold(
       (fail) {

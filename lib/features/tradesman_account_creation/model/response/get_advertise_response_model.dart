@@ -30,6 +30,7 @@ class Advertisement {
   final String mediaUrl;
   final String mediaType;
   final String createdBy;
+  final List<String> categories;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -41,6 +42,7 @@ class Advertisement {
     required this.mediaUrl,
     required this.mediaType,
     required this.createdBy,
+    required this.categories,
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
@@ -82,6 +84,7 @@ class Advertisement {
       mediaUrl: mediaUrl,
       mediaType: _normalizeMediaType(rawMediaType, mediaUrl),
       createdBy: json['createdBy']?.toString() ?? '',
+      categories: _stringListFromAny(json['categories']),
       isActive: json['isActive'] == true,
       createdAt:
           DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
@@ -100,6 +103,7 @@ class Advertisement {
       'mediaUrl': mediaUrl,
       'mediaType': mediaType,
       'createdBy': createdBy,
+      'categories': categories,
       'isActive': isActive,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
@@ -112,6 +116,23 @@ class Advertisement {
       if (text.isNotEmpty) return text;
     }
     return '';
+  }
+
+  static List<String> _stringListFromAny(dynamic value) {
+    if (value is List) {
+      return value
+          .map((item) => item?.toString().trim() ?? '')
+          .where((item) => item.isNotEmpty)
+          .toList();
+    }
+
+    final text = value?.toString().trim() ?? '';
+    if (text.isEmpty) return const [];
+    return text
+        .split(',')
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .toList();
   }
 
   static String _normalizeMediaType(String value, String url) {

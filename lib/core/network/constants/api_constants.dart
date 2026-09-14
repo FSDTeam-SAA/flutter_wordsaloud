@@ -1,7 +1,7 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'http://10.10.26.122:5001'; // eshita
-  // static const String baseDomain = 'https://backendwordsaloudd-three.vercel.app'; // Publish
+  // static const String baseDomain = 'http://10.10.26.122:5001'; // eshita
+  static const String baseDomain = 'https://backendwordsaloudd-rose.vercel.app'; // Publish
   // static const String baseDomain = 'http://18.116.214.151'; /// [AWS]
   // static const String baseDomain = 'http://192.168.0.218:8000';
   // static const String baseDomain = 'http://62.72.58.29:5002';///eshitas laptop
