@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -21,13 +20,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  static const Duration _categoryRefreshInterval = Duration(seconds: 10);
-
   late final HomeController controller;
   late final ClientProfileController _clientProfileController;
   late final TextEditingController _searchTextController;
   late final FocusNode _searchFocusNode;
-  Timer? _categoryRefreshTimer;
 
   @override
   void initState() {
@@ -42,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         : Get.put(ClientProfileController());
     WidgetsBinding.instance.addObserver(this);
     controller.fetchSkillList();
-    _startCategoryRefreshTimer();
 
     if (widget.showCustomerModeBanner) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -54,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    _categoryRefreshTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _searchTextController.dispose();
     _searchFocusNode.dispose();
@@ -65,24 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       controller.refreshCategoryListOnly();
-      _startCategoryRefreshTimer();
-      return;
     }
-
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.detached) {
-      _categoryRefreshTimer?.cancel();
-      _categoryRefreshTimer = null;
-    }
-  }
-
-  void _startCategoryRefreshTimer() {
-    _categoryRefreshTimer?.cancel();
-    _categoryRefreshTimer = Timer.periodic(
-      _categoryRefreshInterval,
-      (_) => controller.refreshCategoryListOnly(),
-    );
   }
 
   void _clearSearch() {

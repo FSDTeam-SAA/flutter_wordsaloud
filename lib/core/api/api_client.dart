@@ -641,13 +641,11 @@ class ApiClient {
 
     final accessToken = await _authStorageService.getAccessToken();
 
-    if (kDebugMode) DPrint.log("Current Access Token: $accessToken");
-
     if (accessToken != null) {
       options.headers ??= {};
       options.headers!['Authorization'] = 'Bearer $accessToken';
     }
-    if (kDebugMode) DPrint.log("Authorization header : ${options.headers}");
+    if (kDebugMode) DPrint.log("Authorization header attached");
     return options;
   }
 

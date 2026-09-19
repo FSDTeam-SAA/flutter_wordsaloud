@@ -123,7 +123,7 @@ class HomeController extends GetxController {
     }
 
     if (tradesmen.isNotEmpty) {
-      countsBySkill.clear();
+      final tradesmanCountsBySkill = <String, int>{};
       for (final tradesman in tradesmen) {
         final offeredSkillKeys = <String>{
           _skillKey(tradesman.mainSkill),
@@ -131,8 +131,16 @@ class HomeController extends GetxController {
         }..removeWhere((skill) => skill.isEmpty);
 
         for (final skill in offeredSkillKeys) {
-          countsBySkill[skill] = (countsBySkill[skill] ?? 0) + 1;
+          tradesmanCountsBySkill[skill] =
+              (tradesmanCountsBySkill[skill] ?? 0) + 1;
         }
+      }
+
+      for (final entry in tradesmanCountsBySkill.entries) {
+        final apiCount = countsBySkill[entry.key] ?? 0;
+        countsBySkill[entry.key] = entry.value > apiCount
+            ? entry.value
+            : apiCount;
       }
     }
 

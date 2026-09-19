@@ -60,6 +60,7 @@ class Tradesman {
   final String verificationStatus;
   final bool isLive;
   final bool isVip;
+  final String vipBySkill;
   final num ratingAverage;
   final int ratingCount;
   final int jobsCount;
@@ -80,6 +81,7 @@ class Tradesman {
     required this.verificationStatus,
     required this.isLive,
     required this.isVip,
+    required this.vipBySkill,
     required this.ratingAverage,
     required this.ratingCount,
     required this.jobsCount,
@@ -125,6 +127,8 @@ class Tradesman {
       ),
       isVip: _boolFromAny(
         Tradesman._firstNonNull([
+          profileJson['isVipForCategory'],
+          json['isVipForCategory'],
           profileJson['isVip'],
           profileJson['isVIP'],
           profileJson['vip'],
@@ -137,6 +141,10 @@ class Tradesman {
           json['featured'],
         ]),
       ),
+      vipBySkill:
+          profileJson['vipBySkill']?.toString() ??
+          json['vipBySkill']?.toString() ??
+          '',
       ratingAverage: _ratingAverageFromJson(json, profileJson),
       ratingCount: _ratingCountFromJson(json, profileJson),
       jobsCount: (profileJson['jobsCount'] as num?)?.toInt() ?? 0,
@@ -163,6 +171,7 @@ class Tradesman {
     String? verificationStatus,
     bool? isLive,
     bool? isVip,
+    String? vipBySkill,
     num? ratingAverage,
     int? ratingCount,
     int? jobsCount,
@@ -183,6 +192,7 @@ class Tradesman {
       verificationStatus: verificationStatus ?? this.verificationStatus,
       isLive: isLive ?? this.isLive,
       isVip: isVip ?? this.isVip,
+      vipBySkill: vipBySkill ?? this.vipBySkill,
       ratingAverage: ratingAverage ?? this.ratingAverage,
       ratingCount: ratingCount ?? this.ratingCount,
       jobsCount: jobsCount ?? this.jobsCount,
@@ -291,6 +301,7 @@ class Tradesman {
       'verificationStatus': verificationStatus,
       'isLive': isLive,
       'isVip': isVip,
+      'vipBySkill': vipBySkill,
       'ratingAverage': ratingAverage,
       'ratingCount': ratingCount,
       'jobsCount': jobsCount,

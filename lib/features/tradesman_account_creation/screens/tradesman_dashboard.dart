@@ -8,6 +8,7 @@ import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/t
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/tradesman_publicview_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart';
 import 'package:flutter_wordsaloud/features/home/screens/home_screen.dart';
 
 class TradesmanDashboard extends StatefulWidget {
@@ -51,6 +52,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
   int _daysOnPlatform = 0;
   List<dashboard_model.RatingBreakdown> _ratingBreakdown = const [];
   List<dashboard_model.RecentReview> _recentReviews = const [];
+  bool _isSwitchingToCustomerView = false;
 
   @override
   void initState() {
@@ -239,6 +241,59 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
       return '$first $lastInitial';
     }
     return parts[0];
+  }
+
+  Future<void> _switchToCustomerView() async {
+    if (_isSwitchingToCustomerView) return;
+
+    setState(() {
+      _isSwitchingToCustomerView = true;
+    });
+
+    final homeController = Get.isRegistered<HomeController>()
+        ? Get.find<HomeController>()
+        : Get.put(HomeController());
+
+    try {
+      await homeController.fetchSkillList();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isSwitchingToCustomerView = false;
+      });
+      Get.snackbar(
+        'Error',
+        'Failed to switch to customer view. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFA83F2D),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(15),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+
+    final errorMessage = _controller.errorMessage.value.trim();
+    if (errorMessage.isNotEmpty && _controller.skillList.isEmpty) {
+      setState(() {
+        _isSwitchingToCustomerView = false;
+      });
+      Get.snackbar(
+        'Error',
+        errorMessage,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFA83F2D),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(15),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSwitchingToCustomerView = false;
+    });
+    Get.to(() => const HomeScreen(showCustomerModeBanner: true));
   }
 
   @override
@@ -692,11 +747,8 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                       subtitle: 'Browse tradesmen as a client',
                       icon: Icons.swap_horiz,
                       iconBg: const Color(0xFFE0F2F1),
-                      onTap: () {
-                        Get.to(
-                          () => const HomeScreen(showCustomerModeBanner: true),
-                        );
-                      },
+                      isLoading: _isSwitchingToCustomerView,
+                      onTap: _switchToCustomerView,
                     ),
                     const SizedBox(height: 10),
                     _buildActionCard(
@@ -973,6 +1025,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
     required VoidCallback onTap,
     Color? textColor,
     bool hideArrow = false,
+    bool isLoading = false,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 18),
@@ -982,7 +1035,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
         border: Border.all(color: const Color(0xFFF3E5CF), width: 1.5),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: isLoading ? null : onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -1028,7 +1081,16 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                   ],
                 ),
               ),
-              if (!hideArrow)
+              if (isLoading)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.3,
+                    color: Color(0xFFA83F2D),
+                  ),
+                )
+              else if (!hideArrow)
                 const Icon(
                   Icons.chevron_right,
                   color: Color(0xFFCDCDCD),

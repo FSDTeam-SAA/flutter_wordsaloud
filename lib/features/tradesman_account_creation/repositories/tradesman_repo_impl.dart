@@ -172,9 +172,20 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
   }
 
   @override
-  NetworkResult<GetAdvertiseResponseModel> getAdvertise() {
+  NetworkResult<GetAdvertiseResponseModel> getAdvertise({
+    String category = '',
+  }) {
+    final queryParams = <String, String>{};
+    final normalizedCategory = category.trim();
+    if (normalizedCategory.isNotEmpty) {
+      queryParams['category'] = normalizedCategory;
+    }
+    final endpoint = Uri.parse(
+      '${ApiConstants.user.getInquiry}/active',
+    ).replace(queryParameters: queryParams).toString();
+
     return _apiClient.get(
-      endpoint: ApiConstants.user.getInquiry,
+      endpoint: endpoint,
       fromJsonT: GetAdvertiseResponseModel.fromData,
     );
   }

@@ -11,6 +11,7 @@ import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart
 import 'package:flutter_wordsaloud/features/client_profile/screens/advertise_inquiry_screen.dart';
 import 'package:flutter_wordsaloud/features/home/screens/tradesman_details_screen.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_advertise_response_model.dart';
 import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart'
     as tradesman_model;
 
@@ -41,7 +42,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
       skill: widget.category.name,
       sort: _selectedSort,
     );
-    _tradesmanController.getAdvertise();
+    _tradesmanController.getAdvertise(category: widget.category.name);
   }
 
   Future<void> _changeSort(String? sort) async {
@@ -188,7 +189,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                 _tradesmanController.allTradesman.toList(),
               );
               final vipTradesmen = tradesmen
-                  .where((tradesman) => tradesman.isVip)
+                  .where(_isVipForCurrentCategory)
                   .toList();
               final isLoading = _tradesmanController.isTradesmanLoading.value;
               final categoryName = widget.category.name.toLowerCase();
@@ -587,6 +588,36 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
   bool _isVerified(tradesman_model.Tradesman? tradesman) {
     final status = tradesman?.verificationStatus.trim().toLowerCase() ?? '';
     return status.contains('verified') || status.contains('approved');
+  }
+
+  bool _isVipForCurrentCategory(tradesman_model.Tradesman tradesman) {
+    if (!tradesman.isVip) return false;
+
+    final currentCategory = widget.category.name;
+    final vipSkill = tradesman.vipBySkill.trim();
+    if (vipSkill.isNotEmpty) {
+      return _sameSkill(vipSkill, currentCategory);
+    }
+
+    return _sameSkill(tradesman.mainSkill, currentCategory);
+  }
+
+  bool _sameSkill(String first, String second) {
+    return _skillLookupKey(first) == _skillLookupKey(second);
+  }
+
+  String _skillLookupKey(String value) {
+    final normalized = value.trim().toLowerCase();
+    switch (normalized) {
+      case 'appliance':
+      case 'appliance fix':
+        return 'appliance';
+      case 'fabricator/welder':
+      case 'welder/gate':
+        return 'welder';
+      default:
+        return normalized;
+    }
   }
 
   Widget _buildNameRow({
@@ -995,9 +1026,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
   Widget _buildSponsoredSlotCard() {
     return Obx(() {
       final isLoading = _tradesmanController.isAdvertiseLoading.value;
-      final advertisement = _tradesmanController.advertisements.isNotEmpty
-          ? _tradesmanController.advertisements.first
-          : null;
+      final advertisement = _advertisementForCurrentCategory();
 
       return DashedBorderContainer(
         color: const Color(0xFFC7B9A4),
@@ -1034,6 +1063,30 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
           ),
         ),
       );
+    });
+  }
+
+  Advertisement? _advertisementForCurrentCategory() {
+    final currentCategory = widget.category.name;
+    Advertisement? globalAdvertisement;
+
+    for (final advertisement in _tradesmanController.advertisements) {
+      if (_advertisementMatchesExactCategory(advertisement, currentCategory)) {
+        return advertisement;
+      }
+      if (globalAdvertisement == null && advertisement.categories.isEmpty) {
+        globalAdvertisement = advertisement;
+      }
+    }
+    return globalAdvertisement;
+  }
+
+  bool _advertisementMatchesExactCategory(
+    Advertisement advertisement,
+    String category,
+  ) {
+    return advertisement.categories.any((adCategory) {
+      return _sameSkill(adCategory, category);
     });
   }
 

@@ -14,16 +14,19 @@ class SkillModel {
   });
 
   factory SkillModel.fromJson(Map<String, dynamic> json) {
-    final rawListedCount =
-        json['listedCount'] ?? json['count'] ?? json['listed'];
+    final listedCount = _intFromAny(
+      json['tradesmanCount'] ??
+          json['tradesmenCount'] ??
+          json['listedCount'] ??
+          json['count'] ??
+          json['listed'],
+    );
     final rawIsNew = json['isNew'];
     final rawIsVip = json['isVerified'] ?? json['isVip'] ?? json['isVIP'];
 
     return SkillModel(
       skill: (json['skill'] ?? json['name'] ?? json['category'])?.toString(),
-      listedCount: rawListedCount is num
-          ? rawListedCount.toInt()
-          : int.tryParse((rawListedCount ?? '').toString()),
+      listedCount: listedCount,
       icon: json['icon']?.toString(),
       isNew: rawIsNew is bool
           ? rawIsNew
@@ -42,6 +45,11 @@ class SkillModel {
       'isNew': isNew,
       'isVip': isVip,
     };
+  }
+
+  static int? _intFromAny(dynamic value) {
+    if (value is num) return value.toInt();
+    return int.tryParse((value ?? '').toString());
   }
 }
 
