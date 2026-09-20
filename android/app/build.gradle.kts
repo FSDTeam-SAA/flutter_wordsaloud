@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.wordsaloud.flutter_wordsaloud"
+    namespace = "com.aturservicett.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

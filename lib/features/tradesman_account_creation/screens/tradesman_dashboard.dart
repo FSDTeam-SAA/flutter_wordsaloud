@@ -1,15 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/core/common/widgets/press_back_to_exit.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/dashboard_response_model.dart'
+import 'package:aturservicett/core/common/widgets/press_back_to_exit.dart';
+import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/dashboard_response_model.dart'
     as dashboard_model;
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/tradesman_edit_profile_screen.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/tradesman_publicview_screen.dart';
+import 'package:aturservicett/features/tradesman_account_creation/screens/tradesman_edit_profile_screen.dart';
+import 'package:aturservicett/features/tradesman_account_creation/screens/tradesman_publicview_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart';
-import 'package:flutter_wordsaloud/features/home/screens/home_screen.dart';
+import 'package:aturservicett/features/home/controller/home_controller.dart';
+import 'package:aturservicett/features/home/screens/home_screen.dart';
 
 class TradesmanDashboard extends StatefulWidget {
   final String tradesmanName;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/sign_up_screen.dart';
+import 'package:aturservicett/features/auth/screens/sign_up_screen.dart';
 import 'package:get/get.dart';
 
 class RoleSelectionController extends GetxController {

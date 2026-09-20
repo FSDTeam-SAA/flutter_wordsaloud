@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/features/client_profile/widgets/header.dart';
+import 'package:aturservicett/features/client_profile/widgets/header.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controller/about_aturservice_controller.dart';
-
-
 
 class AboutAturserviceScreen extends StatelessWidget {
   const AboutAturserviceScreen({super.key});
@@ -24,7 +22,13 @@ class AboutAturserviceScreen extends StatelessWidget {
       backgroundColor: _backgroundColor,
       body: Column(
         children: [
-          Hearder(headerColor: _headerColor, goldColor: _goldColor, text1: 'About ', text2: 'Aturservicett', suvbtitle: 'Skilled professionals at your service'),
+          Hearder(
+            headerColor: _headerColor,
+            goldColor: _goldColor,
+            text1: 'About ',
+            text2: 'Aturservicett',
+            suvbtitle: 'Skilled professionals at your service',
+          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(18),
@@ -118,7 +122,6 @@ class AboutAturserviceScreen extends StatelessWidget {
     );
   }
 }
-
 
 class AboutStat {
   const AboutStat({required this.value, required this.label});

@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/features/client_profile/controller/client_profile_controller.dart';
-import 'package:flutter_wordsaloud/features/client_profile/screens/about_aturservice_screen.dart';
-import 'package:flutter_wordsaloud/features/client_profile/screens/edit_profile_screen.dart';
-import 'package:flutter_wordsaloud/features/client_profile/screens/help_and_faq_screen.dart';
-import 'package:flutter_wordsaloud/features/client_profile/screens/terms_and_privacy_screen.dart';
+import 'package:aturservicett/features/client_profile/controller/client_profile_controller.dart';
+import 'package:aturservicett/features/client_profile/screens/about_aturservice_screen.dart';
+import 'package:aturservicett/features/client_profile/screens/edit_profile_screen.dart';
+import 'package:aturservicett/features/client_profile/screens/help_and_faq_screen.dart';
+import 'package:aturservicett/features/client_profile/screens/terms_and_privacy_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 

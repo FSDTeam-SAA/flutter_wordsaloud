@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/dashboard_response_model.dart'
+import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/dashboard_response_model.dart'
     as dashboard_model;
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_wordsaloud/features/home/controller/edit_profile_controller.dart';
+import 'package:aturservicett/features/home/controller/edit_profile_controller.dart';
 import 'package:image_picker/image_picker.dart';
 
 class TradesmanEditProfileScreen extends StatefulWidget {

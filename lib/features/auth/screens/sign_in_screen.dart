@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/signin_controller.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/sign_up_screen.dart';
+import 'package:aturservicett/core/widgets/button_widget.dart';
+import 'package:aturservicett/features/auth/controller/signin_controller.dart';
+import 'package:aturservicett/features/auth/screens/sign_up_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';

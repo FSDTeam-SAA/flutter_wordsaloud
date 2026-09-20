@@ -1,14 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/core/common/widgets/press_back_to_exit.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
-import 'package:flutter_wordsaloud/features/client_profile/controller/client_profile_controller.dart';
-import 'package:flutter_wordsaloud/features/client_profile/screens/profile_screen.dart';
+import 'package:aturservicett/core/common/widgets/press_back_to_exit.dart';
+import 'package:aturservicett/features/auth/controller/auth_controller.dart';
+import 'package:aturservicett/features/client_profile/controller/client_profile_controller.dart';
+import 'package:aturservicett/features/client_profile/screens/profile_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_wordsaloud/features/home/controller/home_controller.dart';
-import 'package:flutter_wordsaloud/features/home/screens/category_details_screen.dart';
+import 'package:aturservicett/features/home/controller/home_controller.dart';
+import 'package:aturservicett/features/home/screens/category_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool showCustomerModeBanner;

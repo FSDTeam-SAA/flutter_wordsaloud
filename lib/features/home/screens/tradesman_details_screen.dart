@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/features/home/screens/post_review_screen.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_specific_tradesman_response_model.dart'
+import 'package:aturservicett/features/home/screens/post_review_screen.dart';
+import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/get_specific_tradesman_response_model.dart'
     as specific_model;
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';

@@ -2,14 +2,14 @@ import 'dart:developer' as d_print;
 import 'dart:io';
 
 import 'package:dio/dio.dart' as dio;
-import 'package:flutter_wordsaloud/core/base/base_controller.dart';
-import 'package:flutter_wordsaloud/core/services/auth_storage_service.dart';
-import 'package:flutter_wordsaloud/core/services/session_service.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_client_profile_response_model.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/update_profile_response_model.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/repositories/tradesman_repo.dart';
+import 'package:aturservicett/core/base/base_controller.dart';
+import 'package:aturservicett/core/services/auth_storage_service.dart';
+import 'package:aturservicett/core/services/session_service.dart';
+import 'package:aturservicett/features/auth/controller/auth_controller.dart';
+import 'package:aturservicett/features/auth/screens/sign_in_screen.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/get_client_profile_response_model.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/update_profile_response_model.dart';
+import 'package:aturservicett/features/tradesman_account_creation/repositories/tradesman_repo.dart';
 import 'package:get/get.dart';
 
 class ClientProfileController extends BaseController {

@@ -1,7 +1,7 @@
 import 'dart:developer' as d_print;
 
-import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/role_selection_controller.dart';
+import 'package:aturservicett/features/auth/controller/auth_controller.dart';
+import 'package:aturservicett/features/auth/controller/role_selection_controller.dart';
 import 'package:get/get.dart';
 
 class SignupController extends GetxController {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/features/client_profile/screens/privacy_and_policy_screen.dart';
-import 'package:flutter_wordsaloud/features/client_profile/screens/terms_and_condition_screen.dart';
+import 'package:aturservicett/features/client_profile/screens/privacy_and_policy_screen.dart';
+import 'package:aturservicett/features/client_profile/screens/terms_and_condition_screen.dart';
 import 'package:get/get.dart';
 
 class TermsAndPrivacyController extends GetxController {

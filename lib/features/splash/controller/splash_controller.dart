@@ -1,11 +1,11 @@
 import 'package:flutter/animation.dart';
-import 'package:flutter_wordsaloud/core/services/auth_storage_service.dart';
-import 'package:flutter_wordsaloud/core/services/tradesman_profile_status_service.dart';
+import 'package:aturservicett/core/services/auth_storage_service.dart';
+import 'package:aturservicett/core/services/tradesman_profile_status_service.dart';
 import 'package:get/get.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
-import 'package:flutter_wordsaloud/features/home/screens/home_screen.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/tradesman_dashboard.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/what_do_screen.dart';
+import 'package:aturservicett/features/auth/screens/role_selection_screen.dart';
+import 'package:aturservicett/features/home/screens/home_screen.dart';
+import 'package:aturservicett/features/tradesman_account_creation/screens/tradesman_dashboard.dart';
+import 'package:aturservicett/features/tradesman_account_creation/screens/what_do_screen.dart';
 
 class SplashController extends GetxController with GetTickerProviderStateMixin {
   final AuthStorageService _authStorageService = AuthStorageService();

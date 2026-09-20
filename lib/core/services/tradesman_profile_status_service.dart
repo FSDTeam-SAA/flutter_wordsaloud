@@ -1,6 +1,6 @@
 import 'dart:developer' as d_print;
 
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/repositories/tradesman_repo.dart';
+import 'package:aturservicett/features/tradesman_account_creation/repositories/tradesman_repo.dart';
 import 'package:get/get.dart';
 
 import 'auth_storage_service.dart';

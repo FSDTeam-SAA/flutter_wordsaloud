@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
+import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
 
 class TradeCategory {
   final String name;

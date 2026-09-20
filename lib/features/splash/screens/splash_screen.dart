@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_wordsaloud/features/splash/controller/splash_controller.dart';
+import 'package:aturservicett/features/splash/controller/splash_controller.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -27,7 +27,7 @@ class SplashScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 48),
-            
+
             // LogoText Image with Reveal Animation
             AnimatedBuilder(
               animation: controller.textRevealAnimation,
@@ -46,24 +46,26 @@ class SplashScreen extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Subtitle with Reactive Visibility
-            Obx(() => AnimatedOpacity(
-              duration: const Duration(milliseconds: 800),
-              opacity: controller.showSubtext.value ? 1.0 : 0.0,
-              child: Text(
-                "Skilled professional at your service in TnT",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 16,
-                  color: Colors.white.withOpacity(0.9),
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0.2,
+            Obx(
+              () => AnimatedOpacity(
+                duration: const Duration(milliseconds: 800),
+                opacity: controller.showSubtext.value ? 1.0 : 0.0,
+                child: Text(
+                  "Skilled professional at your service in TnT",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.9),
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 0.2,
+                  ),
                 ),
               ),
-            )),
+            ),
           ],
         ),
       ),

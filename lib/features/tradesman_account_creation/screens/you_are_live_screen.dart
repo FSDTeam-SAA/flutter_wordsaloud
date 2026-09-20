@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
+import 'package:aturservicett/core/widgets/button_widget.dart';
 
 class YouAreLiveScreen extends StatelessWidget {
   final String tradesmanName;

@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/what_do_controller.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/what_work_controller.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/screens/you_are_live_screen.dart';
+import 'package:aturservicett/features/auth/controller/auth_controller.dart';
+import 'package:aturservicett/features/auth/controller/signup_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/controller/what_do_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/controller/what_work_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/screens/you_are_live_screen.dart';
 
 class TellClientsController extends GetxController {
   final TradesmanController _tradesmanController =

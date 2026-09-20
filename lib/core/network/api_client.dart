@@ -5,7 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
+import 'package:aturservicett/features/auth/screens/sign_in_screen.dart';
 
 import 'package:get/get.dart' hide FormData;
 

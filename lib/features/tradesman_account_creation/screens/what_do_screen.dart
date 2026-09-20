@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/what_do_controller.dart';
+import 'package:aturservicett/core/widgets/button_widget.dart';
+import 'package:aturservicett/features/tradesman_account_creation/controller/what_do_controller.dart';
 
 class WhatDoScreen extends StatelessWidget {
   const WhatDoScreen({super.key});

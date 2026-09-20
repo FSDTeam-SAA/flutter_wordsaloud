@@ -1,4 +1,4 @@
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
 import 'package:get/get.dart';
 
 class WhatWorkController extends GetxController {

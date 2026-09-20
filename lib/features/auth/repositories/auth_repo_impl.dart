@@ -1,5 +1,5 @@
-import 'package:flutter_wordsaloud/features/auth/models/request/sign_up_otp_request_model.dart';
-import 'package:flutter_wordsaloud/features/auth/models/response/sign_up_otp_response_model.dart';
+import 'package:aturservicett/features/auth/models/request/sign_up_otp_request_model.dart';
+import 'package:aturservicett/features/auth/models/response/sign_up_otp_response_model.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_result.dart';

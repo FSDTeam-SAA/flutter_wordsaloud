@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_wordsaloud/core/di/service_locator.dart';
-import 'package:flutter_wordsaloud/features/splash/screens/splash_screen.dart';
+import 'package:aturservicett/core/di/service_locator.dart';
+import 'package:aturservicett/features/splash/screens/splash_screen.dart';
 
 import 'core/init/app_initializer.dart';
 
-void main() async{
+void main() async {
   await AppInitializer.initializeApp();
   runApp(const MyApp());
 }

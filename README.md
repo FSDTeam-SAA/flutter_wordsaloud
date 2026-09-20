@@ -71,15 +71,15 @@ Replace `YOUR_GITHUB_FLUTTER_LINK_HERE` with the real GitHub link.
 Then open the project in VS Code:
 
 ```bash
-cd flutter_wordsaloud
+cd aturservicett
 code .
 ```
 
-If `code .` does not work, open VS Code manually, choose **File > Open Folder**, and select the `flutter_wordsaloud` folder.
+If `code .` does not work, open VS Code manually, choose **File > Open Folder**, and select the `aturservicett` folder.
 
 ## 3. Install Flutter Packages
 
-In the VS Code terminal, make sure you are inside the `flutter_wordsaloud` folder.
+In the VS Code terminal, make sure you are inside the `aturservicett` folder.
 
 Run:
 
@@ -200,7 +200,7 @@ flutter run
 
 ## 9. Useful Flutter Commands
 
-Run these commands inside the `flutter_wordsaloud` folder.
+Run these commands inside the `aturservicett` folder.
 
 ```bash
 flutter pub get

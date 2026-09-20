@@ -1,4 +1,4 @@
-package com.example.wordsaloud.flutter_wordsaloud
+package com.aturservicett.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/features/client_profile/widgets/pill_button.dart';
+import 'package:aturservicett/features/client_profile/widgets/pill_button.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 
@@ -7,8 +7,12 @@ class Hearder extends StatelessWidget {
   const Hearder({
     super.key,
     required Color headerColor,
-    required Color goldColor, required this.text1, required this.text2, required this.suvbtitle,
-  }) : _headerColor = headerColor, _goldColor = goldColor;
+    required Color goldColor,
+    required this.text1,
+    required this.text2,
+    required this.suvbtitle,
+  }) : _headerColor = headerColor,
+       _goldColor = goldColor;
 
   final Color _headerColor;
   final Color _goldColor;
@@ -21,12 +25,7 @@ class Hearder extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: _headerColor,
-      padding: const EdgeInsets.only(
-        top: 60,
-        left: 18,
-        right: 18,
-        bottom: 16,
-      ),
+      padding: const EdgeInsets.only(top: 60, left: 18, right: 18, bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -45,7 +44,7 @@ class Hearder extends StatelessWidget {
                 height: 1,
               ),
               children: [
-                TextSpan(text: text1 ),
+                TextSpan(text: text1),
                 TextSpan(
                   text: text2,
                   style: TextStyle(

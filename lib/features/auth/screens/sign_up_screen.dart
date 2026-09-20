@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:flutter_wordsaloud/core/widgets/button_widget.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/auth_controller.dart';
-import 'package:flutter_wordsaloud/features/auth/controller/signup_controller.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/role_selection_screen.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
+import 'package:aturservicett/core/widgets/button_widget.dart';
+import 'package:aturservicett/features/auth/controller/auth_controller.dart';
+import 'package:aturservicett/features/auth/controller/signup_controller.dart';
+import 'package:aturservicett/features/auth/screens/role_selection_screen.dart';
+import 'package:aturservicett/features/auth/screens/sign_in_screen.dart';
 
 class SignUpScreen extends StatelessWidget {
   final bool backToRoleSelection;

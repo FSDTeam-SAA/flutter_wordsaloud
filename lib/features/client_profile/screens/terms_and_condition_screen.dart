@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wordsaloud/features/client_profile/widgets/header.dart';
+import 'package:aturservicett/features/client_profile/widgets/header.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class TermsAndConditionScreen extends StatelessWidget {

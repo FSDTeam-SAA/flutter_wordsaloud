@@ -2,7 +2,7 @@
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
+import 'package:aturservicett/features/auth/screens/sign_in_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:get/get.dart';
 

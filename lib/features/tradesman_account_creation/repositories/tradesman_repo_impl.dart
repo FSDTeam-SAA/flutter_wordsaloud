@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/add_inquiry_response_model.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/model/response/tell_clients_response_model.dart';
-import 'package:flutter_wordsaloud/features/tradesman_account_creation/repositories/tradesman_repo.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/add_inquiry_response_model.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/tell_clients_response_model.dart';
+import 'package:aturservicett/features/tradesman_account_creation/repositories/tradesman_repo.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_result.dart';

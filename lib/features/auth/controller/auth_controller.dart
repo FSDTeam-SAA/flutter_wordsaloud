@@ -1,9 +1,9 @@
 import 'dart:developer' as d_print;
 
-import 'package:flutter_wordsaloud/features/auth/models/request/sign_in_request_model.dart';
-import 'package:flutter_wordsaloud/features/auth/models/request/sign_up_otp_request_model.dart';
-import 'package:flutter_wordsaloud/features/auth/models/request/verify_mail_request_model.dart';
-import 'package:flutter_wordsaloud/features/auth/screens/sign_in_screen.dart';
+import 'package:aturservicett/features/auth/models/request/sign_in_request_model.dart';
+import 'package:aturservicett/features/auth/models/request/sign_up_otp_request_model.dart';
+import 'package:aturservicett/features/auth/models/request/verify_mail_request_model.dart';
+import 'package:aturservicett/features/auth/screens/sign_in_screen.dart';
 import 'package:get/get.dart';
 
 import '../../../core/base/base_controller.dart';

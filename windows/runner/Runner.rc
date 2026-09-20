@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example.wordsaloud" "\0"
-            VALUE "FileDescription", "flutter_wordsaloud" "\0"
+            VALUE "FileDescription", "aturservicett" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "flutter_wordsaloud" "\0"
+            VALUE "InternalName", "aturservicett" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example.wordsaloud. All rights reserved." "\0"
-            VALUE "OriginalFilename", "flutter_wordsaloud.exe" "\0"
-            VALUE "ProductName", "flutter_wordsaloud" "\0"
+            VALUE "OriginalFilename", "aturservicett.exe" "\0"
+            VALUE "ProductName", "aturservicett" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
