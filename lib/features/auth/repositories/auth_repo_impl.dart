@@ -68,47 +68,5 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   }
 
-  //
-  // @override
-  // NetworkResult<ForgotPasswordResponseModel> forgotPassword(
-  //     ForgotPasswordRequestModel request) {
-  //   return _apiClient.post(endpoint: ApiConstants.auth.forgotPassword,
-  //       data: request.toJson(),
-  //       fromJsonT: (json) => ForgotPasswordResponseModel.fromJson(json));
-  // }
-  //
-  // @override
-  // NetworkResult<void> verifyOtp(VerifyOtpRequestModel request) {
-  //   return _apiClient.post(endpoint: ApiConstants.auth.verifyOtp,
-  //       data: request.toJson(),
-  //       fromJsonT: (json) {});
-  // }
-  //
-  // @override
-  // NetworkResult<void> createNewPassword(CreateNewPasswordRequestModel request) {
-  //   return _apiClient.post(
-  //       endpoint: ApiConstants.auth.resetPassword,
-  //       data: request.toJson(),
-  //       fromJsonT: (json) {});
-  // }
-  //
-  // @override
-  // NetworkResult<LoginResponseModel> refreshToken(
-  //     RefreshTokenRequestModel request,) {
-  //   return _apiClient.post(
-  //     endpoint: ApiConstants.auth.refreshToken,
-  //     data: request.toJson(),
-  //     fromJsonT: (json) => LoginResponseModel.fromJson(json),
-  //   );
-  // }
-  //
-  // @override
-  // NetworkResult<RefreshTokenResponseModel> refreshTOken(
-  //     RefreshTokenRequestModel request,) {
-  //   return _apiClient.post(
-  //     endpoint: ApiConstants.auth.refreshToken,
-  //     data: request.toJson(),
-  //     fromJsonT: (json) => RefreshTokenResponseModel.fromJson(json),
-  //   );
-  // }
+ 
 }

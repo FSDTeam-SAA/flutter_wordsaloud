@@ -22,10 +22,5 @@ abstract class AuthRepository {
   );
   NetworkResult<RegisterResponseModel> register(RegisterRequestModel request);
   NetworkResult<LoginResponseModel> login(SignInRequestModel request);
-  // NetworkResult<ForgotPasswordResponseModel> forgotPassword(ForgotPasswordRequestModel request);
-  // NetworkResult<void> verifyOtp(VerifyOtpRequestModel request);
-  // NetworkResult<void> createNewPassword(CreateNewPasswordRequestModel request);
-  // NetworkResult<RefreshTokenResponseModel> refreshTOken(RefreshTokenRequestModel request);
-  //
-  // NetworkResult<LoginResponseModel> refreshToken(RefreshTokenRequestModel request);
+
 }

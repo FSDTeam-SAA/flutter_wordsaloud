@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../di/service_locator.dart';
-import '../network/socket_client.dart';
+
 import 'hive_intialization.dart';
 
 class AppInitializer {
