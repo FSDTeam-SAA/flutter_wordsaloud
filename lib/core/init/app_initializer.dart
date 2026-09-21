@@ -24,8 +24,6 @@ class AppInitializer {
 
     setupServiceLocator();
 
-    // SocketClient().connect();
-    // // Wait for connection
-    // SocketClient().onReady;
+   
   }
 }
