@@ -1,9 +1,8 @@
 class ApiConstants {
   /// [Base Configuration]
-    // static const String baseDomain = 'http://10.10.26.122:5001'; 
 
   static const String baseDomain =
-      'https://backendwordsaloudd-rose.vercel.app'; // Publish
+      'https://aturservicett-backend.onrender.com'; // Publish
 
   static const String baseUrl = '$baseDomain/api/v1';
 
