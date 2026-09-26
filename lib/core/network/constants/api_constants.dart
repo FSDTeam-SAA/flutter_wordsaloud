@@ -1,6 +1,5 @@
 class ApiConstants {
   /// [Base Configuration]
-  // static const String baseDomain = 'http://10.10.26.122:5001';
 
   static const String baseDomain =
       'https://aturservicett-backend.onrender.com'; // Publish
