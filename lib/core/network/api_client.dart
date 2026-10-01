@@ -35,6 +35,16 @@ class ApiClient {
   // final SecureStoreServices _secureStoreServices = SecureStoreServices();
   final AuthStorageService _authStorageService = AuthStorageService();
 
+  static Options noCacheOptions() => Options(
+    // Dio/auth interceptors add headers and metadata to these maps later, so
+    // they must remain mutable.
+    headers: <String, dynamic>{
+      'Cache-Control': 'no-cache, no-store',
+      'Pragma': 'no-cache',
+    },
+    extra: <String, dynamic>{CustomCacheInterceptor.skipCacheKey: true},
+  );
+
   // factory ApiClient() {
   //   _instance ??= ApiClient._internal();
   //   _instance!._initialize();
@@ -93,6 +103,11 @@ class ApiClient {
         '/user/me',
         '/admin/advertisements/active',
         '/tradesman/categories',
+        // Tradesman profile data changes during every onboarding step. Serving
+        // this endpoint from the 15-minute cache can hide the just-saved
+        // skills, area, pitch, rate, and photos, and can make startup routing
+        // use an obsolete `isLive` value.
+        '/tradesman/me/dashboard',
         '/tradesman?',
       ],
     );
@@ -191,13 +206,16 @@ class ApiClient {
 
     final connectivityCheck = await _checkConnectivity();
     if (connectivityCheck.isLeft()) {
-      if (method.toUpperCase() == 'GET') {
+      final offlineRequestOptions = RequestOptions(
+        path: endpoint,
+        queryParameters: queryParameters,
+        headers: options?.headers ?? {},
+        extra: options?.extra ?? {},
+      );
+      if (method.toUpperCase() == 'GET' &&
+          !_cacheInterceptor.shouldBypassCache(offlineRequestOptions)) {
         final cacheKey = _cacheInterceptor.generateCacheKey(
-          RequestOptions(
-            path: endpoint,
-            queryParameters: queryParameters,
-            headers: options?.headers ?? {},
-          ),
+          offlineRequestOptions,
         );
         final cachedData = _cacheInterceptor.getCachedData(cacheKey);
         if (cachedData != null) {

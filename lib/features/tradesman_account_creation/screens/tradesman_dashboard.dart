@@ -20,10 +20,10 @@ class TradesmanDashboard extends StatefulWidget {
 
   const TradesmanDashboard({
     super.key,
-    this.tradesmanName = 'Devon Ramsaran',
-    this.tradesmanSkill = 'Plumber',
+    this.tradesmanName = 'Tradesman',
+    this.tradesmanSkill = '',
     this.extraTrades = const [],
-    this.homeArea = 'San Fernando',
+    this.homeArea = '',
     this.profileImagePath,
   });
 
@@ -38,6 +38,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
   late String _homeArea;
   String? _profileImagePath;
   String? _profileImageUrl;
+  String _phoneNumber = '';
   String _verificationStatus = 'Pending Verification';
   String _pitch = '';
   List<String> _extraTrades = const [];
@@ -48,7 +49,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
   int _reviewsTotal = 0;
   int _jobsCount = 0;
   int _viewsThisWeek = 0;
-  int _tradesListed = 3;
+  int _tradesListed = 0;
   int _daysOnPlatform = 0;
   List<dashboard_model.RatingBreakdown> _ratingBreakdown = const [];
   List<dashboard_model.RecentReview> _recentReviews = const [];
@@ -111,6 +112,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
               .toList() ??
           const [];
       _profileImageUrl = user?.profileImage?.url;
+      _phoneNumber = user?.phoneNumber?.trim() ?? '';
       _verificationStatus =
           dashboard.verification?.label ??
           _formatStatusLabel(
@@ -300,8 +302,8 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
   Widget build(BuildContext context) {
     final displaySkill = _tradesmanSkill.isNotEmpty
         ? _tradesmanSkill
-        : 'Plumber';
-    final displayArea = _homeArea.isNotEmpty ? _homeArea : 'San Fernando';
+        : 'Trade not set';
+    final displayArea = _homeArea.isNotEmpty ? _homeArea : 'Area not set';
     final displaySub = '$displaySkill • $displayArea';
     final displayRating = _formatRating(_overallRating);
 
@@ -532,6 +534,8 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                       ),
                     ),
 
+                    _buildProfileDetailsCard(),
+
                     // 3. Rating breakdown Card
                     Container(
                       margin: const EdgeInsets.only(
@@ -671,7 +675,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
                         final result = await Get.to(
                           () => TradesmanEditProfileScreen(
                             tradesmanName: _tradesmanName,
-                            tradesmanPhone: '+1 868 754-2288',
+                            tradesmanPhone: _phoneNumber,
                             tradesmanSkill: _tradesmanSkill,
                             extraTrades: _extraTrades,
                             homeArea: _homeArea,
@@ -805,6 +809,188 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProfileDetailsCard() {
+    final trades = <String>[
+      if (_tradesmanSkill.trim().isNotEmpty) _tradesmanSkill.trim(),
+      ..._extraTrades.where((trade) => trade.trim().isNotEmpty),
+    ];
+    final rate = _rate.trim().isEmpty
+        ? 'Not added yet'
+        : 'TT\$${_rate.trim()} ${_rateUnit.trim().toLowerCase()}';
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(left: 18, right: 18, top: 16),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF3E5CF), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'MY PROFILE DETAILS',
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF6D6D6D),
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Trades',
+            style: GoogleFonts.outfit(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF454545),
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (trades.isEmpty)
+            _buildMissingProfileValue()
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: trades
+                  .map(
+                    (trade) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9E8E4),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFA83F2D)),
+                      ),
+                      child: Text(
+                        trade,
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFA83F2D),
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          const SizedBox(height: 16),
+          _buildProfileDetailRow(
+            icon: Icons.location_on_outlined,
+            label: 'Service area',
+            value: _homeArea.trim().isEmpty ? 'Not added yet' : _homeArea,
+          ),
+          const SizedBox(height: 12),
+          _buildProfileDetailRow(
+            icon: Icons.payments_outlined,
+            label: 'Typical rate',
+            value: rate,
+          ),
+          const SizedBox(height: 12),
+          _buildProfileDetailRow(
+            icon: Icons.description_outlined,
+            label: 'About me',
+            value: _pitch.trim().isEmpty ? 'Not added yet' : _pitch,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Recent work',
+            style: GoogleFonts.outfit(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF454545),
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (_recentWorkPhotoUrls.isEmpty)
+            _buildMissingProfileValue()
+          else
+            SizedBox(
+              height: 86,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _recentWorkPhotoUrls.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (context, index) => ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    _recentWorkPhotoUrls[index],
+                    width: 86,
+                    height: 86,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => Container(
+                      width: 86,
+                      height: 86,
+                      color: const Color(0xFFF5EFE6),
+                      child: const Icon(
+                        Icons.broken_image_outlined,
+                        color: Color(0xFF6D6D6D),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 19, color: const Color(0xFFA83F2D)),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF6D6D6D),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: GoogleFonts.outfit(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                  height: 1.35,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMissingProfileValue() {
+    return Text(
+      'Not added yet',
+      style: GoogleFonts.outfit(
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: const Color(0xFF6D6D6D),
       ),
     );
   }

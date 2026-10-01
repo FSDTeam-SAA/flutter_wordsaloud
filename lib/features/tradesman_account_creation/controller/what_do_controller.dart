@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
 
 class Skill {
   final String name;
@@ -14,42 +15,39 @@ class WhatDoController extends GetxController {
   final TradesmanController _tradesmanController =
       Get.find<TradesmanController>();
 
-  final List<Skill> skills = const [
-    Skill(
-      name: 'Phone Tech',
-      image: 'assets/images/fi_5060325.png',
-      isNew: true,
-    ),
-    Skill(
-      name: 'Computer Tech',
-      image: 'assets/images/fi_10528057.png',
-      isNew: true,
-    ),
-    Skill(name: 'Plumber', image: 'assets/images/fi_6342703.png'),
-    Skill(name: 'Electrician', image: 'assets/images/fi_9781304.png'),
-    Skill(name: 'Appliance Fix', image: 'assets/images/fi_2012957.png'),
-    Skill(name: 'Joinery', image: 'assets/images/fi_14106303.png', isNew: true),
-    Skill(name: 'AC Tech', image: 'assets/images/fi_7969720.png'),
-    Skill(name: 'Painter', image: 'assets/images/fi_1995467.png'),
-    Skill(name: 'Maid Service', image: 'assets/images/fi_15551378.png'),
-    Skill(name: 'Caterer', image: 'assets/images/fi_4490380.png', isNew: true),
-    Skill(
-      name: 'Tile Men',
-      image: 'assets/images/fi_11932525.png',
-      isNew: true,
-    ),
-    Skill(name: 'Glass Men', image: 'assets/images/fi_896123.png'),
-    Skill(name: 'Mason', image: 'assets/images/fi_18029670.png'),
-    Skill(name: 'Carpenter', image: 'assets/images/fi_12479483.png'),
-    Skill(name: 'Fabricator/Welder', image: 'assets/images/fi_9439147.png'),
-    Skill(name: 'Pool Cleaner', image: 'assets/images/fi_15551378.png'),
-    Skill(name: 'Tree Cutter', image: 'assets/images/fi_6327310.png'),
-    Skill(name: 'Landscaper', image: 'assets/images/fi_10033506.png'),
-    Skill(name: 'Roofer', image: 'assets/images/fi_14620736.png'),
-    Skill(name: 'Mechanic', image: 'assets/images/mechanic.png'),
-    Skill(name: 'Auto Body', image: 'assets/images/fi_6332022.png'),
-    Skill(name: 'Contractor', image: 'assets/images/fi_4490380.png'),
-  ];
+  static const String _defaultSkillImage =
+      'assets/images/project-manager_8741633 1.png';
+
+  static const Map<String, String> _localSkillImages = {
+    'phone tech': 'assets/images/fi_5060325.png',
+    'computer tech': 'assets/images/fi_10528057.png',
+    'plumber': 'assets/images/fi_6342703.png',
+    'electrician': 'assets/images/fi_9781304.png',
+    'appliance': 'assets/images/fi_2012957.png',
+    'appliance fix': 'assets/images/fi_2012957.png',
+    'joinery': 'assets/images/fi_14106303.png',
+    'ac tech': 'assets/images/fi_7969720.png',
+    'painter': 'assets/images/fi_1995467.png',
+    'maid service': 'assets/images/fi_15551378.png',
+    'caterer': 'assets/images/fi_4490380.png',
+    'tile man': 'assets/images/fi_11932525.png',
+    'tile men': 'assets/images/fi_11932525.png',
+    'glass man': 'assets/images/fi_896123.png',
+    'glass men': 'assets/images/fi_896123.png',
+    'mason': 'assets/images/fi_18029670.png',
+    'carpenter': 'assets/images/fi_12479483.png',
+    'welder/gate': 'assets/images/fi_9439147.png',
+    'fabricator/welder': 'assets/images/fi_9439147.png',
+    'pool cleaner': 'assets/images/fi_15551378.png',
+    'tree cutter': 'assets/images/fi_6327310.png',
+    'landscaper': 'assets/images/fi_10033506.png',
+    'roofer': 'assets/images/fi_14620736.png',
+    'mechanic': 'assets/images/mechanic.png',
+    'auto body': 'assets/images/fi_6332022.png',
+    'contractor': 'assets/images/fi_4490380.png',
+  };
+
+  final RxList<Skill> skills = <Skill>[].obs;
 
   // Index of the selected main skill (null if none selected)
   final RxnInt selectMainIndex = RxnInt();
@@ -57,14 +55,79 @@ class WhatDoController extends GetxController {
   // Indices of the selected extra skills (up to 2)
   final RxList<int> selectExtraIndices = <int>[].obs;
   final RxString errorMessage = ''.obs;
+  final RxString categoriesError = ''.obs;
 
   RxBool get isLoading => _tradesmanController.isLoading;
+  RxBool get isCategoriesLoading => _tradesmanController.isSkillListLoading;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchCategories();
+  }
 
   int get totalSelectedCount =>
       (selectMainIndex.value != null ? 1 : 0) + selectExtraIndices.length;
 
-  String get mainSkillName =>
-      selectMainIndex.value != null ? skills[selectMainIndex.value!].name : "";
+  String get mainSkillName {
+    final index = selectMainIndex.value;
+    if (index == null || index < 0 || index >= skills.length) return '';
+    return skills[index].name;
+  }
+
+  Future<void> fetchCategories() async {
+    categoriesError.value = '';
+    final apiSkills = await _tradesmanController.fetchSkillList();
+
+    final categories = apiSkills
+        .where((skill) => skill.skill?.trim().isNotEmpty ?? false)
+        .map(_skillFromApi)
+        .toList();
+
+    if (categories.isEmpty) {
+      categoriesError.value = _tradesmanController.errorMessage.value.isNotEmpty
+          ? _tradesmanController.errorMessage.value
+          : 'No trade categories are available right now.';
+      _tradesmanController.clearError();
+      return;
+    }
+
+    _replaceSkillsPreservingSelection(categories);
+    _tradesmanController.clearError();
+  }
+
+  Skill _skillFromApi(SkillModel skill) {
+    final name = skill.skill!.trim();
+    final apiIcon = skill.icon?.trim() ?? '';
+    return Skill(
+      name: name,
+      image: apiIcon.isNotEmpty
+          ? apiIcon
+          : _localSkillImages[name.toLowerCase()] ?? _defaultSkillImage,
+      isNew: skill.isNew,
+    );
+  }
+
+  void _replaceSkillsPreservingSelection(List<Skill> categories) {
+    final selectedMain = mainSkillName.toLowerCase();
+    final selectedExtras = selectExtraIndices
+        .where((index) => index >= 0 && index < skills.length)
+        .map((index) => skills[index].name.toLowerCase())
+        .toSet();
+
+    skills.assignAll(categories);
+
+    final mainIndex = skills.indexWhere(
+      (skill) => skill.name.toLowerCase() == selectedMain,
+    );
+    selectMainIndex.value = mainIndex >= 0 ? mainIndex : null;
+    selectExtraIndices.assignAll([
+      for (var index = 0; index < skills.length; index++)
+        if (selectedExtras.contains(skills[index].name.toLowerCase()) &&
+            index != selectMainIndex.value)
+          index,
+    ]);
+  }
 
   bool isSelected(int index) {
     return selectMainIndex.value == index || selectExtraIndices.contains(index);
@@ -75,6 +138,8 @@ class WhatDoController extends GetxController {
   }
 
   void toggleSkill(int index) {
+    if (index < 0 || index >= skills.length) return;
+
     if (errorMessage.value.isNotEmpty) {
       errorMessage.value = '';
     }
@@ -114,6 +179,11 @@ class WhatDoController extends GetxController {
   }
 
   Future<void> onContinuePressed() async {
+    if (skills.isEmpty) {
+      categoriesError.value = 'Load the trade categories before continuing.';
+      return;
+    }
+
     if (selectMainIndex.value == null) {
       errorMessage.value = 'Please select your main skill.';
       return;

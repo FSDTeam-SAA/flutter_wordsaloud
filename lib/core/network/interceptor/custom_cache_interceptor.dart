@@ -9,6 +9,8 @@ import '../constants/cache_constants.dart';
 import '../models/hive_cache_model.dart';
 
 class CustomCacheInterceptor extends Interceptor {
+  static const String skipCacheKey = 'skipCache';
+
   final Duration maxCacheAge;
   final Duration staleWhileRevalidate;
   final int maxCacheSize; // Maximum cache entries
@@ -42,15 +44,19 @@ class CustomCacheInterceptor extends Interceptor {
     return _cacheBox.get(key)?.statusCode;
   }
 
+  bool shouldBypassCache(RequestOptions options) {
+    return options.extra[skipCacheKey] == true ||
+        _isExcludedPath(options.path) ||
+        _isAuthenticationEndpoint(options.path);
+  }
+
   @override
   Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
     // Skip non-GET requests and excluded paths
-    if (options.method.toUpperCase() != 'GET' ||
-        _isExcludedPath(options.path) ||
-        _isAuthenticationEndpoint(options.path)) {
+    if (options.method.toUpperCase() != 'GET' || shouldBypassCache(options)) {
       return handler.next(options);
     }
 
@@ -123,8 +129,7 @@ class CustomCacheInterceptor extends Interceptor {
     // Only cache successful GET responses
     if (options.method.toUpperCase() == 'GET' &&
         _shouldCacheResponse(response) &&
-        !_isExcludedPath(options.path) &&
-        !_isAuthenticationEndpoint(options.path)) {
+        !shouldBypassCache(options)) {
       await _cacheResponse(options, response);
     }
 
@@ -140,7 +145,7 @@ class CustomCacheInterceptor extends Interceptor {
 
     // Try to serve stale cache on network errors
     if (options.method.toUpperCase() == 'GET' &&
-        !_isExcludedPath(options.path) &&
+        !shouldBypassCache(options) &&
         _isNetworkError(err)) {
       final key = _generateCacheKey(options);
       final cached = _cacheBox.get(key);

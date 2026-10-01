@@ -127,6 +127,7 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
   NetworkResult<TradesmanDashboardResponse> dashboard() {
     return _apiClient.get(
       endpoint: ApiConstants.tradesman.dashboard,
+      options: ApiClient.noCacheOptions(),
       fromJsonT: (json) =>
           TradesmanDashboardResponse.fromJson(json as Map<String, dynamic>),
     );

@@ -19,7 +19,6 @@ import 'package:aturservicett/features/tradesman_account_creation/model/response
 import 'package:aturservicett/features/tradesman_account_creation/model/response/get_specific_tradesman_response_model.dart';
 import 'package:aturservicett/features/tradesman_account_creation/repositories/tradesman_repo.dart';
 import 'package:aturservicett/features/tradesman_account_creation/screens/tell_clients_screen.dart';
-import 'package:aturservicett/features/tradesman_account_creation/screens/tradesman_dashboard.dart';
 import 'package:aturservicett/features/tradesman_account_creation/screens/what_work_screen.dart';
 import 'package:get/get.dart';
 
@@ -225,37 +224,23 @@ class TradesmanController extends BaseController {
     }
   }
 
-  Future<void> goLive({
-    required String tradesmanName,
-    required String tradesmanSkill,
-    List<String> extraTrades = const [],
-    required String homeArea,
-    String? profileImagePath,
-  }) async {
+  Future<bool> goLive() async {
     clearError();
     setLoading(true);
     final result = await _tradesmanRepo.goLive();
 
-    await result.fold<Future<void>>(
+    return result.fold<Future<bool>>(
       (fail) async {
         setError(fail.message);
         d_print.log("Go live failed: ${fail.message}");
         setLoading(false);
+        return false;
       },
       (success) async {
         d_print.log("Go live success: ${success.data}");
         await _authStorageService.setTradesmanProfileCompleted();
         setLoading(false);
-
-        Get.offAll(
-          () => TradesmanDashboard(
-            tradesmanName: tradesmanName,
-            tradesmanSkill: tradesmanSkill,
-            extraTrades: extraTrades,
-            homeArea: homeArea,
-            profileImagePath: profileImagePath,
-          ),
-        );
+        return true;
       },
     );
   }
@@ -708,6 +693,10 @@ class TradesmanController extends BaseController {
         return 'Appliance';
       case 'fabricator/welder':
         return 'Welder/Gate';
+      case 'tile men':
+        return 'Tile Man';
+      case 'glass men':
+        return 'Glass Man';
       // case 'mechanic':
       //   return 'Mechanic';
       default:

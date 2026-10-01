@@ -135,7 +135,16 @@ class TellClientsController extends GetxController {
       homeArea = Get.find<WhatWorkController>().homeArea.value.trim();
     }
 
-    Get.to(
+    final isLive = await _tradesmanController.goLive();
+    if (!isLive) {
+      apiError.value = _tradesmanController.errorMessage.value.isNotEmpty
+          ? _tradesmanController.errorMessage.value
+          : 'Could not publish your profile. Please try again.';
+      _tradesmanController.clearError();
+      return;
+    }
+
+    Get.offAll(
       () => YouAreLiveScreen(
         tradesmanName: fullName.isNotEmpty ? fullName : 'Tradesman',
         tradesmanSkill: tradesmanSkill,

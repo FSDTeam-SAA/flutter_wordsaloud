@@ -105,6 +105,15 @@ class AuthStorageService {
     return profileCompleted == 'true';
   }
 
+  Future<void> clearTradesmanProfileCompleted({String? userId}) async {
+    final storedUserId = userId ?? await getUserId();
+    if (storedUserId == null || storedUserId.isEmpty) return;
+
+    await _secureStorage.delete(
+      key: _tradesmanProfileCompletedKey(storedUserId),
+    );
+  }
+
   // Get all auth data at once
   Future<Map<String, String?>> getAllAuthData() async {
     return {

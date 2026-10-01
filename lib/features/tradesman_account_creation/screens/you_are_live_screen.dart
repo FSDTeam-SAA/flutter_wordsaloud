@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/screens/tradesman_dashboard.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:aturservicett/core/widgets/button_widget.dart';
@@ -23,7 +23,6 @@ class YouAreLiveScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<TradesmanController>();
     final profileSubtitle = [
       tradesmanSkill.trim(),
       homeArea.trim(),
@@ -36,6 +35,18 @@ class YouAreLiveScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 28.0),
           child: Column(
             children: [
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'Step 4 of 4',
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    color: const Color(0xFFB8B8B8),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
               const Spacer(flex: 2),
 
               // Gold checkmark circle
@@ -182,48 +193,23 @@ class YouAreLiveScreen extends StatelessWidget {
               const Spacer(flex: 3),
 
               // Go to dashboard button
-              Obx(
-                () => Column(
-                  children: [
-                    if (controller.errorMessage.value.isNotEmpty) ...[
-                      Text(
-                        controller.errorMessage.value,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.outfit(
-                          fontSize: 13,
-                          color: const Color(0xFFEAAE4B),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    controller.isLoading.value
-                        ? const SizedBox(
-                            height: 50,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFFEAAE4B),
-                              ),
-                            ),
-                          )
-                        : CustomButton(
-                            backgroundColor: Color(0xFFE5A742),
-                            textColor: Colors.black,
-                            height: 50,
-                            borderRadius: 16,
-                            text: 'Go to dashboard',
-                            onPressed: () async {
-                              await controller.goLive(
-                                tradesmanName: tradesmanName,
-                                tradesmanSkill: tradesmanSkill,
-                                extraTrades: extraTrades,
-                                homeArea: homeArea,
-                                profileImagePath: profileImagePath,
-                              );
-                            },
-                          ),
-                  ],
-                ),
+              CustomButton(
+                backgroundColor: const Color(0xFFE5A742),
+                textColor: Colors.black,
+                height: 50,
+                borderRadius: 16,
+                text: 'Go to dashboard',
+                onPressed: () {
+                  Get.offAll(
+                    () => TradesmanDashboard(
+                      tradesmanName: tradesmanName,
+                      tradesmanSkill: tradesmanSkill,
+                      extraTrades: extraTrades,
+                      homeArea: homeArea,
+                      profileImagePath: profileImagePath,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 32),
             ],
