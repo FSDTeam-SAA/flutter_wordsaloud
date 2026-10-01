@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
 import 'package:aturservicett/features/tradesman_account_creation/controller/what_do_controller.dart';
 import 'package:aturservicett/features/tradesman_account_creation/model/response/get_skill_listed_count_response_model.dart';
@@ -90,14 +92,50 @@ void main() {
     expect(extraBorder.top.width, 2);
     expect(find.byIcon(Icons.check), findsNWidgets(2));
   });
+
+  testWidgets('shows categories when the API completes after first build', (
+    tester,
+  ) async {
+    final apiResult = Completer<List<SkillModel>>();
+    tradesmanController.pendingFetch = apiResult;
+
+    await tester.pumpWidget(const GetMaterialApp(home: WhatDoScreen()));
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byKey(const ValueKey('trade-card-Plumber')), findsNothing);
+
+    apiResult.complete([
+      SkillModel(skill: 'Plumber', icon: '🔧'),
+      SkillModel(skill: 'Electrician', icon: '⚡'),
+    ]);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('trade-card-Plumber')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('trade-card-Electrician')),
+      findsOneWidget,
+    );
+  });
 }
 
 class _FakeTradesmanController extends TradesmanController {
   List<SkillModel> categories = const [];
+  Completer<List<SkillModel>>? pendingFetch;
 
   @override
   Future<List<SkillModel>> fetchSkillList() async {
+    isSkillListLoading.value = true;
+    final pending = pendingFetch;
+    if (pending != null) {
+      final result = await pending.future;
+      skillList.assignAll(result);
+      isSkillListLoading.value = false;
+      return result;
+    }
+
     skillList.assignAll(categories);
+    isSkillListLoading.value = false;
     return categories;
   }
 }
