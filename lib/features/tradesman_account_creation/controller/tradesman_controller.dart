@@ -528,7 +528,7 @@ class TradesmanController extends BaseController {
         if (await imageFile.exists()) {
           formData.files.add(
             MapEntry(
-              'profileImage',
+              'avatar',
               await dio.MultipartFile.fromFile(imageFile.path),
             ),
           );
