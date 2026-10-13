@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aturservicett/features/auth/controller/auth_controller.dart';
 import 'package:aturservicett/features/tradesman_account_creation/controller/tradesman_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -250,6 +251,22 @@ class PostReviewScreen extends StatelessWidget {
   }
 }
 
+class PostedReviewResult {
+  const PostedReviewResult({
+    required this.id,
+    required this.reviewerName,
+    required this.rating,
+    required this.comment,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String reviewerName;
+  final int rating;
+  final String comment;
+  final String createdAt;
+}
+
 class PostReviewController extends GetxController {
   PostReviewController({required this.tradesmanId});
 
@@ -291,7 +308,7 @@ class PostReviewController extends GetxController {
     }
 
     isPosting.value = true;
-    final success = await _tradesmanController.addReview(
+    final postedReview = await _tradesmanController.addReview(
       tradesmanId: tradesmanId,
       rating: rating.value,
       ratingLabel: ratingLabel,
@@ -299,7 +316,7 @@ class PostReviewController extends GetxController {
     );
     isPosting.value = false;
 
-    if (!success) {
+    if (postedReview == null) {
       final message = _tradesmanController.errorMessage.value.trim();
       Get.snackbar(
         'Review not posted',
@@ -308,8 +325,34 @@ class PostReviewController extends GetxController {
       return;
     }
 
-    await _tradesmanController.getSingleTradesman(tradesmanId);
-    Get.back(result: {'posted': true});
+    Get.back(
+      result: PostedReviewResult(
+        id: postedReview.id ?? '',
+        reviewerName: _currentReviewerName(),
+        rating: postedReview.rating ?? rating.value,
+        comment: postedReview.reviewText ?? commentController.text.trim(),
+        createdAt: postedReview.createdAt ?? DateTime.now().toIso8601String(),
+      ),
+    );
+  }
+
+  String _currentReviewerName() {
+    if (Get.isRegistered<AuthController>()) {
+      final name = Get.find<AuthController>().currentUserName.value.trim();
+      if (name.isNotEmpty) return name;
+    }
+
+    final profile = _tradesmanController.getProfile.value;
+    final name = profile?.name?.trim() ?? '';
+    if (name.isNotEmpty) return name;
+
+    final firstName = profile?.firstName?.trim() ?? '';
+    final lastName = profile?.lastName?.trim() ?? '';
+    final fullName = [
+      firstName,
+      lastName,
+    ].where((part) => part.isNotEmpty).join(' ');
+    return fullName.isNotEmpty ? fullName : 'You';
   }
 
   void skipReview() {

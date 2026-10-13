@@ -12,6 +12,7 @@ import 'package:aturservicett/features/tradesman_account_creation/model/request/
 import 'package:aturservicett/features/tradesman_account_creation/model/request/tradesman_area_request_model.dart';
 import 'package:aturservicett/features/tradesman_account_creation/model/request/tradesman_skill_request_model.dart';
 import 'package:aturservicett/features/tradesman_account_creation/model/response/dashboard_response_model.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/add_review_response_model.dart';
 import 'package:aturservicett/features/tradesman_account_creation/model/response/get_advertise_response_model.dart';
 import 'package:aturservicett/features/tradesman_account_creation/model/response/get_all_tradesman_response_model.dart';
 import 'package:aturservicett/features/tradesman_account_creation/model/response/get_client_profile_response_model.dart';
@@ -95,7 +96,7 @@ class TradesmanController extends BaseController {
     );
   }
 
-  Future<bool> addReview({
+  Future<AddReviewResponseModel?> addReview({
     required String tradesmanId,
     required int rating,
     required String ratingLabel,
@@ -104,7 +105,7 @@ class TradesmanController extends BaseController {
     clearError();
     if (tradesmanId.trim().isEmpty) {
       setError('Tradesman profile not found. Please try again.');
-      return false;
+      return null;
     }
 
     setLoading(true);
@@ -122,12 +123,12 @@ class TradesmanController extends BaseController {
         setError(fail.message);
         d_print.log("Add review failed: ${fail.message}");
         setLoading(false);
-        return false;
+        return null;
       },
       (success) {
         d_print.log("Add review success: ${success.data}");
         setLoading(false);
-        return true;
+        return success.data;
       },
     );
   }
@@ -315,7 +316,6 @@ class TradesmanController extends BaseController {
     if (tradesmanId.trim().isEmpty) return null;
 
     isSingleTradesmanLoading.value = true;
-    getSpecificTradesman.value = null;
     final result = await _tradesmanRepo.getSpecifiedTradesman(tradesmanId);
 
     return result.fold(

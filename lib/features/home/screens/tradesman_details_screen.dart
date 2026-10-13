@@ -39,6 +39,8 @@ class TradesmanDetailsScreen extends StatefulWidget {
 
 class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
   late final TradesmanController _tradesmanController;
+  specific_model.Review? _locallyPostedReview;
+  int? _optimisticReviewCount;
 
   @override
   void initState() {
@@ -246,11 +248,19 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
       final fetchedReviews = profile != null
           ? fetchedTradesman?.reviews ?? const <specific_model.Review>[]
           : const <specific_model.Review>[];
-      final displayReviewCount = profile != null
+      final serverReviewCount = profile != null
           ? (profile.ratingCount > 0
                 ? profile.ratingCount
                 : fetchedReviews.length)
           : 0;
+      final reviews = _mergeLocallyPostedReview(fetchedReviews);
+      final displayReviewCount =
+          _optimisticReviewCount != null &&
+              _optimisticReviewCount! > serverReviewCount
+          ? _optimisticReviewCount!
+          : serverReviewCount > reviews.length
+          ? serverReviewCount
+          : reviews.length;
       final displayJobsCount = profile?.jobsCount ?? 142;
       final displayPitch = profile?.pitch.trim().isNotEmpty ?? false
           ? profile!.pitch
@@ -271,8 +281,6 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
               .where((url) => url.isNotEmpty)
               .toList() ??
           const <String>[];
-      final reviews = fetchedReviews;
-
       // Use pitch if provided, otherwise fall back to a generated description
       final String formattedCategory = displayCategory.endsWith('s')
           ? displayCategory
@@ -691,7 +699,20 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                                 avatarLetters: displayAvatarLetter,
                               ),
                             );
-                            if (result is Map && result['posted'] == true) {
+                            if (result is PostedReviewResult) {
+                              if (mounted) {
+                                setState(() {
+                                  _locallyPostedReview = specific_model.Review(
+                                    id: result.id,
+                                    reviewerName: result.reviewerName,
+                                    rating: result.rating,
+                                    comment: result.comment,
+                                    createdAt: result.createdAt,
+                                  );
+                                  _optimisticReviewCount =
+                                      displayReviewCount + 1;
+                                });
+                              }
                               await _tradesmanController.getSingleTradesman(
                                 effectiveTradesmanId,
                               );
@@ -738,6 +759,38 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
   }
 
   int _clampedStars(int stars) => stars.clamp(0, 5).toInt();
+
+  List<specific_model.Review> _mergeLocallyPostedReview(
+    List<specific_model.Review> fetchedReviews,
+  ) {
+    final localReview = _locallyPostedReview;
+    if (localReview == null) return fetchedReviews;
+
+    final isAlreadyFetched = fetchedReviews.any((review) {
+      if (localReview.id.isNotEmpty && review.id.isNotEmpty) {
+        return localReview.id == review.id;
+      }
+      return localReview.rating == review.rating &&
+          localReview.comment.trim() == review.comment.trim() &&
+          localReview.createdAt == review.createdAt;
+    });
+
+    return isAlreadyFetched
+        ? fetchedReviews
+        : <specific_model.Review>[localReview, ...fetchedReviews];
+  }
+
+  String _reviewerDisplayName(String name) {
+    final normalizedName = name.trim();
+    if (normalizedName.isEmpty) return 'Anonymous';
+    if (normalizedName == 'You' || normalizedName == 'Anonymous') {
+      return normalizedName;
+    }
+
+    final parts = normalizedName.split(RegExp(r'\s+'));
+    if (parts.length == 1) return parts.first;
+    return '${parts.first} ${parts.last[0].toUpperCase()}.';
+  }
 
   Widget _buildRecentWorkPhoto(String imageUrl) {
     return ClipRRect(
@@ -802,28 +855,28 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF3E5CF), width: 2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFF3E5CF), width: 1.5),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Text(
-                  review.reviewerName,
+                  _reviewerDisplayName(review.reviewerName),
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF1E1E1E),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Row(
                 children: List.generate(
                   5,
@@ -832,18 +885,18 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                         ? Icons.star
                         : Icons.star_border,
                     color: const Color(0xFFEAAE4B),
-                    size: 16,
+                    size: 14,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             comment,
             style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+              fontSize: 10,
+              fontWeight: FontWeight.w400,
               color: Color(0xFF6C6C6C),
             ),
           ),
