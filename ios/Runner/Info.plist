@@ -24,6 +24,14 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Aturservicett needs camera access to take photos that you choose to upload to your profile or work portfolio.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Aturservicett needs photo library access so you can select photos to upload as your profile picture or examples of your work.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Aturservicett needs microphone access to include sound when you choose to record a video for upload.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Aturservicett does not require GPS access. You enter your area manually to find tradespeople; the app does not request or track your device location.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
