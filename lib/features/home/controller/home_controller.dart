@@ -20,7 +20,7 @@ class TradeCategory {
 }
 
 class HomeController extends GetxController {
-  final List<TradeCategory> _fallbackCategories = const [
+  final List<TradeCategory> _categoryIcons = const [
     TradeCategory(name: 'Phone Tech', image: 'assets/images/fi_5060325.png'),
     TradeCategory(
       name: 'Computer Tech',
@@ -55,12 +55,6 @@ class HomeController extends GetxController {
   final RxList<TradeCategory> categories = <TradeCategory>[].obs;
   final RxBool isLoadingSkills = false.obs;
   bool _isFetchingSkills = false;
-
-  @override
-  void onInit() {
-    super.onInit();
-    categories.assignAll(_fallbackCategories);
-  }
 
   Future<void> fetchSkillList() async {
     if (!Get.isRegistered<TradesmanController>()) return;
@@ -98,21 +92,16 @@ class HomeController extends GetxController {
     List<SkillModel> skills, {
     List<Tradesman> tradesmen = const [],
   }) {
-    if (skills.isEmpty && tradesmen.isEmpty) return;
-
     final countsBySkill = <String, int>{};
     final iconsBySkill = <String, String>{};
     final newBySkill = <String, bool>{};
     final vipBySkill = <String, bool>{};
     final apiCategoryNames = <String>[];
-    final apiCategoryKeys = <String>{};
     for (final skill in skills) {
       final name = skill.skill?.trim();
       if (name == null || name.isEmpty) continue;
       final key = _skillKey(name);
-      if (apiCategoryKeys.add(key)) {
-        apiCategoryNames.add(name);
-      }
+      apiCategoryNames.add(name);
       countsBySkill[key] = skill.listedCount ?? 0;
       final icon = skill.icon?.trim();
       if (icon != null && icon.isNotEmpty) {
@@ -144,40 +133,27 @@ class HomeController extends GetxController {
       }
     }
 
-    final fallbackKeys = _fallbackCategories
-        .map((category) => _skillKey(category.name))
-        .toSet();
-
-    final apiOnlyCategories = <TradeCategory>[];
-    for (final name in apiCategoryNames) {
-      final key = _skillKey(name);
-      if (fallbackKeys.contains(key)) continue;
-
-      apiOnlyCategories.add(
-        TradeCategory(
+    // The API controls category membership and order. Local assets only
+    // supply icons for categories without an API icon.
+    final localIcons = {
+      for (final category in _categoryIcons)
+        _skillKey(category.name): category.image,
+    };
+    categories.assignAll(
+      apiCategoryNames.map((name) {
+        final key = _skillKey(name);
+        return TradeCategory(
           name: name,
           image:
               iconsBySkill[key] ??
+              localIcons[key] ??
               'assets/images/project-manager_8741633 1.png',
           isNew: newBySkill[key] ?? false,
           isVip: vipBySkill[key] ?? false,
           listed: countsBySkill[key] ?? 0,
-        ),
-      );
-    }
-
-    final mergedCategories = _fallbackCategories.map((category) {
-      final listedCount = countsBySkill[_skillKey(category.name)];
-      return TradeCategory(
-        name: category.name,
-        image: iconsBySkill[_skillKey(category.name)] ?? category.image,
-        isNew: newBySkill[_skillKey(category.name)] ?? false,
-        isVip: vipBySkill[_skillKey(category.name)] ?? false,
-        listed: listedCount ?? category.listed,
-      );
-    }).toList();
-
-    categories.assignAll([...apiOnlyCategories, ...mergedCategories]);
+        );
+      }),
+    );
   }
 
   List<TradeCategory> get filteredCategories {

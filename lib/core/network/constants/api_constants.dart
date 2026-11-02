@@ -2,7 +2,8 @@ class ApiConstants {
   /// [Base Configuration]
 
   static const String baseDomain =
-      'https://aturservicett-backend.onrender.com'; // Publish
+      'https://aturservicett-backend.onrender.com';
+
 
   static const String baseUrl = '$baseDomain/api/v1';
 
@@ -76,7 +77,10 @@ class UserEndpoints {
   final String addInquiry = '${ApiConstants.baseUrl}/inquiry';
   final String getInquiry = '${ApiConstants.baseUrl}/admin/advertisements';
   final String updateProfile = '${ApiConstants.baseUrl}/user/me';
-  String tradesmanDetails(String id) => '${ApiConstants.baseUrl}/tradesman/$id';
+  String tradesmanDetails(String id, {String skill = ''}) =>
+      Uri.parse('${ApiConstants.baseUrl}/tradesman/$id')
+          .replace(queryParameters: skill.isEmpty ? null : {'skill': skill})
+          .toString();
   String review(String tradesmanId) =>
       '${ApiConstants.baseUrl}/review/$tradesmanId';
 

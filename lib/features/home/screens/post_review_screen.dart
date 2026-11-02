@@ -9,7 +9,7 @@ class PostReviewScreen extends StatelessWidget {
     super.key,
     this.tradesmanId = '',
     this.tradesmanName = 'Devon Ramcharan',
-    this.trade = 'Plumber',
+    required this.trade,
     this.lastContacted = 'Tue',
     this.avatarLetters = 'DR',
   });
@@ -31,8 +31,8 @@ class PostReviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(
-      PostReviewController(tradesmanId: tradesmanId),
-      tag: tradesmanId,
+      PostReviewController(tradesmanId: tradesmanId, skill: trade),
+      tag: '$tradesmanId:$trade',
     );
     final firstName = tradesmanName.split(' ').first;
 
@@ -268,7 +268,9 @@ class PostedReviewResult {
 }
 
 class PostReviewController extends GetxController {
-  PostReviewController({required this.tradesmanId});
+  PostReviewController({required this.tradesmanId, required this.skill});
+
+  final String skill;
 
   final String tradesmanId;
   final formKey = GlobalKey<FormState>();
@@ -310,6 +312,7 @@ class PostReviewController extends GetxController {
     isPosting.value = true;
     final postedReview = await _tradesmanController.addReview(
       tradesmanId: tradesmanId,
+      skill: skill,
       rating: rating.value,
       ratingLabel: ratingLabel,
       reviewText: commentController.text.trim(),

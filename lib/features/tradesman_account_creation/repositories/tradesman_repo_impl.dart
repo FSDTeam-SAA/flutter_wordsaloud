@@ -144,10 +144,11 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
 
   @override
   NetworkResult<GetSpecificTradesmanResponseModel> getSpecifiedTradesman(
-    String tradesmanId,
-  ) {
+    String tradesmanId, {
+    String skill = '',
+  }) {
     return _apiClient.get(
-      endpoint: ApiConstants.user.tradesmanDetails(tradesmanId),
+      endpoint: ApiConstants.user.tradesmanDetails(tradesmanId, skill: skill),
       fromJsonT: GetSpecificTradesmanResponseModel.fromData,
     );
   }

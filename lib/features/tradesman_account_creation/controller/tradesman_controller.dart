@@ -98,6 +98,7 @@ class TradesmanController extends BaseController {
 
   Future<AddReviewResponseModel?> addReview({
     required String tradesmanId,
+    required String skill,
     required int rating,
     required String ratingLabel,
     required String reviewText,
@@ -111,6 +112,7 @@ class TradesmanController extends BaseController {
     setLoading(true);
 
     final request = AddReviewRequestModel(
+      skill: skill,
       rating: rating,
       ratingLabel: ratingLabel,
       reviewText: reviewText,
@@ -310,13 +312,17 @@ class TradesmanController extends BaseController {
   }
 
   Future<GetSpecificTradesmanResponseModel?> getSingleTradesman(
-    String tradesmanId,
-  ) async {
+    String tradesmanId, {
+    String skill = '',
+  }) async {
     clearError();
     if (tradesmanId.trim().isEmpty) return null;
 
     isSingleTradesmanLoading.value = true;
-    final result = await _tradesmanRepo.getSpecifiedTradesman(tradesmanId);
+    final result = await _tradesmanRepo.getSpecifiedTradesman(
+      tradesmanId,
+      skill: skill,
+    );
 
     return result.fold(
       (fail) {

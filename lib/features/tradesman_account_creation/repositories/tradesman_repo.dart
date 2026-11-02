@@ -41,8 +41,9 @@ abstract class TradesmanRepo {
   NetworkResult<TradesmanDashboardResponse> updateProfile(FormData formData);
   NetworkResult<List<SkillModel>> getSkillList();
   NetworkResult<GetSpecificTradesmanResponseModel> getSpecifiedTradesman(
-    String tradesmanId,
-  );
+    String tradesmanId, {
+    String skill = '',
+  });
   NetworkResult<GetClientProfileResponseModel> getClientProfile();
   NetworkResult<UpdateProfileResponseModel> updateClientProfile(
     FormData formData,

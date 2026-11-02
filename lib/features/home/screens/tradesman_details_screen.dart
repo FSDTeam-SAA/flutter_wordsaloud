@@ -39,8 +39,16 @@ class TradesmanDetailsScreen extends StatefulWidget {
 
 class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
   late final TradesmanController _tradesmanController;
-  specific_model.Review? _locallyPostedReview;
-  int? _optimisticReviewCount;
+  final _categoryDetails =
+      Rxn<specific_model.GetSpecificTradesmanResponseModel>();
+
+  Future<void> _loadCategoryDetails(String tradesmanId) async {
+    final result = await _tradesmanController.getSingleTradesman(
+      tradesmanId,
+      skill: widget.categoryName,
+    );
+    if (mounted) _categoryDetails.value = result;
+  }
 
   @override
   void initState() {
@@ -48,7 +56,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
     _tradesmanController = Get.find<TradesmanController>();
     final tradesmanId = widget.tradesmanId;
     if (tradesmanId != null && tradesmanId.trim().isNotEmpty) {
-      _tradesmanController.getSingleTradesman(tradesmanId);
+      _loadCategoryDetails(tradesmanId);
     }
   }
 
@@ -225,7 +233,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final fetchedTradesman = _tradesmanController.getSpecificTradesman.value;
+      final fetchedTradesman = _categoryDetails.value;
       final fetchedProfile = fetchedTradesman?.profile;
       final profile =
           widget.tradesmanId != null && fetchedProfile?.id == widget.tradesmanId
@@ -235,9 +243,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
       final displayLocation = profile != null
           ? _profileLocation(profile)
           : widget.location;
-      final displayCategory = profile?.mainSkill.trim().isNotEmpty ?? false
-          ? profile!.mainSkill
-          : widget.categoryName;
+      final displayCategory = widget.categoryName;
       final displayAvatarLetter = _getInitials(displayName).isNotEmpty
           ? _getInitials(displayName)
           : widget.avatarLetter;
@@ -253,14 +259,8 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                 ? profile.ratingCount
                 : fetchedReviews.length)
           : 0;
-      final reviews = _mergeLocallyPostedReview(fetchedReviews);
-      final displayReviewCount =
-          _optimisticReviewCount != null &&
-              _optimisticReviewCount! > serverReviewCount
-          ? _optimisticReviewCount!
-          : serverReviewCount > reviews.length
-          ? serverReviewCount
-          : reviews.length;
+      final reviews = fetchedReviews;
+      final displayReviewCount = serverReviewCount;
       final displayJobsCount = profile?.jobsCount ?? 142;
       final displayPitch = profile?.pitch.trim().isNotEmpty ?? false
           ? profile!.pitch
@@ -700,22 +700,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
                               ),
                             );
                             if (result is PostedReviewResult) {
-                              if (mounted) {
-                                setState(() {
-                                  _locallyPostedReview = specific_model.Review(
-                                    id: result.id,
-                                    reviewerName: result.reviewerName,
-                                    rating: result.rating,
-                                    comment: result.comment,
-                                    createdAt: result.createdAt,
-                                  );
-                                  _optimisticReviewCount =
-                                      displayReviewCount + 1;
-                                });
-                              }
-                              await _tradesmanController.getSingleTradesman(
-                                effectiveTradesmanId,
-                              );
+                              await _loadCategoryDetails(effectiveTradesmanId);
                             }
                           },
                           child: Text('Add Review'),
@@ -759,26 +744,6 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
   }
 
   int _clampedStars(int stars) => stars.clamp(0, 5).toInt();
-
-  List<specific_model.Review> _mergeLocallyPostedReview(
-    List<specific_model.Review> fetchedReviews,
-  ) {
-    final localReview = _locallyPostedReview;
-    if (localReview == null) return fetchedReviews;
-
-    final isAlreadyFetched = fetchedReviews.any((review) {
-      if (localReview.id.isNotEmpty && review.id.isNotEmpty) {
-        return localReview.id == review.id;
-      }
-      return localReview.rating == review.rating &&
-          localReview.comment.trim() == review.comment.trim() &&
-          localReview.createdAt == review.createdAt;
-    });
-
-    return isAlreadyFetched
-        ? fetchedReviews
-        : <specific_model.Review>[localReview, ...fetchedReviews];
-  }
 
   String _reviewerDisplayName(String name) {
     final normalizedName = name.trim();
