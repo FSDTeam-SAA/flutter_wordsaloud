@@ -1,3 +1,5 @@
+import '../../../../core/utils/review_visibility.dart';
+
 class TradesmanDashboardResponse {
   final Profile? profile;
   final int? viewsThisWeek;
@@ -40,9 +42,11 @@ class TradesmanDashboardResponse {
       ratingBreakdown: (json['ratingBreakdown'] as List?)
           ?.map((e) => RatingBreakdown.fromJson(e))
           .toList(),
-      recentReviews: _recentReviewsFromJson(
-        json,
-      ).map((e) => RecentReview.fromJson(e)).toList(),
+      recentReviews: _recentReviewsFromJson(json)
+          .whereType<Map>()
+          .where(isVisibleReview)
+          .map((e) => RecentReview.fromJson(e))
+          .toList(),
       daysOnPlatform: json['daysOnPlatform'],
     );
   }

@@ -1,3 +1,5 @@
+import '../../../../core/utils/review_visibility.dart';
+
 class GetSpecificTradesmanResponseModel {
   final Profile profile;
   final List<Review> reviews;
@@ -19,6 +21,7 @@ class GetSpecificTradesmanResponseModel {
       profile: Profile.fromJson(profileJson),
       reviews: rawReviews
           .whereType<Map>()
+          .where(isVisibleReview)
           .map((e) => Review.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
     );

@@ -149,6 +149,7 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
   }) {
     return _apiClient.get(
       endpoint: ApiConstants.user.tradesmanDetails(tradesmanId, skill: skill),
+      options: ApiClient.noCacheOptions(),
       fromJsonT: GetSpecificTradesmanResponseModel.fromData,
     );
   }
@@ -210,6 +211,7 @@ class TradesmanRepositoryImpl implements TradesmanRepo {
         page: page,
         limit: limit,
       ),
+      options: ApiClient.noCacheOptions(),
       fromJsonT: GetAllTradesmanResponseModel.fromData,
     );
   }

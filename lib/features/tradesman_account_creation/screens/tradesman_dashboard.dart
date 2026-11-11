@@ -17,6 +17,7 @@ class TradesmanDashboard extends StatefulWidget {
   final List<String> extraTrades;
   final String homeArea;
   final String? profileImagePath;
+  final dashboard_model.TradesmanDashboardResponse? initialDashboard;
 
   const TradesmanDashboard({
     super.key,
@@ -25,13 +26,15 @@ class TradesmanDashboard extends StatefulWidget {
     this.extraTrades = const [],
     this.homeArea = '',
     this.profileImagePath,
+    this.initialDashboard,
   });
 
   @override
   State<TradesmanDashboard> createState() => _TradesmanDashboardState();
 }
 
-class _TradesmanDashboardState extends State<TradesmanDashboard> {
+class _TradesmanDashboardState extends State<TradesmanDashboard>
+    with WidgetsBindingObserver {
   late final TradesmanController _controller;
   late String _tradesmanName;
   late String _tradesmanSkill;
@@ -58,13 +61,19 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller = Get.find<TradesmanController>();
     _tradesmanName = widget.tradesmanName;
     _tradesmanSkill = widget.tradesmanSkill;
     _extraTrades = widget.extraTrades;
     _homeArea = widget.homeArea;
     _profileImagePath = widget.profileImagePath;
-    _loadDashboard();
+    final initialDashboard = widget.initialDashboard;
+    if (initialDashboard != null) {
+      _applyDashboard(initialDashboard);
+    } else {
+      _loadDashboard();
+    }
   }
 
   Future<void> _loadDashboard() async {
@@ -72,6 +81,17 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
     if (!mounted || dashboard == null) return;
 
     _applyDashboard(dashboard);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _loadDashboard();
   }
 
   void _applyDashboard(dashboard_model.TradesmanDashboardResponse dashboard) {
@@ -435,375 +455,385 @@ class _TradesmanDashboardState extends State<TradesmanDashboard> {
 
             // ── Scrollable Body ──────────────────────────────
             Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1. Overall Rating Card
-                    Container(
-                      margin: const EdgeInsets.only(
-                        left: 18,
-                        right: 18,
-                        top: 20,
-                      ),
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E1E1E), // Dark charcoal
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            displayRating,
-                            style: GoogleFonts.outfit(
-                              fontSize: 48,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFFEAAE4B),
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: List.generate(
-                                  5,
-                                  (index) => Icon(
-                                    Icons.star,
-                                    color: index < _overallRating.round()
-                                        ? const Color(0xFFEAAE4B)
-                                        : Colors.white.withValues(alpha: 0.35),
-                                    size: 20,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                'OVERALL RATING',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '$_reviewsTotal reviews',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white.withValues(alpha: 0.70),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // 2. Views/Trades Row
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 18,
-                        right: 18,
-                        top: 16,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _buildStatCard(
-                              emojiOrAsset: '👁️',
-                              emojiColor: const Color(0xFFFDE8E8),
-                              number: _viewsThisWeek.toString(),
-                              label: 'VIEWS THIS WEEK',
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: _buildStatCard(
-                              emojiOrAsset: '🔧',
-                              emojiColor: const Color(0xFFE3F2FD),
-                              number: _tradesListed.toString(),
-                              label: 'TRADES LISTED',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    _buildProfileDetailsCard(),
-
-                    // 3. Rating breakdown Card
-                    Container(
-                      margin: const EdgeInsets.only(
-                        left: 18,
-                        right: 18,
-                        top: 16,
-                      ),
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFFF3E5CF),
-                          width: 1.5,
+              child: RefreshIndicator(
+                onRefresh: _loadDashboard,
+                color: const Color(0xFFA83F2D),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1. Overall Rating Card
+                      Container(
+                        margin: const EdgeInsets.only(
+                          left: 18,
+                          right: 18,
+                          top: 20,
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Rating breakdown',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              Text(
-                                '$_reviewsTotal reviews total',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12,
-                                  color: const Color(0xFF6D6D6D),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 18),
-                          _buildBreakdownRow(
-                            '5',
-                            _ratingPercent(5),
-                            _ratingCount(5),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildBreakdownRow(
-                            '4',
-                            _ratingPercent(4),
-                            _ratingCount(4),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildBreakdownRow(
-                            '3',
-                            _ratingPercent(3),
-                            _ratingCount(3),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildBreakdownRow(
-                            '2',
-                            _ratingPercent(2),
-                            _ratingCount(2),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildBreakdownRow(
-                            '1',
-                            _ratingPercent(1),
-                            _ratingCount(1),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // 4. Recent Reviews Section
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 18,
-                        right: 18,
-                        top: 22,
-                        bottom: 8,
-                      ),
-                      child: Text(
-                        'RECENT REVIEWS',
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF6D6D6D),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-
-                    if (_recentReviews.isEmpty)
-                      _buildNoReviewsCard()
-                    else
-                      ..._recentReviews.map(
-                        (review) => Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: _buildReviewCard(
-                            reviewer: _reviewerDisplayName(review.reviewerName),
-                            stars: review.rating ?? 0,
-                            description:
-                                review.comment?.trim().isNotEmpty ?? false
-                                ? review.comment!.trim()
-                                : 'No comment provided.',
-                            timeAgo: _timeAgo(review.createdAt),
-                          ),
-                        ),
-                      ),
-
-                    // 5. Quick Actions Section
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 18,
-                        right: 18,
-                        top: 22,
-                        bottom: 8,
-                      ),
-                      child: Text(
-                        'QUICK ACTIONS',
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF6D6D6D),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-
-                    _buildActionCard(
-                      title: 'Edit my profile',
-                      subtitle: 'Update bio, rate, trades, area, photo',
-                      icon: Icons.edit_outlined,
-                      iconBg: const Color(0xFFFCE4EC),
-                      onTap: () async {
-                        final result = await Get.to(
-                          () => TradesmanEditProfileScreen(
-                            tradesmanName: _tradesmanName,
-                            tradesmanPhone: _phoneNumber,
-                            tradesmanSkill: _tradesmanSkill,
-                            extraTrades: _extraTrades,
-                            homeArea: _homeArea,
-                            profileImagePath: _profileImagePath,
-                          ),
-                        );
-                        if (result != null && result is Map) {
-                          setState(() {
-                            if (result['mainTrade'] != null) {
-                              _tradesmanSkill = result['mainTrade'];
-                            }
-                            if (result['homeArea'] != null) {
-                              _homeArea = result['homeArea'];
-                            }
-                            if (result['profileImagePath'] != null) {
-                              _profileImagePath = result['profileImagePath'];
-                              _profileImageUrl = null;
-                            }
-                            if (result['pitch'] != null) {
-                              _pitch = result['pitch'];
-                            }
-                            if (result['rate'] != null) {
-                              _rate = result['rate'];
-                            }
-                            if (result['rateUnit'] != null) {
-                              _rateUnit = result['rateUnit'];
-                            }
-                            if (result['extraTrades'] != null) {
-                              _extraTrades = List<String>.from(
-                                result['extraTrades'],
-                              );
-                            }
-                            if (result['recentWorkPhotoUrls'] != null) {
-                              _recentWorkPhotoUrls = List<String>.from(
-                                result['recentWorkPhotoUrls'],
-                              );
-                            }
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    _buildActionCard(
-                      title: 'Preview my public profile',
-                      subtitle: 'See what clients see',
-                      icon: Icons.visibility_outlined,
-                      iconBg: const Color(0xFFFFF9C4),
-                      onTap: () {
-                        Get.to(
-                          () => TradesmanPublicviewScreen(
-                            name: _tradesmanName,
-                            location: displayArea,
-                            avatarLetter: _getInitials(_tradesmanName),
-                            profileImagePath: _profileImagePath,
-                            profileImageUrl: _profileImageUrl,
-                            rating: displayRating,
-                            reviewsCount: _reviewsTotal,
-                            jobsCount: _jobsCount,
-                            categoryName: displaySkill,
-                            pitch: _pitch,
-                            extraTrades: _extraTrades,
-                            recentWorkPhotoUrls: _recentWorkPhotoUrls,
-                            rate: _rate,
-                            rateUnit: _rateUnit,
-                            showPreviewBanner: true,
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    _buildActionCard(
-                      title: 'Switch to customer view',
-                      subtitle: 'Browse tradesmen as a client',
-                      icon: Icons.swap_horiz,
-                      iconBg: const Color(0xFFE0F2F1),
-                      isLoading: _isSwitchingToCustomerView,
-                      onTap: _switchToCustomerView,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildActionCard(
-                      title: 'Sign out',
-                      subtitle: '',
-                      icon: Icons.logout,
-                      iconBg: const Color(0xFFFFEBEE),
-                      textColor: const Color(0xFFA83F2D),
-                      hideArrow: true,
-                      onTap: () {
-                        _controller.signOut();
-                      },
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    // 6. Days badge / Footer
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
+                        padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEBD7C7),
-                          borderRadius: BorderRadius.circular(20),
+                          color: const Color(0xFF1E1E1E), // Dark charcoal
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const Icon(
-                              Icons.calendar_today_outlined,
-                              size: 14,
-                              color: Color(0xFF5A493B),
-                            ),
-                            const SizedBox(width: 8),
                             Text(
-                              '$_daysOnPlatform days on Aturservicett',
+                              displayRating,
                               style: GoogleFonts.outfit(
-                                fontSize: 12,
-                                color: const Color(0xFF5A493B),
-                                fontWeight: FontWeight.w700,
+                                fontSize: 48,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFFEAAE4B),
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: List.generate(
+                                    5,
+                                    (index) => Icon(
+                                      Icons.star,
+                                      color: index < _overallRating.round()
+                                          ? const Color(0xFFEAAE4B)
+                                          : Colors.white.withValues(
+                                              alpha: 0.35,
+                                            ),
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  'OVERALL RATING',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '$_reviewsTotal reviews',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white.withValues(alpha: 0.70),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // 2. Views/Trades Row
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 18,
+                          right: 18,
+                          top: 16,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatCard(
+                                emojiOrAsset: '👁️',
+                                emojiColor: const Color(0xFFFDE8E8),
+                                number: _viewsThisWeek.toString(),
+                                label: 'VIEWS THIS WEEK',
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: _buildStatCard(
+                                emojiOrAsset: '🔧',
+                                emojiColor: const Color(0xFFE3F2FD),
+                                number: _tradesListed.toString(),
+                                label: 'TRADES LISTED',
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
 
-                    const SizedBox(height: 32),
-                  ],
+                      _buildProfileDetailsCard(),
+
+                      // 3. Rating breakdown Card
+                      Container(
+                        margin: const EdgeInsets.only(
+                          left: 18,
+                          right: 18,
+                          top: 16,
+                        ),
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFF3E5CF),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Rating breakdown',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  '$_reviewsTotal reviews total',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 12,
+                                    color: const Color(0xFF6D6D6D),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18),
+                            _buildBreakdownRow(
+                              '5',
+                              _ratingPercent(5),
+                              _ratingCount(5),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildBreakdownRow(
+                              '4',
+                              _ratingPercent(4),
+                              _ratingCount(4),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildBreakdownRow(
+                              '3',
+                              _ratingPercent(3),
+                              _ratingCount(3),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildBreakdownRow(
+                              '2',
+                              _ratingPercent(2),
+                              _ratingCount(2),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildBreakdownRow(
+                              '1',
+                              _ratingPercent(1),
+                              _ratingCount(1),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // 4. Recent Reviews Section
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 18,
+                          right: 18,
+                          top: 22,
+                          bottom: 8,
+                        ),
+                        child: Text(
+                          'RECENT REVIEWS',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF6D6D6D),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+
+                      if (_recentReviews.isEmpty)
+                        _buildNoReviewsCard()
+                      else
+                        ..._recentReviews.map(
+                          (review) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: _buildReviewCard(
+                              reviewer: _reviewerDisplayName(
+                                review.reviewerName,
+                              ),
+                              stars: review.rating ?? 0,
+                              description:
+                                  review.comment?.trim().isNotEmpty ?? false
+                                  ? review.comment!.trim()
+                                  : 'No comment provided.',
+                              timeAgo: _timeAgo(review.createdAt),
+                            ),
+                          ),
+                        ),
+
+                      // 5. Quick Actions Section
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 18,
+                          right: 18,
+                          top: 22,
+                          bottom: 8,
+                        ),
+                        child: Text(
+                          'QUICK ACTIONS',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF6D6D6D),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+
+                      _buildActionCard(
+                        title: 'Edit my profile',
+                        subtitle: 'Update bio, rate, trades, area, photo',
+                        icon: Icons.edit_outlined,
+                        iconBg: const Color(0xFFFCE4EC),
+                        onTap: () async {
+                          final result = await Get.to(
+                            () => TradesmanEditProfileScreen(
+                              tradesmanName: _tradesmanName,
+                              tradesmanPhone: _phoneNumber,
+                              tradesmanSkill: _tradesmanSkill,
+                              extraTrades: _extraTrades,
+                              homeArea: _homeArea,
+                              profileImagePath: _profileImagePath,
+                            ),
+                          );
+                          if (result != null && result is Map) {
+                            setState(() {
+                              if (result['mainTrade'] != null) {
+                                _tradesmanSkill = result['mainTrade'];
+                              }
+                              if (result['homeArea'] != null) {
+                                _homeArea = result['homeArea'];
+                              }
+                              if (result['profileImagePath'] != null) {
+                                _profileImagePath = result['profileImagePath'];
+                                _profileImageUrl = null;
+                              }
+                              if (result['pitch'] != null) {
+                                _pitch = result['pitch'];
+                              }
+                              if (result['rate'] != null) {
+                                _rate = result['rate'];
+                              }
+                              if (result['rateUnit'] != null) {
+                                _rateUnit = result['rateUnit'];
+                              }
+                              if (result['extraTrades'] != null) {
+                                _extraTrades = List<String>.from(
+                                  result['extraTrades'],
+                                );
+                              }
+                              if (result['recentWorkPhotoUrls'] != null) {
+                                _recentWorkPhotoUrls = List<String>.from(
+                                  result['recentWorkPhotoUrls'],
+                                );
+                              }
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      _buildActionCard(
+                        title: 'Preview my public profile',
+                        subtitle: 'See what clients see',
+                        icon: Icons.visibility_outlined,
+                        iconBg: const Color(0xFFFFF9C4),
+                        onTap: () {
+                          Get.to(
+                            () => TradesmanPublicviewScreen(
+                              name: _tradesmanName,
+                              location: displayArea,
+                              avatarLetter: _getInitials(_tradesmanName),
+                              profileImagePath: _profileImagePath,
+                              profileImageUrl: _profileImageUrl,
+                              rating: displayRating,
+                              reviewsCount: _reviewsTotal,
+                              jobsCount: _jobsCount,
+                              categoryName: displaySkill,
+                              pitch: _pitch,
+                              extraTrades: _extraTrades,
+                              recentWorkPhotoUrls: _recentWorkPhotoUrls,
+                              rate: _rate,
+                              rateUnit: _rateUnit,
+                              showPreviewBanner: true,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      _buildActionCard(
+                        title: 'Switch to customer view',
+                        subtitle: 'Browse tradesmen as a client',
+                        icon: Icons.swap_horiz,
+                        iconBg: const Color(0xFFE0F2F1),
+                        isLoading: _isSwitchingToCustomerView,
+                        onTap: _switchToCustomerView,
+                      ),
+                      const SizedBox(height: 10),
+                      _buildActionCard(
+                        title: 'Sign out',
+                        subtitle: '',
+                        icon: Icons.logout,
+                        iconBg: const Color(0xFFFFEBEE),
+                        textColor: const Color(0xFFA83F2D),
+                        hideArrow: true,
+                        onTap: () {
+                          _controller.signOut();
+                        },
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      // 6. Days badge / Footer
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEBD7C7),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.calendar_today_outlined,
+                                size: 14,
+                                color: Color(0xFF5A493B),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '$_daysOnPlatform days on Aturservicett',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12,
+                                  color: const Color(0xFF5A493B),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+                    ],
+                  ),
                 ),
               ),
             ),

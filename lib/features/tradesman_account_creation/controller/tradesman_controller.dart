@@ -353,9 +353,7 @@ class TradesmanController extends BaseController {
       isLive: profile.isLive,
       isVip: profile.isVip,
       ratingAverage: profile.ratingAverage,
-      ratingCount: profile.ratingCount > 0
-          ? profile.ratingCount
-          : tradesman.reviews.length,
+      ratingCount: profile.ratingCount,
       jobsCount: profile.jobsCount,
       workPhotos: profile.workPhotos,
       mainSkill: profile.mainSkill,

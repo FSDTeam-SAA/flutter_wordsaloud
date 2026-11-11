@@ -12,8 +12,13 @@ import 'package:aturservicett/features/home/screens/category_details_screen.dart
 
 class HomeScreen extends StatefulWidget {
   final bool showCustomerModeBanner;
+  final List<TradeCategory>? initialCategories;
 
-  const HomeScreen({super.key, this.showCustomerModeBanner = false});
+  const HomeScreen({
+    super.key,
+    this.showCustomerModeBanner = false,
+    this.initialCategories,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -24,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late final ClientProfileController _clientProfileController;
   late final TextEditingController _searchTextController;
   late final FocusNode _searchFocusNode;
+  String? _selectedCategoryName;
 
   @override
   void initState() {
@@ -37,7 +43,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ? Get.find<ClientProfileController>()
         : Get.put(ClientProfileController());
     WidgetsBinding.instance.addObserver(this);
-    controller.fetchSkillList();
+    final initialCategories = widget.initialCategories;
+    if (initialCategories != null) {
+      controller.categories.assignAll(initialCategories);
+    } else {
+      controller.fetchSkillList();
+    }
 
     if (widget.showCustomerModeBanner) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -146,7 +157,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return;
     }
 
-    Get.to(() => CategoryDetailsScreen(category: category));
+    if (!mounted) return;
+    setState(() => _selectedCategoryName = category.name);
+    try {
+      await Get.to(() => CategoryDetailsScreen(category: category));
+    } finally {
+      if (mounted) setState(() => _selectedCategoryName = null);
+    }
   }
 
   @override
@@ -335,6 +352,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             Expanded(
               child: Obx(() {
                 final items = controller.filteredCategories;
+                if (items.isEmpty && controller.isLoadingSkills.value) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFFA83F2D)),
+                  );
+                }
                 if (items.isEmpty) {
                   return RefreshIndicator(
                     onRefresh: controller.fetchSkillList,
@@ -409,8 +431,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               ),
                           itemBuilder: (context, index) {
                             final cat = items[index];
-                            final bool hasRedBorder = index == 0;
-                            final bool hasTealBorder = cat.isNew && index != 0;
+                            final bool hasRedBorder =
+                                _selectedCategoryName == cat.name;
+                            final bool hasTealBorder =
+                                cat.isNew && !hasRedBorder;
 
                             Color borderColor = const Color(0xFFF3E5CF);
 

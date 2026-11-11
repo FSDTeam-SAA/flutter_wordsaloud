@@ -37,7 +37,8 @@ class TradesmanDetailsScreen extends StatefulWidget {
   State<TradesmanDetailsScreen> createState() => _TradesmanDetailsScreenState();
 }
 
-class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
+class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen>
+    with WidgetsBindingObserver {
   late final TradesmanController _tradesmanController;
   final _categoryDetails =
       Rxn<specific_model.GetSpecificTradesmanResponseModel>();
@@ -53,10 +54,27 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tradesmanController = Get.find<TradesmanController>();
     final tradesmanId = widget.tradesmanId;
     if (tradesmanId != null && tradesmanId.trim().isNotEmpty) {
       _loadCategoryDetails(tradesmanId);
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final id = widget.tradesmanId;
+    if (state == AppLifecycleState.resumed &&
+        id != null &&
+        id.trim().isNotEmpty) {
+      _loadCategoryDetails(id);
     }
   }
 
@@ -254,11 +272,7 @@ class _TradesmanDetailsScreenState extends State<TradesmanDetailsScreen> {
       final fetchedReviews = profile != null
           ? fetchedTradesman?.reviews ?? const <specific_model.Review>[]
           : const <specific_model.Review>[];
-      final serverReviewCount = profile != null
-          ? (profile.ratingCount > 0
-                ? profile.ratingCount
-                : fetchedReviews.length)
-          : 0;
+      final serverReviewCount = profile != null ? profile.ratingCount : 0;
       final reviews = fetchedReviews;
       final displayReviewCount = serverReviewCount;
       final displayJobsCount = profile?.jobsCount ?? 142;

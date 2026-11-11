@@ -1,6 +1,7 @@
 import 'dart:developer' as d_print;
 
 import 'package:aturservicett/features/tradesman_account_creation/repositories/tradesman_repo.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/dashboard_response_model.dart';
 import 'package:get/get.dart';
 
 import 'auth_storage_service.dart';
@@ -17,7 +18,10 @@ class TradesmanProfileStatusService {
 
   TradesmanRepo get _repo => _tradesmanRepo ?? Get.find<TradesmanRepo>();
 
-  Future<bool> hasCompletedProfile({String? userId}) async {
+  Future<bool> hasCompletedProfile({
+    String? userId,
+    void Function(TradesmanDashboardResponse)? onDashboardLoaded,
+  }) async {
     // Registration creates an empty tradesman profile so it can enter the
     // verification queue. Profile existence therefore does not mean that the
     // user finished onboarding. Always use the backend's `isLive` state as the
@@ -33,6 +37,7 @@ class TradesmanProfileStatusService {
         return false;
       },
       (success) async {
+        onDashboardLoaded?.call(success.data);
         final profile = success.data.profile;
         final rate = profile?.typicalRate;
         final isComplete =

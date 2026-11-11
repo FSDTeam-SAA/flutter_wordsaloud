@@ -1,4 +1,6 @@
-import 'package:flutter/animation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:aturservicett/features/home/controller/home_controller.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/dashboard_response_model.dart';
 import 'package:aturservicett/core/services/auth_storage_service.dart';
 import 'package:aturservicett/core/services/tradesman_profile_status_service.dart';
 import 'package:get/get.dart';
@@ -18,6 +20,7 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
   late Animation<double> textRevealAnimation;
 
   final RxBool showSubtext = false.obs;
+  late final Future<Widget> _initialScreen;
 
   @override
   void onInit() {
@@ -45,6 +48,8 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
       ),
     );
 
+    // Prepare the destination while the splash animates, before showing its UI.
+    _initialScreen = _prepareInitialScreen();
     _startAnimationSequence();
   }
 
@@ -59,32 +64,34 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
     // 3. Show the subtext
     showSubtext.value = true;
 
-    // 4. Navigate to Role Selection Screen after remaining time to hit exactly 3 seconds total
+    // Keep the splash visible until both the animation and initial data are ready.
     await Future.delayed(const Duration(milliseconds: 1300));
-    await _navigateToInitialScreen();
+    final screen = await _initialScreen;
+    if (isClosed) return;
+    Get.offAll(() => screen);
   }
 
-  Future<void> _navigateToInitialScreen() async {
+  Future<Widget> _prepareInitialScreen() async {
     final isAuthenticated = await _authStorageService.isAuthenticated();
     if (!isAuthenticated) {
-      Get.offAll(() => const RoleSelectionScreen());
-      return;
+      return const RoleSelectionScreen();
     }
 
     final role = (await _authStorageService.getRole())?.toLowerCase().trim();
     if (role == 'tradesman') {
+      TradesmanDashboardResponse? dashboard;
       final isProfileCompleted = await _tradesmanProfileStatusService
-          .hasCompletedProfile();
+          .hasCompletedProfile(onDashboardLoaded: (data) => dashboard = data);
 
-      Get.offAll(
-        () => isProfileCompleted
-            ? const TradesmanDashboard(tradesmanName: 'Tradesman')
-            : const WhatDoScreen(),
-      );
-      return;
+      return isProfileCompleted
+          ? TradesmanDashboard(initialDashboard: dashboard)
+          : const WhatDoScreen();
     }
 
-    Get.offAll(() => const HomeScreen());
+    // Pass values rather than registering a controller owned by the splash route.
+    final home = HomeController();
+    await home.fetchSkillList();
+    return HomeScreen(initialCategories: home.categories.toList());
   }
 
   @override

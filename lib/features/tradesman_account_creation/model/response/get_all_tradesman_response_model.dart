@@ -1,3 +1,5 @@
+import '../../../../core/utils/review_visibility.dart';
+
 class GetAllTradesmanResponseModel {
   final List<Tradesman> data;
   final Meta meta;
@@ -239,37 +241,37 @@ class Tradesman {
     Map<String, dynamic> json,
     Map<String, dynamic> profileJson,
   ) {
-    final count = _intFromAny(
-      _firstNonNull([
-        profileJson['ratingCount'],
-        profileJson['reviewCount'],
-        profileJson['reviewsCount'],
-        profileJson['totalReviews'],
-        profileJson['reviewsTotal'],
-        json['ratingCount'],
-        json['reviewCount'],
-        json['reviewsCount'],
-        json['totalReviews'],
-        json['reviewsTotal'],
-        _nestedValue(profileJson, ['rating', 'count']),
-        _nestedValue(profileJson, ['ratings', 'count']),
-        _nestedValue(profileJson, ['reviews', 'count']),
-        _nestedValue(json, ['rating', 'count']),
-        _nestedValue(json, ['ratings', 'count']),
-        _nestedValue(json, ['reviews', 'count']),
-        _nestedValue(profileJson, ['_count', 'reviews']),
-        _nestedValue(json, ['_count', 'reviews']),
-      ]),
-    );
+    final rawCount = _firstNonNull([
+      profileJson['ratingCount'],
+      profileJson['reviewCount'],
+      profileJson['reviewsCount'],
+      profileJson['totalReviews'],
+      profileJson['reviewsTotal'],
+      json['ratingCount'],
+      json['reviewCount'],
+      json['reviewsCount'],
+      json['totalReviews'],
+      json['reviewsTotal'],
+      _nestedValue(profileJson, ['rating', 'count']),
+      _nestedValue(profileJson, ['ratings', 'count']),
+      _nestedValue(profileJson, ['reviews', 'count']),
+      _nestedValue(json, ['rating', 'count']),
+      _nestedValue(json, ['ratings', 'count']),
+      _nestedValue(json, ['reviews', 'count']),
+      _nestedValue(profileJson, ['_count', 'reviews']),
+      _nestedValue(json, ['_count', 'reviews']),
+    ]);
 
-    if (count > 0) return count;
+    if (rawCount != null) return _intFromAny(rawCount);
 
     final reviews =
         profileJson['reviews'] ??
         json['reviews'] ??
         _nestedValue(profileJson, ['reviews', 'data']) ??
         _nestedValue(json, ['reviews', 'data']);
-    if (reviews is List) return reviews.length;
+    if (reviews is List) {
+      return reviews.whereType<Map>().where(isVisibleReview).length;
+    }
 
     return 0;
   }
