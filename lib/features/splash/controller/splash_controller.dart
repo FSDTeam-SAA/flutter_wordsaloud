@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:aturservicett/features/home/controller/home_controller.dart';
 import 'package:aturservicett/features/tradesman_account_creation/model/response/dashboard_response_model.dart';
 import 'package:aturservicett/core/services/auth_storage_service.dart';
 import 'package:aturservicett/core/services/tradesman_profile_status_service.dart';
@@ -88,10 +87,7 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
           : const WhatDoScreen();
     }
 
-    // Pass values rather than registering a controller owned by the splash route.
-    final home = HomeController();
-    await home.fetchSkillList();
-    return HomeScreen(initialCategories: home.categories.toList());
+    return HomeScreen.prepare();
   }
 
   @override

@@ -13,6 +13,10 @@ import 'package:aturservicett/features/tradesman_account_creation/repositories/t
 import 'package:get/get.dart';
 
 class ClientProfileController extends BaseController {
+  ClientProfileController({GetClientProfileResponseModel? initialProfile}) {
+    if (initialProfile != null) setInitialProfile(initialProfile);
+  }
+
   late final TradesmanRepo _tradesmanRepo = Get.find<TradesmanRepo>();
   final AuthStorageService _authStorageService = AuthStorageService();
 
@@ -24,14 +28,25 @@ class ClientProfileController extends BaseController {
   final RxnString profileImagePath = RxnString();
   final RxnString profileImageUrl = RxnString();
   final memberSince = ''.obs;
+  Future<GetClientProfileResponseModel?>? _profileRequest;
 
   @override
   void onInit() {
     super.onInit();
-    fetchClientProfile();
+    if (clientProfile.value == null) fetchClientProfile();
   }
 
-  Future<GetClientProfileResponseModel?> fetchClientProfile() async {
+  Future<GetClientProfileResponseModel?> fetchClientProfile() =>
+      _profileRequest ??= _loadClientProfile().whenComplete(
+        () => _profileRequest = null,
+      );
+
+  void setInitialProfile(GetClientProfileResponseModel profile) {
+    clientProfile.value = profile;
+    _applyProfile(profile);
+  }
+
+  Future<GetClientProfileResponseModel?> _loadClientProfile() async {
     clearError();
     setLoading(true);
 

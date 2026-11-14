@@ -9,16 +9,35 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:aturservicett/features/home/controller/home_controller.dart';
 import 'package:aturservicett/features/home/screens/category_details_screen.dart';
+import 'package:aturservicett/features/tradesman_account_creation/model/response/get_client_profile_response_model.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool showCustomerModeBanner;
   final List<TradeCategory>? initialCategories;
+  final GetClientProfileResponseModel? initialProfile;
 
   const HomeScreen({
     super.key,
     this.showCustomerModeBanner = false,
     this.initialCategories,
+    this.initialProfile,
   });
+
+  static Future<HomeScreen> prepare({
+    bool showCustomerModeBanner = false,
+  }) async {
+    // Keep this controller outside GetX until the destination route opens.
+    final home = HomeController();
+    final profile = Get.isRegistered<ClientProfileController>()
+        ? Get.find<ClientProfileController>()
+        : ClientProfileController();
+    await Future.wait([home.fetchSkillList(), profile.fetchClientProfile()]);
+    return HomeScreen(
+      showCustomerModeBanner: showCustomerModeBanner,
+      initialCategories: home.categories.toList(),
+      initialProfile: profile.clientProfile.value,
+    );
+  }
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -39,9 +58,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     controller = Get.isRegistered<HomeController>()
         ? Get.find<HomeController>()
         : Get.put(HomeController());
+    controller.searchQuery.value = '';
     _clientProfileController = Get.isRegistered<ClientProfileController>()
         ? Get.find<ClientProfileController>()
-        : Get.put(ClientProfileController());
+        : Get.put(
+            ClientProfileController(initialProfile: widget.initialProfile),
+          );
+    if (widget.initialProfile != null) {
+      _clientProfileController.setInitialProfile(widget.initialProfile!);
+    }
     WidgetsBinding.instance.addObserver(this);
     final initialCategories = widget.initialCategories;
     if (initialCategories != null) {
@@ -368,7 +393,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           height: MediaQuery.of(context).size.height * 0.45,
                           child: Center(
                             child: Text(
-                              'No matches found.',
+                              controller.searchQuery.value.trim().isEmpty
+                                  ? 'No categories available. Pull down to retry.'
+                                  : 'No matches found.',
                               style: GoogleFonts.outfit(
                                 fontSize: 16,
                                 color: const Color(0xFF6D6D6D),

@@ -12,6 +12,7 @@ import '../../../core/services/tradesman_profile_status_service.dart';
 import '../../home/screens/home_screen.dart';
 import '../../tradesman_account_creation/screens/tradesman_dashboard.dart';
 import '../../tradesman_account_creation/screens/what_do_screen.dart';
+import '../../tradesman_account_creation/model/response/dashboard_response_model.dart';
 import '../models/request/register_request_model.dart';
 import '../repositories/auth_repo.dart';
 
@@ -180,12 +181,17 @@ class AuthController extends BaseController {
         );
 
         if (role.toLowerCase() == "tradesman") {
+          TradesmanDashboardResponse? dashboard;
           final isProfileCompleted = await _tradesmanProfileStatusService
-              .hasCompletedProfile(userId: user.id);
+              .hasCompletedProfile(
+                userId: user.id,
+                onDashboardLoaded: (data) => dashboard = data,
+              );
 
           Get.offAll(
             () => isProfileCompleted
                 ? TradesmanDashboard(
+                    initialDashboard: dashboard,
                     tradesmanName: currentUserName.value.trim().isNotEmpty
                         ? currentUserName.value.trim()
                         : 'Tradesman',
@@ -193,7 +199,8 @@ class AuthController extends BaseController {
                 : const WhatDoScreen(),
           );
         } else {
-          Get.offAll(() => const HomeScreen());
+          final home = await HomeScreen.prepare();
+          Get.offAll(() => home);
         }
         setLoading(false);
       },

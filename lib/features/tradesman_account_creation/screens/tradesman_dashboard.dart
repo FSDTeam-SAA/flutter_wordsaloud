@@ -8,7 +8,6 @@ import 'package:aturservicett/features/tradesman_account_creation/screens/trades
 import 'package:aturservicett/features/tradesman_account_creation/screens/tradesman_publicview_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:aturservicett/features/home/controller/home_controller.dart';
 import 'package:aturservicett/features/home/screens/home_screen.dart';
 
 class TradesmanDashboard extends StatefulWidget {
@@ -272,12 +271,9 @@ class _TradesmanDashboardState extends State<TradesmanDashboard>
       _isSwitchingToCustomerView = true;
     });
 
-    final homeController = Get.isRegistered<HomeController>()
-        ? Get.find<HomeController>()
-        : Get.put(HomeController());
-
+    late final HomeScreen home;
     try {
-      await homeController.fetchSkillList();
+      home = await HomeScreen.prepare(showCustomerModeBanner: true);
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -315,7 +311,7 @@ class _TradesmanDashboardState extends State<TradesmanDashboard>
     setState(() {
       _isSwitchingToCustomerView = false;
     });
-    Get.to(() => const HomeScreen(showCustomerModeBanner: true));
+    Get.to(() => home);
   }
 
   @override

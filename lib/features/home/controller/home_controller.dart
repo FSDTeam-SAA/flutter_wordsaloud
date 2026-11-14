@@ -54,37 +54,33 @@ class HomeController extends GetxController {
   final RxString searchQuery = ''.obs;
   final RxList<TradeCategory> categories = <TradeCategory>[].obs;
   final RxBool isLoadingSkills = false.obs;
-  bool _isFetchingSkills = false;
+  Future<void>? _skillRequest;
 
-  Future<void> fetchSkillList() async {
+  Future<void> fetchSkillList() => _fetchSkills(includeCounts: true);
+
+  Future<void> refreshCategoryListOnly() => _fetchSkills(includeCounts: false);
+
+  Future<void> _fetchSkills({required bool includeCounts}) {
+    // Every caller must wait for the active request before opening HomeScreen.
+    return _skillRequest ??= _loadSkills(
+      includeCounts: includeCounts,
+    ).whenComplete(() => _skillRequest = null);
+  }
+
+  Future<void> _loadSkills({required bool includeCounts}) async {
     if (!Get.isRegistered<TradesmanController>()) return;
-    if (_isFetchingSkills) return;
-
-    _isFetchingSkills = true;
     final tradesmanController = Get.find<TradesmanController>();
     isLoadingSkills.value = true;
     try {
       final skills = await tradesmanController.fetchSkillList();
       _applySkillList(skills);
 
-      final tradesmen = await tradesmanController.fetchTradesmenForCounts();
-      _applySkillList(skills, tradesmen: tradesmen);
+      if (includeCounts) {
+        final tradesmen = await tradesmanController.fetchTradesmenForCounts();
+        _applySkillList(skills, tradesmen: tradesmen);
+      }
     } finally {
       isLoadingSkills.value = false;
-      _isFetchingSkills = false;
-    }
-  }
-
-  Future<void> refreshCategoryListOnly() async {
-    if (!Get.isRegistered<TradesmanController>()) return;
-    if (_isFetchingSkills) return;
-
-    _isFetchingSkills = true;
-    try {
-      final skills = await Get.find<TradesmanController>().fetchSkillList();
-      _applySkillList(skills);
-    } finally {
-      _isFetchingSkills = false;
     }
   }
 
